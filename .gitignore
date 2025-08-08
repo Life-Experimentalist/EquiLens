@@ -1,0 +1,131 @@
+logs/*
+results/*
+Phase1_CorpusGenerator/corpus/*
+.venv
+
+
+# EquiLens Docker ignore file
+# Exclude large files and directories that don't need to be in the container
+
+# Docker build context optimization - reduce from 846MB to ~50MB
+
+# Git and version control
+.git/
+.gitignore
+.gitattributes
+
+# Documentation and non-essential files
+*.md
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.gif
+
+# Keep essential docs in container but exclude temp files
+!README.md
+!docs/
+CONSOLIDATION_*.md
+OPTIMIZATION_*.md
+*_PLAN.md
+*_COMPLETE.md
+
+# Development and IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+.container-welcome
+.devcontainer/
+
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.env
+.venv/
+
+# Results and logs (these are generated at runtime)
+results/
+logs/
+corpus/
+*.log
+*.csv
+*.json.bak
+
+# Docker and compose files (not needed in container)
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+
+# Windows and PowerShell
+*.ps1
+*.bat
+*.cmd
+
+# Large test data
+test_data/
+samples/
+examples/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# IDE and editor files
+.pytest_cache/
+.coverage
+.nyc_output
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Node modules (if any)
+node_modules/
+
+# Archives
+*.tar
+*.tar.gz
+*.zip
+*.rar

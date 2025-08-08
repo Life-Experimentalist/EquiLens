@@ -1,0 +1,101 @@
+# EquiLens - Single Docker System
+# Optimized for Windows 11 with RTX 2050
+# All-in-one configuration - no redundant files
+
+services:
+    # Ollama service for AI models
+    ollama:
+        image: ollama/ollama:latest
+        container_name: equilens-ollama
+
+        ports:
+            - "11434:11434"
+
+        volumes:
+            - ollama_data:/root/.ollama
+
+        networks:
+            - equilens-network
+
+        # GPU acceleration for Windows with NVIDIA Container Toolkit
+        deploy:
+            resources:
+                reservations:
+                    devices:
+                        - driver: nvidia
+                          count: all
+                          capabilities: [gpu]
+
+        environment:
+            - NVIDIA_VISIBLE_DEVICES=all
+            - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+            - OLLAMA_HOST=0.0.0.0:11434
+            - OLLAMA_ORIGINS=*
+            - OLLAMA_KEEP_ALIVE=24h
+
+        restart: unless-stopped
+
+        # Simple healthcheck
+        healthcheck:
+            test:
+                [
+                    "CMD-SHELL",
+                    "ollama api version --host http://localhost:11434 || exit 1",
+                ]
+            interval: 30s
+            timeout: 10s
+            retries: 5
+            start_period: 60s
+
+        # Start Ollama server directly - models downloaded on-demand
+        command: ["serve"]
+
+    # EquiLens application service
+    equilens-app:
+        build:
+            context: .
+            dockerfile: Dockerfile # Single Dockerfile in root
+        container_name: equilens-app
+
+        volumes:
+            - .:/workspace:cached
+            - /var/run/docker.sock:/var/run/docker.sock # For Docker CLI access
+
+        working_dir: /workspace
+
+        ports:
+            - "8080:8080" # For future web interface
+
+        networks:
+            - equilens-network
+
+        depends_on:
+            ollama:
+                condition: service_healthy
+
+        environment:
+            - OLLAMA_BASE_URL=http://ollama:11434
+            - PYTHONPATH=/workspace
+            - EQUILENS_DATA_DIR=/workspace/data
+            - EQUILENS_RESULTS_DIR=/workspace/results
+            - EQUILENS_LOGS_DIR=/workspace/logs
+            - EQUILENS_WEB_PORT=8080
+
+        restart: unless-stopped
+
+        # Keep container running and ready for commands
+        command: ["tail", "-f", "/dev/null"]
+
+# Network for container communication
+networks:
+    equilens-network:
+        driver: bridge
+        ipam:
+            driver: default
+            config:
+                - subnet: 172.20.0.0/16
+
+# Persistent volumes for model storage
+volumes:
+    ollama_data:
+        driver: local

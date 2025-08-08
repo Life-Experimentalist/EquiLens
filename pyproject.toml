@@ -1,0 +1,170 @@
+[project]
+name = "equilens"
+version = "0.1.0"
+description = "AI Bias Detection Platform - A comprehensive platform for detecting and analyzing bias in AI language models"
+readme = "README.md"
+authors = [
+    { name = "VKrishna04", email = "krishnagsvv@gmail.com" }
+]
+license = { text = "Apache-2.0" }
+keywords = ["ai", "bias", "detection", "audit", "llm", "language-models"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Testing",
+]
+requires-python = ">=3.11"
+dependencies = [
+    # Core dependencies
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "requests>=2.28.0",
+    "tqdm>=4.64.0",
+    "jsonschema>=4.17.0",
+    # Interactive CLI
+    "rich>=13.0.0",
+    "textual>=0.41.0",
+    "typer>=0.9.0",
+    # Data visualization
+    "matplotlib>=3.6.0",
+    "plotly>=5.15.0",
+    # Text processing
+    "spacy>=3.6.0",
+    # Web framework (for future web UI)
+    "fastapi>=0.104.0",
+    "uvicorn>=0.24.0",
+    "seaborn>=0.13.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.5.0",
+    "pre-commit>=3.0.0",
+]
+web = [
+    "jinja2>=3.1.0",
+    "python-multipart>=0.0.6",
+]
+ml = [
+    "sentence-transformers>=2.2.0",
+    "torch>=2.0.0",
+    "transformers>=4.21.0",
+]
+viz = [
+    "seaborn>=0.12.0",
+    "wordcloud>=1.9.0",
+    "textstat>=0.7.0",
+]
+
+[project.urls]
+Homepage = "https://vkrishna04.github.io"
+Repository = "https://github.com/Life-Experimentalists/EquiLens"
+Documentation = "https://github.com/Life-Experimentalists/EquiLens/docs"
+Issues = "https://github.com/Life-Experimentalists/EquiLens/issues"
+
+[project.scripts]
+equilens = "equilens.cli:app"
+equilens-web = "equilens.web:main"
+equilens-tui = "equilens.tui:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/equilens"]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.5.0",
+    "pre-commit>=3.0.0",
+]
+
+[tool.uv.sources]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501", # line too long, handled by black
+    "B008", # do not perform function calls in argument defaults
+    "C901", # too complex
+    "W293", # blank line contains whitespace
+]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.black]
+target-version = ['py311']
+line-length = 88
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = [
+    "--cov=equilens",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--strict-markers",
+    "--disable-warnings",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+]
