@@ -1,10 +1,10 @@
 [project]
 name = "equilens"
-version = "0.1.0"
+version = "1.0.0"
 description = "AI Bias Detection Platform - A comprehensive platform for detecting and analyzing bias in AI language models"
 readme = "README.md"
 authors = [
-    { name = "VKrishna04", email = "krishnagsvv@gmail.com" }
+    { name = "VKrishna04", email = "krishnagsvv@gmail.com", url = "https://vkrishna04.github.io"}
 ]
 license = { text = "Apache-2.0" }
 keywords = ["ai", "bias", "detection", "audit", "llm", "language-models"]
@@ -12,7 +12,7 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
@@ -33,6 +33,9 @@ dependencies = [
     "rich>=13.0.0",
     "textual>=0.41.0",
     "typer>=0.9.0",
+    "colorama>=0.4.6",
+    # Async HTTP for enhanced performance
+    "aiohttp>=3.12.15",
     # Data visualization
     "matplotlib>=3.6.0",
     "plotly>=5.15.0",
@@ -42,6 +45,8 @@ dependencies = [
     "fastapi>=0.104.0",
     "uvicorn>=0.24.0",
     "seaborn>=0.13.2",
+	# Data processing
+    "psutil>=7.0.0",
 ]
 
 [project.optional-dependencies]
@@ -76,8 +81,6 @@ Issues = "https://github.com/Life-Experimentalists/EquiLens/issues"
 
 [project.scripts]
 equilens = "equilens.cli:app"
-equilens-web = "equilens.web:main"
-equilens-tui = "equilens.tui:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -99,7 +102,7 @@ dev-dependencies = [
 [tool.uv.sources]
 
 [tool.ruff]
-target-version = "py311"
+target-version = "py313"
 line-length = 88
 select = [
     "E",  # pycodestyle errors
@@ -121,7 +124,7 @@ ignore = [
 "__init__.py" = ["F401"]
 
 [tool.black]
-target-version = ['py311']
+target-version = ['py313']
 line-length = 88
 include = '\.pyi?$'
 extend-exclude = '''
@@ -139,7 +142,7 @@ extend-exclude = '''
 '''
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.13"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true

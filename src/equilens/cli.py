@@ -5,6 +5,7 @@ A comprehensive command-line interface for the EquiLens AI bias detection platfo
 Features interactive commands, beautiful output formatting, and comprehensive help.
 """
 
+import json
 import subprocess
 from pathlib import Path
 from typing import Annotated
@@ -14,7 +15,14 @@ import typer
 from rich.console import Console
 from rich.panel import Panel
 
-from equilens.core.manager import EquiLensManager
+try:
+    from equilens.core.manager import EquiLensManager
+except ImportError:
+    # Fallback for relative imports when run as script
+    import sys
+
+    sys.path.append(str(Path(__file__).parent.parent))
+    from equilens.core.manager import EquiLensManager
 
 console = Console()
 
@@ -93,7 +101,7 @@ def main(
     **Interactive Mode:**
 
     • `uv run equilens tui` - Launch interactive terminal UI
-    • `uv run equilens-web` - Start web interface (future)
+    • `uv run equilens web` - Start web interface (future)
     """
     if version:
         from equilens import __version__
@@ -182,6 +190,95 @@ def models_pull(
         raise typer.Exit(1)
 
 
+def find_interrupted_sessions(model: str | None = None) -> list[tuple[str, dict]]:
+    """Find interrupted audit sessions that can be resumed"""
+    interrupted_sessions = []
+    results_dir = Path("results")
+
+    if not results_dir.exists():
+        return interrupted_sessions
+
+    # Look for progress files in session directories
+    for session_dir in results_dir.iterdir():
+        if session_dir.is_dir():
+            # Look for progress files
+            for progress_file in session_dir.glob("progress_*.json"):
+                try:
+                    with open(progress_file, encoding="utf-8") as f:
+                        progress_data = json.load(f)
+
+                    # Check if it's an incomplete session
+                    total_tests = progress_data.get("total_tests", 0)
+                    completed_tests = progress_data.get("completed_tests", 0)
+                    session_model = progress_data.get("model_name", "")
+
+                    # Only include if incomplete and matches model (if specified)
+                    if completed_tests < total_tests and (
+                        not model or session_model == model
+                    ):
+                        interrupted_sessions.append((str(progress_file), progress_data))
+
+                except (json.JSONDecodeError, KeyError, FileNotFoundError):
+                    continue
+
+    # Sort by start time (most recent first)
+    interrupted_sessions.sort(key=lambda x: x[1].get("start_time", ""), reverse=True)
+    return interrupted_sessions
+
+
+def prompt_for_resume(model: str | None = None) -> str | None:
+    """Check for interrupted sessions and prompt user to resume"""
+    interrupted_sessions = find_interrupted_sessions(model)
+
+    if not interrupted_sessions:
+        return None
+
+    console.print("\n[yellow]🔄 Found interrupted audit sessions:[/yellow]")
+
+    for i, (_progress_file, progress_data) in enumerate(interrupted_sessions, 1):
+        session_model = progress_data.get("model_name", "Unknown")
+        completed = progress_data.get("completed_tests", 0)
+        total = progress_data.get("total_tests", 0)
+        completion_percent = (completed / total * 100) if total > 0 else 0
+        start_time = progress_data.get("start_time", "Unknown")
+
+        # Parse start time for better display
+        try:
+            from datetime import datetime
+
+            start_dt = datetime.fromisoformat(start_time)
+            time_str = start_dt.strftime("%Y-%m-%d %H:%M:%S")
+        except Exception:
+            time_str = start_time
+
+        console.print(
+            f"  {i}. [cyan]{session_model}[/cyan] - {completed}/{total} tests ({completion_percent:.1f}% complete)"
+        )
+        console.print(f"     [dim]Started: {time_str}[/dim]")
+
+    console.print("\n[bold]Options:[/bold]")
+    console.print(
+        f"  [green]1-{len(interrupted_sessions)}[/green]: Resume interrupted session"
+    )
+    console.print("  [yellow]n[/yellow]: Start new audit session")
+    console.print("  [red]q[/red]: Quit")
+
+    while True:
+        choice = typer.prompt("\nSelect option").lower().strip()
+
+        if choice == "q":
+            console.print("[yellow]Audit cancelled.[/yellow]")
+            raise typer.Exit(0)
+        elif choice == "n":
+            return None
+        elif choice.isdigit() and 1 <= int(choice) <= len(interrupted_sessions):
+            return interrupted_sessions[int(choice) - 1][0]
+        else:
+            console.print(
+                f"[red]Invalid choice. Please enter 1-{len(interrupted_sessions)}, 'n', or 'q'[/red]"
+            )
+
+
 @app.command()
 def audit(
     model: Annotated[
@@ -193,6 +290,28 @@ def audit(
     output_dir: Annotated[
         str, typer.Option("--output-dir", "-o", help="Output directory for results")
     ] = "results",
+    enhanced: Annotated[
+        bool,
+        typer.Option(
+            "--enhanced",
+            "-e",
+            help="[BETA] Use experimental enhanced auditor (may have reliability issues)",
+        ),
+    ] = False,
+    batch_size: Annotated[
+        int,
+        typer.Option(
+            "--batch-size", "-b", help="Number of concurrent requests for enhanced mode"
+        ),
+    ] = 5,
+    resume: Annotated[
+        str | None,
+        typer.Option(
+            "--resume",
+            "-r",
+            help="Resume from a previous interrupted audit session (provide progress file path)",
+        ),
+    ] = None,
     silent: Annotated[
         bool,
         typer.Option(
@@ -203,6 +322,38 @@ def audit(
     ] = False,
 ):
     """🔍 Run bias audit with interactive prompts and enhanced visual design"""
+
+    # Auto-resume detection (if not explicitly resuming and no model specified)
+    if resume is None and model is None:
+        auto_resume_file = prompt_for_resume()
+        if auto_resume_file:
+            resume = auto_resume_file
+
+    # If resuming, extract model and corpus from progress file
+    if resume:
+        try:
+            with open(resume, encoding="utf-8") as f:
+                progress_data = json.load(f)
+
+            resume_model = progress_data.get("model_name")
+            resume_corpus = progress_data.get("corpus_file")
+
+            if resume_model and resume_corpus:
+                model = resume_model
+                corpus = resume_corpus
+                console.print("🔄 [green]Resuming audit session...[/green]")
+                console.print(f"📊 Model: [cyan]{model}[/cyan]")
+                console.print(f"📂 Corpus: [cyan]{corpus}[/cyan]")
+                console.print(
+                    f"📋 Progress: {progress_data.get('completed_tests', 0)}/{progress_data.get('total_tests', 0)} tests completed"
+                )
+            else:
+                console.print(f"[red]❌ Invalid progress file: {resume}[/red]")
+                raise typer.Exit(1)
+
+        except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
+            console.print(f"[red]❌ Error reading progress file: {e}[/red]")
+            raise typer.Exit(1) from e
 
     # Step 1: Model Selection
     if model is None:
@@ -254,16 +405,18 @@ def audit(
 
         # Look for common corpus files
         common_paths = [
-            "quick_test_corpus.csv",
+            "src/Phase1_CorpusGenerator/corpus/quick_test_corpus.csv",
             "src/Phase1_CorpusGenerator/corpus/test_corpus.csv",
+            "src/Phase1_CorpusGenerator/corpus/audit_corpus_gender_bias.csv",
+            "quick_test_corpus.csv",
             "test_corpus.csv",
         ]
 
         found_files = []
-        for path in common_paths:
-            if Path(path).exists():
-                file_size = Path(path).stat().st_size
-                found_files.append((path, file_size))
+        for file_path in common_paths:
+            if Path(file_path).exists():
+                file_size = Path(file_path).stat().st_size
+                found_files.append((file_path, file_size))
 
         if found_files:
             console.print("\n[green]✓ Found corpus files:[/green]")
@@ -335,75 +488,121 @@ def audit(
     )
 
     try:
-        # Configure subprocess parameters based on silent mode
-        if silent:
-            # Redirect both stdout and stderr to suppress emoji encoding errors
-            # This prevents the Unicode errors from cluttering output
-            subprocess.run(
-                [
-                    "python",
-                    "src/Phase2_ModelAuditor/audit_model.py",
-                    "--model",
-                    model,
-                    "--corpus",
-                    corpus,
-                    "--output-dir",
-                    output_dir,
-                ],
-                check=True,
-                stderr=subprocess.DEVNULL,
-                stdout=subprocess.DEVNULL,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-            )
-            # Show clean progress feedback
+        if enhanced:
+            # Warning for beta enhanced auditor
             console.print(
-                "[green]✓[/green] Audit process completed successfully (output suppressed)"
+                "⚠️ [bold yellow]BETA WARNING: Enhanced auditor is experimental and may have reliability issues[/bold yellow]"
             )
-        else:
-            # Normal execution with full output but with proper encoding handling
+            console.print(
+                "💡 [dim]For stable results, use the standard auditor (without --enhanced flag)[/dim]\n"
+            )
+
+            # Use enhanced auditor with Rich progress bars
+            console.print(
+                "🚀 [bold cyan]Starting enhanced audit with real-time progress...[/bold cyan]"
+            )
+
+            # Import the enhanced auditor with better error handling
+            import sys
+
+            enhanced_path = Path("src/Phase2_ModelAuditor").resolve()
+            if str(enhanced_path) not in sys.path:
+                sys.path.insert(0, str(enhanced_path))
+
             try:
-                subprocess.run(
-                    [
-                        "python",
-                        "src/Phase2_ModelAuditor/audit_model.py",
-                        "--model",
-                        model,
-                        "--corpus",
-                        corpus,
-                        "--output-dir",
-                        output_dir,
-                    ],
-                    check=True,
-                    text=True,
-                    encoding="utf-8",
-                    errors="replace",
+                from Phase2_ModelAuditor.enhanced_audit_model import EnhancedBiasAuditor
+
+                # Create and run enhanced auditor
+                auditor = EnhancedBiasAuditor(
+                    model_name=model, corpus_file=corpus, output_dir=output_dir
                 )
-            except UnicodeDecodeError:
-                # Fallback for Unicode issues - run in silent mode automatically
-                console.print(
-                    "[yellow]⚠ Unicode display issues detected, switching to silent mode...[/yellow]"
-                )
+
+                # Set batch size if specified
+                auditor.batch_size = batch_size
+
+                success = auditor.run_enhanced_audit(resume_file=resume)
+
+                if success:
+                    console.print(
+                        "\n✅ [bold green]Enhanced audit completed successfully![/bold green]"
+                    )
+                else:
+                    console.print("\n❌ [bold red]Enhanced audit failed![/bold red]")
+                    raise typer.Exit(1)
+
+            except ImportError as e:
+                console.print(f"[red]❌ Failed to import enhanced auditor: {e}[/red]")
+                console.print("[yellow]Falling back to legacy auditor...[/yellow]")
+                enhanced = False
+
+        if not enhanced:
+            # Use original auditor with subprocess
+            console.print("🔄 [yellow]Using legacy auditor...[/yellow]")
+
+            # Configure subprocess parameters based on silent mode
+            cmd = [
+                "python",
+                "src/Phase2_ModelAuditor/audit_model.py",
+                "--model",
+                model,
+                "--corpus",
+                corpus,
+                "--output-dir",
+                output_dir,
+            ]
+
+            # Add resume parameter if specified
+            if resume:
+                cmd.extend(["--resume", resume])
+
+            if silent:
+                # Redirect both stdout and stderr to suppress emoji encoding errors
                 subprocess.run(
-                    [
-                        "python",
-                        "src/Phase2_ModelAuditor/audit_model.py",
-                        "--model",
-                        model,
-                        "--corpus",
-                        corpus,
-                        "--output-dir",
-                        output_dir,
-                    ],
+                    cmd,
                     check=True,
                     stderr=subprocess.DEVNULL,
                     stdout=subprocess.DEVNULL,
                     text=True,
+                    encoding="utf-8",
+                    errors="replace",
                 )
                 console.print(
-                    "[green]✓[/green] Audit completed (Unicode issues bypassed)"
+                    "[green]✓[/green] Audit process completed successfully (output suppressed)"
                 )
+            else:
+                # Normal execution with full output but with proper encoding handling
+                try:
+                    subprocess.run(
+                        cmd,
+                        check=True,
+                        text=True,
+                        encoding="utf-8",
+                        errors="replace",
+                    )
+                except UnicodeDecodeError:
+                    # Fallback for Unicode issues - run in silent mode automatically
+                    console.print(
+                        "[yellow]⚠ Unicode display issues detected, switching to silent mode...[/yellow]"
+                    )
+                    subprocess.run(
+                        [
+                            "python",
+                            "src/Phase2_ModelAuditor/audit_model.py",
+                            "--model",
+                            model,
+                            "--corpus",
+                            corpus,
+                            "--output-dir",
+                            output_dir,
+                        ],
+                        check=True,
+                        stderr=subprocess.DEVNULL,
+                        stdout=subprocess.DEVNULL,
+                        text=True,
+                    )
+                    console.print(
+                        "[green]✓[/green] Audit completed (Unicode issues bypassed)"
+                    )
 
         # Success Panel with enhanced information
         safe_model = model.replace(":", "_")

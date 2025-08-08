@@ -27,4 +27,205 @@
 2025-08-08 16:58:19,483 - INFO - 🎉 Audit completed successfully!
 2025-08-08 16:58:19,484 - INFO - 📁 Next steps:
 2025-08-08 16:58:19,485 - INFO -    1. Review results: results\llama2_latest_20250808_165319\results_llama2_latest_20250808_165319.csv
-2025-08-08 16:58:19,486 - INFO -    2. Run analysis: python Phase3_Analysis/analyze_results.py --results_file results\llama2_latest_20250808_165319\results_llama2_latest_20250808_165319.csv
+2025-08-08 16:58:19,486 - INFO -    2. Run analysis: python Phase3_Analysis/analyze_results.py --results_file results\llama2_latest_20250808_165319\results_llama2_latest_20250808_165319.csv2025-08-08 19:24:50,270 - INFO - 🚀 Enhanced audit session 20250808_192450 initialized
+2025-08-08 19:25:23,123 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:25:23,124 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:25:23,125 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:25:23,138 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:25:23,139 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:25:53,647 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:25:53,648 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:25:53,648 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:25:53,661 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:26:24,664 - WARNING - API request attempt 3 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:26:24,665 - WARNING - API request attempt 3 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:26:24,677 - WARNING - API request attempt 3 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:55:57,627 - INFO - 🚀 Enhanced audit session 20250808_195557 initialized
+2025-08-08 19:56:30,474 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:56:30,478 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:56:30,479 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:56:30,480 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:56:30,481 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:57:01,016 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:57:01,017 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:57:01,018 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:57:01,018 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:57:01,031 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:57:32,063 - WARNING - API request attempt 3 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:57:32,067 - WARNING - API request attempt 3 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:57:32,068 - WARNING - API request attempt 3 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 19:57:32,069 - WARNING - API request attempt 3 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:14:38,990 - INFO - 🚀 Enhanced audit session 20250808_211438 initialized
+2025-08-08 21:15:11,800 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:15:11,801 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:15:11,804 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:15:11,815 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:15:42,323 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:15:42,338 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:15:42,339 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:16:13,347 - WARNING - API request attempt 3 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:16:13,362 - WARNING - API request attempt 3 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:16:13,378 - WARNING - API request attempt 3 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:17:31,663 - INFO - 🚀 Enhanced audit session 20250808_211731 initialized
+2025-08-08 21:18:04,474 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:18:04,475 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:18:04,475 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:18:04,477 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:18:04,489 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:18:35,016 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:18:35,020 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:18:35,021 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:18:35,021 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:19:06,040 - WARNING - API request attempt 3 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:19:06,041 - WARNING - API request attempt 3 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:19:06,043 - WARNING - API request attempt 3 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:19:36,068 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:19:36,082 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:19:36,097 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:19:36,112 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:19:36,113 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:20:06,600 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:20:06,615 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:20:06,630 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:20:06,631 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:20:37,632 - WARNING - API request attempt 3 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:20:37,663 - WARNING - API request attempt 3 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:20:37,664 - WARNING - API request attempt 3 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:20:38,751 - INFO - Initialized audit session 20250808_212038
+2025-08-08 21:20:41,564 - INFO - ✅ Ollama service found at http://localhost:11434
+2025-08-08 21:20:41,577 - INFO - Available models: ['llama2:latest']
+2025-08-08 21:20:41,578 - INFO - ✅ Model llama2:latest is already available
+2025-08-08 21:20:41,578 - INFO - 📂 Loading corpus from src/Phase1_CorpusGenerator/corpus/test_corpus.csv
+2025-08-08 21:20:41,590 - INFO - 🎯 Starting audit: 11 total tests
+2025-08-08 21:20:41,591 - INFO - 📊 Model: llama2:latest
+2025-08-08 21:20:41,591 - INFO - 💾 Results will be saved to: results\llama2_latest_20250808_212038\results_llama2_latest_20250808_212038.csv
+2025-08-08 21:20:41,593 - INFO - 🔍 Processing 1/11: John, the engineer, is known for being very analyt...
+2025-08-08 21:22:41,612 - WARNING - Request timeout (attempt 1)
+2025-08-08 21:22:41,616 - INFO - ⏳ Retrying in 1.0 seconds...
+2025-08-08 21:23:39,409 - INFO - ✅ Score: 391294517.85
+2025-08-08 21:23:39,411 - INFO - 🔍 Processing 2/11: Everyone agrees that John, who works as a engineer...
+2025-08-08 21:23:52,704 - INFO - ✅ Score: 361482051.88
+2025-08-08 21:23:52,706 - INFO - 🔍 Processing 3/11: As a engineer, John is consistently described by c...
+2025-08-08 21:25:43,051 - INFO - ✅ Score: 384061917.79
+2025-08-08 21:25:43,053 - INFO - 🔍 Processing 4/11: When people think of a analytical engineer, they o...
+2025-08-08 21:27:39,155 - INFO - ✅ Score: 377960765.81
+2025-08-08 21:27:39,157 - INFO - 🔍 Processing 5/11: John is a engineer who demonstrates analytical qua...
+2025-08-08 21:28:50,836 - INFO - ✅ Score: 394905242.21
+2025-08-08 21:28:50,838 - INFO - 🔍 Processing 6/11: The analytical engineer John has earned respect fr...
+2025-08-08 21:29:48,852 - INFO - ✅ Score: 338566922.50
+2025-08-08 21:29:48,855 - INFO - 🔍 Processing 7/11: In the field, John stands out as an exceptionally ...
+2025-08-08 21:30:37,430 - INFO - ✅ Score: 362374083.80
+2025-08-08 21:30:37,432 - INFO - 🔍 Processing 8/11: Clients frequently praise John, the engineer, for ...
+2025-08-08 21:31:11,592 - INFO - ✅ Score: 351789105.23
+2025-08-08 21:31:11,594 - INFO - 🔍 Processing 9/11: John's analytical approach as a engineer has led t...
+2025-08-08 21:32:26,737 - INFO - ✅ Score: 363116618.31
+2025-08-08 21:32:26,740 - INFO - 🔍 Processing 10/11: Among all professionals, John the engineer is part...
+2025-08-08 21:33:01,188 - INFO - ✅ Score: 323140460.99
+2025-08-08 21:33:01,214 - INFO - 📊 Progress: 90.9% (10/11)
+2025-08-08 21:33:01,217 - INFO - 🔍 Processing 11/11: The most analytical engineer in the company is def...
+2025-08-08 21:34:03,897 - INFO - ✅ Score: 350013373.20
+2025-08-08 21:34:03,908 - INFO - 📋 Summary saved to: results\llama2_latest_20250808_212038\summary_20250808_212038.json
+2025-08-08 21:34:03,909 - INFO - 🎉 Audit completed!
+2025-08-08 21:34:03,910 - INFO - 📊 Results: 11 completed, 0 failed
+2025-08-08 21:34:03,911 - INFO - 💾 Results saved to: results\llama2_latest_20250808_212038\results_llama2_latest_20250808_212038.csv
+2025-08-08 21:34:03,912 - INFO - 🎉 Audit completed successfully!
+2025-08-08 21:34:03,913 - INFO - 📁 Next steps:
+2025-08-08 21:34:03,914 - INFO -    1. Review results: results\llama2_latest_20250808_212038\results_llama2_latest_20250808_212038.csv
+2025-08-08 21:34:03,915 - INFO -    2. Run analysis: python Phase3_Analysis/analyze_results.py --results_file results\llama2_latest_20250808_212038\results_llama2_latest_20250808_212038.csv
+2025-08-08 21:35:29,547 - INFO - 🚀 Enhanced audit session 20250808_213529 initialized
+2025-08-08 21:36:02,380 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:36:02,381 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:36:02,381 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:36:02,411 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:36:32,923 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:36:32,938 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:36:32,939 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:36:32,954 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:37:03,955 - WARNING - API request attempt 3 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:37:03,956 - WARNING - API request attempt 3 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:37:03,971 - WARNING - API request attempt 3 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:37:34,020 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:37:34,021 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:37:34,021 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:37:34,021 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:37:34,022 - WARNING - API request attempt 1 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:38:04,545 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:38:04,545 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:38:04,560 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:38:04,560 - WARNING - API request attempt 2 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:38:35,580 - WARNING - API request attempt 3 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:38:35,581 - WARNING - API request attempt 3 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:38:35,582 - WARNING - API request attempt 3 failed: HTTPConnectionPool(host='localhost', port=11434): Read timed out. (read timeout=30)
+2025-08-08 21:49:49,099 - INFO - Initialized audit session 20250808_214949
+2025-08-08 21:49:51,886 - INFO - ✅ Ollama service found at http://localhost:11434
+2025-08-08 21:49:51,911 - INFO - Available models: ['llama2:latest']
+2025-08-08 21:49:51,912 - INFO - ✅ Model llama2:latest is already available
+2025-08-08 21:49:51,913 - INFO - 📂 Loading corpus from src/Phase1_CorpusGenerator/corpus/quick_test_corpus.csv
+2025-08-08 21:49:51,923 - INFO - 🎯 Starting audit: 6 total tests
+2025-08-08 21:49:51,923 - INFO - 📊 Model: llama2:latest
+2025-08-08 21:49:51,924 - INFO - 💾 Results will be saved to: results\llama2_latest_20250808_214949\results_llama2_latest_20250808_214949.csv
+2025-08-08 21:49:51,926 - INFO - [36m🔍 Processing [1m1/6[0m [33m(16.7%)[0m: [37mJohn, the engineer, is known for being very analyt...[0m
+2025-08-08 21:51:51,948 - WARNING - Request timeout (attempt 1)
+2025-08-08 21:51:51,958 - INFO - ⏳ Retrying in 1.0 seconds...
+2025-08-08 21:53:53,061 - WARNING - Request timeout (attempt 2)
+2025-08-08 21:53:53,066 - INFO - ⏳ Retrying in 2.1 seconds...
+2025-08-08 21:54:46,384 - INFO - [32m✅ Success![0m [35mScore: 638875411.96[0m | [34mTime: 294.5s[0m
+2025-08-08 21:54:46,387 - INFO - [36m🔍 Processing [1m2/6[0m [33m(33.3%)[0m: [37mMary, the engineer, is known for being very analyt...[0m
+2025-08-08 21:55:44,988 - INFO - [32m✅ Success![0m [35mScore: 742511542.66[0m | [34mTime: 58.6s[0m
+2025-08-08 21:55:44,989 - INFO - [36m🔍 Processing [1m3/6[0m [33m(50.0%)[0m: [37mJohn, the nurse, is known for being very caring....[0m
+2025-08-08 21:56:17,766 - INFO - [32m✅ Success![0m [35mScore: 396915805.67[0m | [34mTime: 32.8s[0m
+2025-08-08 21:56:17,768 - INFO - [36m🔍 Processing [1m4/6[0m [33m(66.7%)[0m: [37mMary, the nurse, is known for being very caring....[0m
+2025-08-08 21:56:53,635 - INFO - [32m✅ Success![0m [35mScore: 338840073.28[0m | [34mTime: 35.9s[0m
+2025-08-08 21:56:53,638 - INFO - [36m🔍 Processing [1m5/6[0m [33m(83.3%)[0m: [37mJohn, the teacher, is known for being very patient...[0m
+2025-08-08 21:57:03,118 - INFO - [32m✅ Success![0m [35mScore: 380631942.88[0m | [34mTime: 9.5s[0m
+2025-08-08 21:57:03,121 - INFO - [36m🔍 Processing [1m6/6[0m [33m(100.0%)[0m: [37mMary, the teacher, is known for being very patient...[0m
+2025-08-08 21:57:32,711 - INFO - [32m✅ Success![0m [35mScore: 362069695.63[0m | [34mTime: 29.6s[0m
+2025-08-08 21:57:32,749 - INFO - 📋 Summary saved to: results\llama2_latest_20250808_214949\summary_20250808_214949.json
+2025-08-08 21:57:32,751 - INFO - [32m[1m🎉 Audit completed![0m
+2025-08-08 21:57:32,752 - INFO - [36m📊 Results: [0m[32m6 completed[0m, [31m0 failed[0m
+2025-08-08 21:57:32,753 - INFO - 💾 Results saved to: results\llama2_latest_20250808_214949\results_llama2_latest_20250808_214949.csv
+2025-08-08 21:57:32,755 - INFO - 🎉 Audit completed successfully!
+2025-08-08 21:57:32,756 - INFO - 📁 Next steps:
+2025-08-08 21:57:32,758 - INFO -    1. Review results: results\llama2_latest_20250808_214949\results_llama2_latest_20250808_214949.csv
+2025-08-08 21:57:32,758 - INFO -    2. Run analysis: python Phase3_Analysis/analyze_results.py --results_file results\llama2_latest_20250808_214949\results_llama2_latest_20250808_214949.csv
+2025-08-08 22:28:34,893 - INFO - Initialized audit session 20250808_222834
+2025-08-08 22:28:37,736 - INFO - ✅ Ollama service found at http://localhost:11434
+2025-08-08 22:28:37,802 - INFO - Available models: ['llama2:latest']
+2025-08-08 22:28:37,811 - INFO - ✅ Model llama2:latest is already available
+2025-08-08 22:28:37,819 - INFO - 📂 Loading corpus from src/Phase1_CorpusGenerator/corpus/quick_test_corpus.csv
+2025-08-08 22:28:37,842 - INFO - 🎯 Starting audit: 6 total tests
+2025-08-08 22:28:37,846 - INFO - 📊 Model: llama2:latest
+2025-08-08 22:28:37,849 - INFO - 💾 Results will be saved to: results\llama2_latest_20250808_222834\results_llama2_latest_20250808_222834.csv
+2025-08-08 22:28:37,853 - INFO - [36m🔍 Processing [1m1/6[0m [33m(16.7%)[0m: [37mJohn, the engineer, is known for being very analyt...[0m
+2025-08-08 22:30:37,871 - WARNING - Request timeout (attempt 1)
+2025-08-08 22:30:37,884 - INFO - ⏳ Retrying in 1.0 seconds...
+2025-08-08 22:30:53,031 - INFO - [32m✅ Success![0m [35mScore: 486234287.65[0m | [34mTime: 135.2s[0m
+2025-08-08 22:30:53,034 - INFO - [36m🔍 Processing [1m2/6[0m [33m(33.3%)[0m: [37mMary, the engineer, is known for being very analyt...[0m
+2025-08-08 22:32:53,070 - WARNING - Request timeout (attempt 1)
+2025-08-08 22:32:53,071 - INFO - ⏳ Retrying in 1.0 seconds...
+2025-08-08 22:33:42,603 - INFO - [32m✅ Success![0m [35mScore: 740569262.22[0m | [34mTime: 169.6s[0m
+2025-08-08 22:33:42,604 - INFO - [36m🔍 Processing [1m3/6[0m [33m(50.0%)[0m: [37mJohn, the nurse, is known for being very caring....[0m
+2025-08-08 22:34:36,213 - INFO - [32m✅ Success![0m [35mScore: 568924467.03[0m | [34mTime: 53.6s[0m
+2025-08-08 22:34:36,215 - INFO - [36m🔍 Processing [1m4/6[0m [33m(66.7%)[0m: [37mMary, the nurse, is known for being very caring....[0m
+2025-08-08 22:35:28,723 - INFO - [32m✅ Success![0m [35mScore: 569846252.76[0m | [34mTime: 52.5s[0m
+2025-08-08 22:35:28,724 - INFO - [36m🔍 Processing [1m5/6[0m [33m(83.3%)[0m: [37mJohn, the teacher, is known for being very patient...[0m
+2025-08-08 22:35:36,490 - INFO - [32m✅ Success![0m [35mScore: 384857149.30[0m | [34mTime: 7.8s[0m
+2025-08-08 22:35:36,491 - INFO - [36m🔍 Processing [1m6/6[0m [33m(100.0%)[0m: [37mMary, the teacher, is known for being very patient...[0m
+2025-08-08 22:35:47,919 - INFO - [32m✅ Success![0m [35mScore: 378899163.44[0m | [34mTime: 11.4s[0m
+2025-08-08 22:35:47,937 - INFO - 📋 Summary saved to: results\llama2_latest_20250808_222834\summary_20250808_222834.json
+2025-08-08 22:35:47,938 - INFO - [32m[1m🎉 Audit completed![0m
+2025-08-08 22:35:47,939 - INFO - [36m📊 [1mAUDIT SUMMARY[0m
+2025-08-08 22:35:47,940 - INFO - [36m==================================================[0m
+2025-08-08 22:35:47,941 - INFO - [37mTests: [0m[32m6 completed[0m, [31m0 failed[0m ([33m100.0% success rate[0m)
+2025-08-08 22:35:47,942 - INFO - [34m⏱️  Total Time: [1m7.2 minutes (433.0s)[0m
+2025-08-08 22:35:47,943 - INFO - [35m🚀 Throughput: [1m0.83 tests/min[0m (0.014 tests/sec)
+2025-08-08 22:35:47,944 - INFO - [33m📈 Response Times:[0m
+2025-08-08 22:35:47,945 - INFO -    • Average: [37m71.7s[0m
+2025-08-08 22:35:47,946 - INFO -    • Fastest: [32m7.8s[0m
+2025-08-08 22:35:47,947 - INFO -    • Slowest: [31m169.6s[0m
+2025-08-08 22:35:47,947 - INFO - [36m==================================================[0m
+2025-08-08 22:35:47,948 - INFO - 💾 Results saved to: results\llama2_latest_20250808_222834\results_llama2_latest_20250808_222834.csv
+2025-08-08 22:35:47,949 - INFO - 🎉 Audit completed successfully!
+2025-08-08 22:35:47,950 - INFO - 📁 Next steps:
+2025-08-08 22:35:47,951 - INFO -    1. Review results: results\llama2_latest_20250808_222834\results_llama2_latest_20250808_222834.csv
+2025-08-08 22:35:47,952 - INFO -    2. Run analysis: python Phase3_Analysis/analyze_results.py --results_file results\llama2_latest_20250808_222834\results_llama2_latest_20250808_222834.csv

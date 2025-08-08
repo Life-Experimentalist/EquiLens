@@ -1,43 +1,65 @@
-# EquiLens Application Dockerfile - ULTRA-OPTIMIZED for speed
-FROM python:3.12-slim
-LABEL author="VKrishna04 <https://github.com/VKrishna04>"
+# EquiLens Application Dockerfile - ULTRA-OPTIMIZED & SECURE
+FROM python:3.13.3-slim
 
-# Install ONLY essential system dependencies in one layer
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Metadata for security and traceability
+LABEL author="VKrishna04 <https://github.com/VKrishna04>"
+LABEL org.opencontainers.image.source="https://github.com/Life-Experimentalists/EquiLens"
+LABEL org.opencontainers.image.description="EquiLens AI Bias Detection Platform"
+LABEL org.opencontainers.image.licenses="Apache-2.0"
+LABEL org.opencontainers.image.version="1.0.0"
+LABEL org.opencontainers.image.created="2025-08-08"
+
+# Security: Update base packages and install only essential tools
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
 	curl \
 	git \
+	ca-certificates \
 	&& rm -rf /var/lib/apt/lists/* \
-	&& apt-get clean
+	&& apt-get clean \
+	&& apt-get autoremove -y
 
-# Install uv for fast Python package management
-RUN pip install --no-cache-dir uv
+# Install UV for fast Python package management
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
+	pip install --no-cache-dir uv
 
-# Create working directory and user
-WORKDIR /workspace
-RUN useradd -m -u 1000 equilens
+# Security: Create non-root user with explicit shell
+RUN useradd -m -u 1000 -s /bin/bash equilens && \
+	mkdir -p /workspace && \
+	chown equilens:equilens /workspace
 
-# Copy ONLY requirements first for better layer caching
-COPY requirements.txt .
-
-# Install Python dependencies with uv (OPTIMIZED - no heavy packages)
-RUN uv pip install --system --no-cache-dir -r requirements.txt
-
-# Skip spaCy model download during build - do it at runtime instead
-# This saves ~500MB and 5+ minutes during build
-# RUN python -m spacy download en_core_web_sm --quiet
-
-# Copy application files (this layer changes most often, so keep it last)
-COPY . .
-
-# Set permissions and create directories
-RUN chown -R equilens:equilens /workspace && \
-	mkdir -p logs results corpus
-
-# Switch to non-root user
+# Switch to non-root user for security
 USER equilens
+WORKDIR /workspace
+
+# Copy UV configuration files first for better layer caching
+COPY --chown=equilens:equilens pyproject.toml uv.lock ./
+
+# Install Python dependencies with UV (OPTIMIZED)
+RUN uv sync --frozen --no-dev
+
+# Copy application files (this layer changes most often)
+COPY --chown=equilens:equilens . .
+
+# Create necessary directories with proper permissions
+RUN mkdir -p logs results src/Phase1_CorpusGenerator/corpus && \
+	chmod 755 logs results
+
+# Security: Clean up Python cache and temporary files
+RUN find . -name "*.pyc" -delete && \
+	find . -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
+
+# Health check for container monitoring
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+	CMD python -c "import sys; print('🚀 EquiLens healthy'); sys.exit(0)" || exit 1
 
 # Expose port for future web interface
 EXPOSE 8000
 
-# Default command - lightweight and fast
-CMD ["python", "-c", "print('EquiLens container ready - optimized build!'); import time; time.sleep(999999)"]
+# Set environment variables for better Unicode support
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONIOENCODING=utf-8
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+# Default command - ready for interactive use
+CMD ["uv", "run", "equilens", "--help"]

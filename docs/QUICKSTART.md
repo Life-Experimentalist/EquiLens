@@ -1,53 +1,69 @@
 # 🚀 EquiLens Quick Start Guide
 
-**Get started with AI bias detection in under 5 minutes**
+**Get started with EquiLens AI bias detection in under 5 minutes!**
 
----
+## 📋 Overview
 
-## 🎯 Prerequisites
+EquiLens is a comprehensive AI bias detection platform featuring an interactive CLI with Rich UI, automatic session management, and comprehensive performance analytics. This guide gets you up and running quickly.
 
-### Required
-- ✅ **Python 3.13+** - [Download here](https://www.python.org/downloads/)
-- ✅ **Docker Desktop** - [Download here](https://www.docker.com/products/docker-desktop/)
-- ✅ **uv** package manager - `pip install uv`
+## ✅ Prerequisites
+
+### System Requirements
+- **Python**: 3.11+ (3.13 recommended)
+- **RAM**: 4GB minimum, 8GB+ recommended
+- **Disk**: 2GB free space
+- **OS**: Windows 10+, macOS 10.15+, Ubuntu 18.04+
 
 ### Optional (for GPU acceleration)
-- ⚡ **NVIDIA GPU** with recent drivers
-- 🔧 **NVIDIA Container Toolkit** for Docker GPU support
+- **Docker**: Latest version with GPU support
+- **NVIDIA GPU**: With CUDA drivers
+- **8GB+ RAM**: For enhanced performance
 
----
+## 🎯 One-Command Setup
 
-## 🚀 5-Minute Setup
-
-### Step 1: Clone & Setup Environment
+### 1. Quick Installation
 ```bash
-# 📥 Clone the repository
+# Clone the repository
 git clone https://github.com/Life-Experimentalists/EquiLens.git
 cd EquiLens
 
-# 📦 Create virtual environment
-uv venv
-uv pip install -r pyproject.toml
+# Install dependencies with UV (recommended)
+pip install uv
+uv sync
+
+# Alternative: Install with pip
+pip install -e .
 ```
 
-### Step 2: Start Services
+### 2. Verify Setup
 ```bash
-# 🐳 Start Docker services (Ollama + GPU support)
-docker compose up -d
+# Run the verification script
+python verify_setup.py
 
-# ✅ Verify services are running
-docker compose ps
+# Expected output:
+✓ Python 3.13.x detected
+✓ Required packages installed
+✓ Directory structure validated
+✓ Docker available
+✓ System resources sufficient
 ```
 
-### Step 3: Launch Interactive CLI
+### 3. Start Your First Audit
 ```bash
-# 🎨 Launch the Rich interactive interface
-uv run python src/equilens/cli.py
-```
+# Interactive audit with auto-discovery
+uv run equilens audit
 
-**That's it!** The interactive CLI will:
-- 🔍 Auto-discover available corpus files
-- 🤖 Detect available AI models
+# You'll see a beautiful interface like:
+╭─────────────────────────────────────────────────────────╮
+│ Step 1: Model Selection                                 │
+│ Select or specify the language model to audit for bias. │
+╰─────────────────────────────────────────────────────────╯
+
+✓ Found available models:
+  1. llama2:latest
+
+Select model number or enter custom name: 1
+```
 - 🎨 Present beautiful selection panels
 - 📊 Guide you through the complete workflow
 - 📁 Save results in organized session directories

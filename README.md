@@ -2,10 +2,9 @@
 
 **Professional AI bias detection platform with interactive CLI, GPU acceleration, and comprehensive reporting**
 
-[![License](https://img.shields.io/badge/license-Apache%202.0-green)](#license)
-[![Python](https://img.shields.io/badge/python-3.13-blue)](#requirements)
-[![Docker](https://img.shields.io/badge/docker-compose-blue)](#docker-setup)
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-brightgreen)](#compatibility)
+| License                                                                         | Python                                                                    | Docker                                                                       | Platform                                                                                                             |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| [![License](https://img.shields.io/badge/license-Apache%202.0-green)](#license) | [![Python](https://img.shields.io/badge/python-3.13-blue)](#requirements) | [![Docker](https://img.shields.io/badge/docker-compose-blue)](#docker-setup) | [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-brightgreen)](#compatibility) |
 
 ## 🌟 Key Features
 
@@ -19,11 +18,27 @@
 
 ## 🚀 Quick Start
 
+### ✅ Setup Verification
+
+```bash
+# 🔍 Verify your setup (recommended first step)
+python verify_setup.py
+
+# The verification script checks:
+# - Python version compatibility
+# - Required packages installation
+# - Directory structure integrity
+# - Docker availability
+# - Ollama connection
+# - GPU support detection
+# - System resources
+```
+
 ### 🎯 One-Command Experience (Recommended)
 
 ```bash
 # 🚀 Launch Interactive Interface
-uv run python src/equilens/cli.py
+uv run equilens --help
 
 # ✨ The CLI will:
 # - Auto-discover corpus files and available models
@@ -74,6 +89,8 @@ EquiLens automatically detects and uses GPU acceleration when available:
 - **📋 Setup Guidance**: Direct links to NVIDIA CUDA downloads
 
 **Performance Impact**: 5-10x faster model inference with GPU acceleration
+
+```
 ./equilens.sh start
 ```
 
@@ -196,6 +213,7 @@ python equilens.py generate bias_config.json
 
 # 4. Run bias audit
 python equilens.py audit bias_config.json
+```
 
 ---
 
@@ -212,8 +230,8 @@ graph TB
         TUI --> MANAGER
         WEB --> MANAGER
 
-        MANAGER --> PHASE1[📝 Corpus Generator]
         MANAGER --> PHASE2[🔍 Model Auditor]
+        MANAGER --> PHASE1[📝 Corpus Generator]
         MANAGER --> PHASE3[📊 Results Analyzer]
 
         PHASE2 --> OLLAMA[🤖 Ollama Service]
@@ -223,11 +241,6 @@ graph TB
         PHASE2 --> STORAGE
         PHASE3 --> STORAGE
     end
-
-    style CLI fill:#e3f2fd
-    style MANAGER fill:#f3e5f5
-    style PHASE2 fill:#fff3e0
-    style STORAGE fill:#e8f5e8
 ```
 
 ## 📊 Results & Output
@@ -299,7 +312,7 @@ EquiLens automatically detects and utilizes GPU acceleration:
 nvidia-smi
 
 # Verify GPU usage in EquiLens
-uv run python src/equilens/cli.py
+uv run equilens status
 # The CLI will show GPU status during model detection
 ```
 
@@ -323,7 +336,7 @@ uv run python src/equilens/cli.py
 ### Quick Diagnostics
 ```bash
 # 🔍 Comprehensive system check
-uv run python src/equilens/cli.py --help
+uv run equilens --help
 
 # 🐳 Docker status
 docker compose ps
@@ -408,8 +421,8 @@ EquiLens has evolved from a complex multi-script system to a streamlined, produc
 - 🐳 **Container Ready**: Docker integration with GPU support
 - 📊 **Professional Results**: Comprehensive bias analysis and reporting
 
-**Ready to detect AI bias?** Start with `uv run python src/equilens/cli.py` and experience the difference! 🚀
+**Ready to detect AI bias?** Start with `uv run equilens --help` and experience the difference! 🚀
 
 ---
 
-**💡 Pro Tip**: Start with `python equilens.py status` to check your system, then `python equilens.py start` to begin!
+>**💡 Pro Tip**: Start with `uv run equilens status` to check your system, then `uv run equilens start` to begin!

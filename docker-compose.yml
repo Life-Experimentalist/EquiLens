@@ -1,23 +1,20 @@
-# EquiLens - Single Docker System
-# Optimized for Windows 11 with RTX 2050
-# All-in-one configuration - no redundant files
+# EquiLens - Cross-Platform Docker System
+# Compatible with Windows, macOS, and Linux
+# GPU acceleration when available
 
 services:
     # Ollama service for AI models
     ollama:
         image: ollama/ollama:latest
         container_name: equilens-ollama
-
         ports:
             - "11434:11434"
-
         volumes:
             - ollama_data:/root/.ollama
-
         networks:
             - equilens-network
 
-        # GPU acceleration for Windows with NVIDIA Container Toolkit
+        # Cross-platform GPU support (optional)
         deploy:
             resources:
                 reservations:
@@ -35,36 +32,34 @@ services:
 
         restart: unless-stopped
 
-        # Simple healthcheck
+        # Health monitoring
         healthcheck:
-            test:
-                [
-                    "CMD-SHELL",
-                    "ollama api version --host http://localhost:11434 || exit 1",
-                ]
+            test: ["CMD", "ollama", "--version"]
             interval: 30s
             timeout: 10s
-            retries: 5
+            retries: 3
             start_period: 60s
 
-        # Start Ollama server directly - models downloaded on-demand
         command: ["serve"]
 
     # EquiLens application service
     equilens-app:
         build:
             context: .
-            dockerfile: Dockerfile # Single Dockerfile in root
+            dockerfile: Dockerfile
         container_name: equilens-app
 
         volumes:
             - .:/workspace:cached
-            - /var/run/docker.sock:/var/run/docker.sock # For Docker CLI access
+            # Docker socket for container management (if needed)
+            # Uncomment based on platform:
+            # Windows: //var/run/docker.sock:/var/run/docker.sock
+            # macOS/Linux: /var/run/docker.sock:/var/run/docker.sock
 
         working_dir: /workspace
 
         ports:
-            - "8080:8080" # For future web interface
+            - "8080:8080"  # Web interface
 
         networks:
             - equilens-network
@@ -83,7 +78,11 @@ services:
 
         restart: unless-stopped
 
-        # Keep container running and ready for commands
+        # Interactive mode for CLI usage
+        stdin_open: true
+        tty: true
+
+        # Default command - can be overridden
         command: ["tail", "-f", "/dev/null"]
 
 # Network for container communication

@@ -23,10 +23,33 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import pandas as pd
 import requests
+
+# Color support with fallback
+try:
+    import colorama
+
+    colorama.init(autoreset=True)  # Initialize colorama for Windows compatibility
+    COLORS_AVAILABLE = True
+    # Color constants
+    COLOR_CYAN = colorama.Fore.CYAN
+    COLOR_GREEN = colorama.Fore.GREEN
+    COLOR_RED = colorama.Fore.RED
+    COLOR_YELLOW = colorama.Fore.YELLOW
+    COLOR_BLUE = colorama.Fore.BLUE
+    COLOR_MAGENTA = colorama.Fore.MAGENTA
+    COLOR_WHITE = colorama.Fore.WHITE
+    STYLE_BRIGHT = colorama.Style.BRIGHT
+    STYLE_RESET = colorama.Style.RESET_ALL
+except ImportError:
+    # Fallback if colorama is not available
+    COLORS_AVAILABLE = False
+    COLOR_CYAN = COLOR_GREEN = COLOR_RED = COLOR_YELLOW = ""
+    COLOR_BLUE = COLOR_MAGENTA = COLOR_WHITE = ""
+    STYLE_BRIGHT = STYLE_RESET = ""
 
 # Ensure logs directory exists
 log_dir = Path("./logs")
@@ -258,7 +281,7 @@ class ModelAuditor:
         )
         return False
 
-    def list_available_models(self) -> List[str]:
+    def list_available_models(self) -> list[str]:
         """List models available in Ollama"""
         if not self.ollama_url:
             if not self.check_ollama_service():
@@ -382,8 +405,10 @@ class ModelAuditor:
         jitter = delay * 0.1 * (0.5 - abs(hash(str(time.time())) % 1000) / 1000)
         return delay + jitter
 
-    def make_api_request(self, prompt: str) -> Optional[Dict]:
-        """Make API request with exponential backoff retry"""
+    def make_api_request(self, prompt: str) -> dict | None:
+        """Make API request with exponential backoff retry and timing"""
+        request_start = time.time()
+
         for attempt in range(self.max_retries):
             try:
                 if self.killer.kill_now:
@@ -396,7 +421,10 @@ class ModelAuditor:
                 )
 
                 if response.status_code == 200:
-                    return response.json()
+                    result = response.json()
+                    # Add timing information
+                    result["response_time"] = time.time() - request_start
+                    return result
                 else:
                     logger.warning(
                         f"API request failed (attempt {attempt + 1}): {response.status_code}"
@@ -417,7 +445,7 @@ class ModelAuditor:
         logger.error(f"❌ Failed to get response after {self.max_retries} attempts")
         return None
 
-    def calculate_surprisal_score(self, response_data: Dict) -> float:
+    def calculate_surprisal_score(self, response_data: dict) -> float:
         """Calculate surprisal score from response data"""
         try:
             eval_duration = response_data.get("eval_duration", 0)
@@ -443,7 +471,7 @@ class ModelAuditor:
     def load_progress(self, progress_file: str) -> bool:
         """Load progress from file for resumption"""
         try:
-            with open(progress_file, "r") as f:
+            with open(progress_file) as f:
                 data = json.load(f)
                 self.progress = AuditProgress(**data)
                 logger.info(
@@ -454,7 +482,7 @@ class ModelAuditor:
             logger.error(f"Failed to load progress: {e}")
             return False
 
-    def run_audit(self, resume_file: Optional[str] = None) -> bool:
+    def run_audit(self, resume_file: str | None = None) -> bool:
         """Run the complete audit with error handling and resumption"""
         try:
             # Load existing progress if resuming
@@ -494,7 +522,7 @@ class ModelAuditor:
             logger.info(f"💾 Results will be saved to: {self.results_file}")
 
             # Prepare results file
-            results: List[Dict[str, Any]] = []
+            results: list[dict[str, Any]] = []
             if os.path.exists(self.results_file):
                 try:
                     existing_df = pd.read_csv(self.results_file)
@@ -510,7 +538,7 @@ class ModelAuditor:
             # Process each test
             for idx_raw, row in df.iterrows():
                 # Handle pandas index which can be various types
-                if isinstance(idx_raw, (int, float)):
+                if isinstance(idx_raw, int | float):
                     idx = int(idx_raw)
                 else:
                     idx = hash(idx_raw) % len(df)  # Fallback for non-numeric indices
@@ -526,15 +554,26 @@ class ModelAuditor:
                 self.progress.current_index = idx
                 prompt = str(row.get("full_prompt_text", row.get("sentence", "")))
 
-                logger.info(
-                    f"🔍 Processing {idx + 1}/{self.progress.total_tests}: {prompt[:50]}..."
-                )  # Make API request
+                # Colorful progress indicator with timing
+                progress_percent = ((idx + 1) / self.progress.total_tests) * 100
+                if COLORS_AVAILABLE:
+                    logger.info(
+                        f"{COLOR_CYAN}🔍 Processing {STYLE_BRIGHT}{idx + 1}/{self.progress.total_tests}{STYLE_RESET} "
+                        f"{COLOR_YELLOW}({progress_percent:.1f}%){STYLE_RESET}: {COLOR_WHITE}{prompt[:50]}...{STYLE_RESET}"
+                    )
+                else:
+                    logger.info(
+                        f"🔍 Processing {idx + 1}/{self.progress.total_tests} ({progress_percent:.1f}%): {prompt[:50]}..."
+                    )
+
+                # Make API request
                 response_data = self.make_api_request(prompt)
 
                 if response_data:
                     surprisal_score = self.calculate_surprisal_score(response_data)
+                    response_time = response_data.get("response_time", 0)
 
-                    result: Dict[str, Any] = {
+                    result: dict[str, Any] = {
                         "sentence": prompt,
                         "name_category": str(row.get("name_category", "")),
                         "trait_category": str(row.get("trait_category", "")),
@@ -550,15 +589,32 @@ class ModelAuditor:
                         "eval_duration": response_data.get("eval_duration", 0),
                         "eval_count": response_data.get("eval_count", 0),
                         "timestamp": datetime.now().isoformat(),
+                        "response_time": response_time,
                     }
 
                     results.append(result)
                     self.progress.completed_tests += 1
 
-                    logger.info(f"✅ Score: {surprisal_score:.2f}")
+                    # Colorful success message with timing
+                    if COLORS_AVAILABLE:
+                        logger.info(
+                            f"{COLOR_GREEN}✅ Success!{STYLE_RESET} "
+                            f"{COLOR_MAGENTA}Score: {surprisal_score:.2f}{STYLE_RESET} | "
+                            f"{COLOR_BLUE}Time: {response_time:.1f}s{STYLE_RESET}"
+                        )
+                    else:
+                        logger.info(
+                            f"✅ Success! Score: {surprisal_score:.2f} | Time: {response_time:.1f}s"
+                        )
 
                 else:
-                    logger.warning(f"❌ Failed to get response for test {idx + 1}")
+                    # Colorful failure message
+                    if COLORS_AVAILABLE:
+                        logger.warning(
+                            f"{COLOR_RED}❌ Failed{STYLE_RESET} to get response for test {COLOR_YELLOW}{idx + 1}{STYLE_RESET}"
+                        )
+                    else:
+                        logger.warning(f"❌ Failed to get response for test {idx + 1}")
                     self.progress.failed_tests += 1
 
                 # Save progress every 10 tests
@@ -568,18 +624,135 @@ class ModelAuditor:
                     completion_rate = (
                         self.progress.completed_tests / self.progress.total_tests
                     ) * 100
-                    logger.info(
-                        f"📊 Progress: {completion_rate:.1f}% ({self.progress.completed_tests}/{self.progress.total_tests})"
-                    )
+
+                    # Colorful progress reporting
+                    if COLORS_AVAILABLE:
+                        logger.info(
+                            f"{COLOR_CYAN}📊 Progress: {STYLE_BRIGHT}{completion_rate:.1f}%{STYLE_RESET} "
+                            f"({COLOR_GREEN}{self.progress.completed_tests}{STYLE_RESET}/"
+                            f"{COLOR_BLUE}{self.progress.total_tests}{STYLE_RESET})"
+                        )
+                    else:
+                        logger.info(
+                            f"📊 Progress: {completion_rate:.1f}% ({self.progress.completed_tests}/{self.progress.total_tests})"
+                        )
 
             # Final save
             self.save_progress()
             self._save_final_results(results)
 
-            logger.info(f"🎉 Audit completed!")
-            logger.info(
-                f"📊 Results: {self.progress.completed_tests} completed, {self.progress.failed_tests} failed"
+            # Calculate comprehensive metrics for completion summary
+            end_time = datetime.now()
+            start_time = datetime.fromisoformat(self.progress.start_time)
+            total_duration = end_time - start_time
+
+            # Calculate timing metrics
+            total_seconds = total_duration.total_seconds()
+            total_minutes = total_seconds / 60
+            total_hours = total_minutes / 60
+
+            # Calculate average response time from results
+            response_times = [
+                r.get("response_time", 0) for r in results if r.get("response_time")
+            ]
+            avg_response_time = (
+                sum(response_times) / len(response_times) if response_times else 0
             )
+            min_response_time = min(response_times) if response_times else 0
+            max_response_time = max(response_times) if response_times else 0
+
+            # Calculate throughput
+            throughput_per_second = (
+                self.progress.completed_tests / total_seconds
+                if total_seconds > 0
+                else 0
+            )
+            throughput_per_minute = throughput_per_second * 60
+
+            # Success rate
+            success_rate = (
+                (self.progress.completed_tests / self.progress.total_tests * 100)
+                if self.progress.total_tests > 0
+                else 0
+            )
+
+            # Colorful completion summary with comprehensive metrics
+            if COLORS_AVAILABLE:
+                logger.info(
+                    f"{COLOR_GREEN}{STYLE_BRIGHT}🎉 Audit completed!{STYLE_RESET}"
+                )
+                logger.info(f"{COLOR_CYAN}📊 {STYLE_BRIGHT}AUDIT SUMMARY{STYLE_RESET}")
+                logger.info(f"{COLOR_CYAN}{'=' * 50}{STYLE_RESET}")
+
+                # Basic results
+                logger.info(
+                    f"{COLOR_WHITE}Tests: {STYLE_RESET}"
+                    f"{COLOR_GREEN}{self.progress.completed_tests} completed{STYLE_RESET}, "
+                    f"{COLOR_RED}{self.progress.failed_tests} failed{STYLE_RESET} "
+                    f"({COLOR_YELLOW}{success_rate:.1f}% success rate{STYLE_RESET})"
+                )
+
+                # Timing metrics
+                if total_hours >= 1:
+                    duration_str = f"{total_hours:.1f} hours ({total_minutes:.1f} min)"
+                elif total_minutes >= 1:
+                    duration_str = f"{total_minutes:.1f} minutes ({total_seconds:.1f}s)"
+                else:
+                    duration_str = f"{total_seconds:.1f} seconds"
+
+                logger.info(
+                    f"{COLOR_BLUE}⏱️  Total Time: {STYLE_BRIGHT}{duration_str}{STYLE_RESET}"
+                )
+                logger.info(
+                    f"{COLOR_MAGENTA}🚀 Throughput: {STYLE_BRIGHT}{throughput_per_minute:.2f} tests/min{STYLE_RESET} ({throughput_per_second:.3f} tests/sec)"
+                )
+
+                # Response time metrics
+                if response_times:
+                    logger.info(f"{COLOR_YELLOW}📈 Response Times:{STYLE_RESET}")
+                    logger.info(
+                        f"   • Average: {COLOR_WHITE}{avg_response_time:.1f}s{STYLE_RESET}"
+                    )
+                    logger.info(
+                        f"   • Fastest: {COLOR_GREEN}{min_response_time:.1f}s{STYLE_RESET}"
+                    )
+                    logger.info(
+                        f"   • Slowest: {COLOR_RED}{max_response_time:.1f}s{STYLE_RESET}"
+                    )
+
+                logger.info(f"{COLOR_CYAN}{'=' * 50}{STYLE_RESET}")
+
+            else:
+                logger.info("🎉 Audit completed!")
+                logger.info("📊 AUDIT SUMMARY")
+                logger.info("=" * 50)
+                logger.info(
+                    f"Tests: {self.progress.completed_tests} completed, {self.progress.failed_tests} failed "
+                    f"({success_rate:.1f}% success rate)"
+                )
+
+                # Timing metrics
+                if total_hours >= 1:
+                    duration_str = f"{total_hours:.1f} hours ({total_minutes:.1f} min)"
+                elif total_minutes >= 1:
+                    duration_str = f"{total_minutes:.1f} minutes ({total_seconds:.1f}s)"
+                else:
+                    duration_str = f"{total_seconds:.1f} seconds"
+
+                logger.info(f"⏱️  Total Time: {duration_str}")
+                logger.info(
+                    f"🚀 Throughput: {throughput_per_minute:.2f} tests/min ({throughput_per_second:.3f} tests/sec)"
+                )
+
+                # Response time metrics
+                if response_times:
+                    logger.info("📈 Response Times:")
+                    logger.info(f"   • Average: {avg_response_time:.1f}s")
+                    logger.info(f"   • Fastest: {min_response_time:.1f}s")
+                    logger.info(f"   • Slowest: {max_response_time:.1f}s")
+
+                logger.info("=" * 50)
+
             logger.info(f"💾 Results saved to: {self.results_file}")
 
             return True
@@ -589,7 +762,7 @@ class ModelAuditor:
             self.save_progress()
             return False
 
-    def _save_intermediate_results(self, results: List[Dict]):
+    def _save_intermediate_results(self, results: list[dict]):
         """Save intermediate results"""
         try:
             df_results = pd.DataFrame(results)
@@ -597,29 +770,81 @@ class ModelAuditor:
         except Exception as e:
             logger.error(f"Failed to save intermediate results: {e}")
 
-    def _save_final_results(self, results: List[Dict]):
-        """Save final results with summary"""
+    def _save_final_results(self, results: list[dict]):
+        """Save final results with comprehensive summary"""
         try:
             df_results = pd.DataFrame(results)
             df_results.to_csv(self.results_file, index=False)
 
-            # Create summary
-            summary = {
-                "session_id": self.session_id,
-                "model_name": self.model_name,
-                "corpus_file": self.corpus_file,
-                "total_tests": self.progress.total_tests,
-                "completed_tests": self.progress.completed_tests,
-                "failed_tests": self.progress.failed_tests,
-                "success_rate": (
-                    self.progress.completed_tests / self.progress.total_tests * 100
-                )
+            # Calculate comprehensive metrics
+            end_time = datetime.now()
+            start_time = datetime.fromisoformat(self.progress.start_time)
+            total_duration = end_time - start_time
+            total_seconds = total_duration.total_seconds()
+
+            # Calculate response time metrics
+            response_times = [
+                r.get("response_time", 0) for r in results if r.get("response_time")
+            ]
+            avg_response_time = (
+                sum(response_times) / len(response_times) if response_times else 0
+            )
+            min_response_time = min(response_times) if response_times else 0
+            max_response_time = max(response_times) if response_times else 0
+
+            # Calculate throughput
+            throughput_per_second = (
+                self.progress.completed_tests / total_seconds
+                if total_seconds > 0
+                else 0
+            )
+            throughput_per_minute = throughput_per_second * 60
+
+            # Calculate success rate
+            success_rate = (
+                (self.progress.completed_tests / self.progress.total_tests * 100)
                 if self.progress.total_tests > 0
-                else 0,
-                "duration": (
-                    datetime.now() - datetime.fromisoformat(self.progress.start_time)
-                ).total_seconds(),
-                "results_file": str(self.results_file),
+                else 0
+            )
+
+            # Create comprehensive summary
+            summary = {
+                "session_info": {
+                    "session_id": self.session_id,
+                    "model_name": self.model_name,
+                    "corpus_file": self.corpus_file,
+                    "start_time": self.progress.start_time,
+                    "end_time": end_time.isoformat(),
+                    "results_file": str(self.results_file),
+                },
+                "test_results": {
+                    "total_tests": self.progress.total_tests,
+                    "completed_tests": self.progress.completed_tests,
+                    "failed_tests": self.progress.failed_tests,
+                    "success_rate_percent": (
+                        self.progress.completed_tests / self.progress.total_tests * 100
+                    )
+                    if self.progress.total_tests > 0
+                    else 0,
+                },
+                "timing_metrics": {
+                    "total_duration_seconds": total_seconds,
+                    "total_duration_minutes": total_seconds / 60,
+                    "total_duration_hours": total_seconds / 3600,
+                    "average_response_time_seconds": avg_response_time,
+                    "min_response_time_seconds": min_response_time,
+                    "max_response_time_seconds": max_response_time,
+                    "throughput_tests_per_second": throughput_per_second,
+                    "throughput_tests_per_minute": throughput_per_minute,
+                },
+                "performance_summary": {
+                    "fastest_test_time": min_response_time,
+                    "slowest_test_time": max_response_time,
+                    "efficiency_score": success_rate * throughput_per_minute
+                    if self.progress.total_tests > 0
+                    else 0,
+                    "total_api_calls": len(response_times),
+                },
             }
 
             summary_file = self.model_session_dir / f"summary_{self.session_id}.json"
@@ -666,7 +891,7 @@ def main():
 
     if success:
         logger.info("🎉 Audit completed successfully!")
-        logger.info(f"📁 Next steps:")
+        logger.info("📁 Next steps:")
         logger.info(f"   1. Review results: {auditor.results_file}")
         logger.info(
             f"   2. Run analysis: python Phase3_Analysis/analyze_results.py --results_file {auditor.results_file}"
