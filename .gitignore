@@ -132,3 +132,5 @@ node_modules/
 
 
 logs/*
+.vscode/
+logs/audit_session.log

@@ -45,7 +45,7 @@ dependencies = [
     "fastapi>=0.104.0",
     "uvicorn>=0.24.0",
     "seaborn>=0.13.2",
-	# Data processing
+    # Data processing
     "psutil>=7.0.0",
 ]
 
@@ -75,7 +75,7 @@ viz = [
 
 [project.urls]
 Homepage = "https://vkrishna04.github.io"
-Repository = "https://github.com/Life-Experimentalists/EquiLens"
+Repository = "https://github.com/Life-Experimentalists/EquiLens.git"
 Documentation = "https://github.com/Life-Experimentalists/EquiLens/docs"
 Issues = "https://github.com/Life-Experimentalists/EquiLens/issues"
 

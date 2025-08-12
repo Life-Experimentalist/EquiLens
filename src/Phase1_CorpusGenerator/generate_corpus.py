@@ -1,6 +1,7 @@
-import json
 import itertools
+import json
 import os
+
 import pandas as pd
 from tqdm import tqdm
 
@@ -12,7 +13,7 @@ def generate_corpus():
     and sentence templates defined in 'word_lists.json' for the active comparison.
     """
     print("Loading word lists from word_lists.json...")
-    with open("word_lists.json", "r") as f:
+    with open("word_lists.json") as f:
         config = json.load(f)
 
     # Get the active comparison configuration

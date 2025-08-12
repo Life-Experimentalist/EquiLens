@@ -132,11 +132,14 @@ class GracefulKiller:
 class EnhancedBiasAuditor:
     """Enhanced bias auditor with Rich progress tracking and performance optimization"""
 
-    def __init__(self, model_name: str, corpus_file: str, output_dir: str = "results"):
+    def __init__(self, model_name: str, corpus_file: str, output_dir: str = "results", eta_per_test: float | None = None):
         self.model_name = model_name
         self.corpus_file = corpus_file
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(exist_ok=True)
+
+        # ETA tracking
+        self.user_eta_per_test = eta_per_test
 
         # Setup session management
         self.session_id = datetime.now().strftime("%Y%m%d_%H%M%S")

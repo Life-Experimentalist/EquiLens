@@ -20,6 +20,7 @@ import subprocess
 # Configure logging with Unicode-safe console output
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
@@ -27,6 +28,7 @@ from typing import Any
 
 import pandas as pd
 import requests
+from tqdm import tqdm
 
 # Color support with fallback
 try:
@@ -118,11 +120,39 @@ class GracefulKiller:
 class ModelAuditor:
     """Enhanced model auditor with robust error handling"""
 
-    def __init__(self, model_name: str, corpus_file: str, output_dir: str = "results"):
+    def __init__(
+        self,
+        model_name: str,
+        corpus_file: str,
+        output_dir: str = "results",
+        eta_per_test: float | None = None,
+        max_workers: int = 1,
+    ):
         self.model_name = model_name
         self.corpus_file = corpus_file
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(exist_ok=True)
+
+        # ETA tracking
+        self.user_eta_per_test = eta_per_test  # User-provided estimate
+        self.actual_response_times = []  # Track actual response times for dynamic ETA
+        self.session_start_time = None  # Track when processing starts
+
+        # Concurrency settings with dynamic scaling
+        self.max_workers = max_workers  # Number of concurrent threads
+        self.current_workers = max_workers  # Current active workers (can be scaled down)
+        self.consecutive_errors = 0  # Track consecutive errors for fallback
+        self.consecutive_successes = 0  # Track consecutive successes for recovery
+        self.max_consecutive_errors = 3  # Reduce workers after 3 consecutive errors
+        self.recovery_threshold = 10  # Increase workers after 10 consecutive successes
+        self.original_max_workers = max_workers  # Store original setting for recovery
+        self.error_fallback_active = False  # Track if we're in fallback mode
+
+        # Retry tracking system
+        self.failed_tests = {}  # Track failed tests: {idx: (row, failure_count)}
+        self.retry_queue = []  # Tests ready for retry
+        self.success_count_since_last_retry = 0  # Count successes between retries
+        self.retry_batch_size = 10  # Retry after this many successes
 
         # Setup session management
         self.session_id = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -399,6 +429,266 @@ class ModelAuditor:
 
         return False
 
+    def add_failed_test(self, idx: int, row: Any) -> None:
+        """Add a failed test to retry tracking"""
+        if idx in self.failed_tests:
+            _, failure_count = self.failed_tests[idx]
+            self.failed_tests[idx] = (row, failure_count + 1)
+        else:
+            self.failed_tests[idx] = (row, 1)
+
+        # Add to retry queue if failed 5 times
+        if self.failed_tests[idx][1] >= 5:
+            if idx not in [test_idx for test_idx, _ in self.retry_queue]:
+                self.retry_queue.append((idx, row))
+            del self.failed_tests[idx]  # Remove from failed tracking
+
+    def should_process_retries(self) -> bool:
+        """Check if we should process retry queue"""
+        return (
+            self.success_count_since_last_retry >= self.retry_batch_size
+            and len(self.retry_queue) > 0
+        )
+
+    def process_retry_batch(self, pbar, results: list) -> None:
+        """Process a batch of retry tests with clean logging above progress bar"""
+        if not self.retry_queue:
+            return
+
+        # Print retry messages above progress bar
+        pbar.write(
+            f"\n🔄 Processing {len(self.retry_queue)} failed tests (retry batch)"
+        )
+        pbar.write("─" * 60)
+
+        retry_batch = self.retry_queue.copy()
+        self.retry_queue.clear()
+        self.success_count_since_last_retry = 0
+
+        for retry_idx, (_, row) in enumerate(retry_batch, 1):
+            if self.killer.kill_now:
+                break
+
+            prompt = str(row.get("full_prompt_text", row.get("sentence", "")))
+            pbar.write(f"🔄 Retry {retry_idx}/{len(retry_batch)}: {prompt[:50]}...")
+
+            # Make API request for retry
+            response_data = self.make_api_request(prompt)
+
+            if response_data:
+                surprisal_score = self.calculate_surprisal_score(response_data)
+                response_time = response_data.get("response_time", 0)
+
+                result: dict[str, Any] = {
+                    "sentence": prompt,
+                    "name_category": str(row.get("name_category", "")),
+                    "trait_category": str(row.get("trait_category", "")),
+                    "profession": str(row.get("profession", "")),
+                    "name": str(row.get("name", "")),
+                    "trait": str(row.get("trait", "")),
+                    "comparison_type": str(row.get("comparison_type", "")),
+                    "template_id": str(row.get("template_id", "")),
+                    "surprisal_score": surprisal_score,
+                    "model_response": str(response_data.get("response", ""))[:200],
+                    "eval_duration": response_data.get("eval_duration", 0),
+                    "eval_count": response_data.get("eval_count", 0),
+                    "timestamp": datetime.now().isoformat(),
+                    "response_time": response_time,
+                }
+
+                results.append(result)
+                self.progress.completed_tests += 1
+                self.update_response_time(response_time)
+
+                pbar.write(
+                    f"✅ Retry success! Score: {surprisal_score:.2f}, Time: {response_time:.1f}s"
+                )
+            else:
+                self.progress.failed_tests += 1
+                pbar.write("❌ Retry failed")
+
+        pbar.write("─" * 60)
+        pbar.write(f"✅ Retry batch completed: {len(retry_batch)} tests processed\n")
+
+    def _verify_and_complete_missing_tests(self, df, results: list, pbar) -> None:
+        """Verify completion and process any missing tests"""
+        processed_indices = set()
+
+        # Track which tests we've actually processed
+        for result in results:
+            sentence = result.get("sentence", "")
+            for idx, row in df.iterrows():
+                row_sentence = str(row.get("full_prompt_text", row.get("sentence", "")))
+                if sentence == row_sentence:
+                    processed_indices.add(idx)
+                    break
+
+        # Find missing tests
+        all_indices = set(range(len(df)))
+        missing_indices = all_indices - processed_indices
+
+        if missing_indices:
+            missing_count = len(missing_indices)
+            pbar.write(f"\n⚠️  Found {missing_count} unprocessed tests!")
+            pbar.write("🔍 Processing missing tests to ensure completeness...")
+            pbar.write("─" * 60)
+
+            for missing_idx in sorted(missing_indices):
+                if self.killer.kill_now:
+                    break
+
+                row = df.iloc[missing_idx]
+                prompt = str(row.get("full_prompt_text", row.get("sentence", "")))
+                pbar.write(f"🔄 Missing test {missing_idx}: {prompt[:50]}...")
+
+                response_data = self.make_api_request(prompt)
+
+                if response_data:
+                    surprisal_score = self.calculate_surprisal_score(response_data)
+                    response_time = response_data.get("response_time", 0)
+
+                    result: dict[str, Any] = {
+                        "sentence": prompt,
+                        "name_category": str(row.get("name_category", "")),
+                        "trait_category": str(row.get("trait_category", "")),
+                        "profession": str(row.get("profession", "")),
+                        "name": str(row.get("name", "")),
+                        "trait": str(row.get("trait", "")),
+                        "comparison_type": str(row.get("comparison_type", "")),
+                        "template_id": str(row.get("template_id", "")),
+                        "surprisal_score": surprisal_score,
+                        "model_response": str(response_data.get("response", ""))[:200],
+                        "eval_duration": response_data.get("eval_duration", 0),
+                        "eval_count": response_data.get("eval_count", 0),
+                        "timestamp": datetime.now().isoformat(),
+                        "response_time": response_time,
+                    }
+
+                    results.append(result)
+                    self.progress.completed_tests += 1
+                    self.update_response_time(response_time)
+
+                    pbar.write(f"✅ Completed! Score: {surprisal_score:.2f}, Time: {response_time:.1f}s")
+                else:
+                    self.progress.failed_tests += 1
+                    pbar.write("❌ Failed")
+
+            pbar.write("─" * 60)
+            pbar.write(f"✅ Missing tests completed: {missing_count} tests processed\n")
+        else:
+            pbar.write("\n✅ All tests completed - no missing tests found!\n")
+
+    def _process_test_batch_concurrent(self, test_batch: list, pbar) -> list[dict[str, Any]]:
+        """Process a batch of tests concurrently"""
+        batch_results = []
+
+        def process_single_test(test_data):
+            idx, row = test_data
+            prompt = str(row.get("full_prompt_text", row.get("sentence", "")))
+
+            response_data = self.make_api_request(prompt)
+
+            if response_data:
+                surprisal_score = self.calculate_surprisal_score(response_data)
+                response_time = response_data.get("response_time", 0)
+
+                result: dict[str, Any] = {
+                    "sentence": prompt,
+                    "name_category": str(row.get("name_category", "")),
+                    "trait_category": str(row.get("trait_category", "")),
+                    "profession": str(row.get("profession", "")),
+                    "name": str(row.get("name", "")),
+                    "trait": str(row.get("trait", "")),
+                    "comparison_type": str(row.get("comparison_type", "")),
+                    "template_id": str(row.get("template_id", "")),
+                    "surprisal_score": surprisal_score,
+                    "model_response": str(response_data.get("response", ""))[:200],
+                    "eval_duration": response_data.get("eval_duration", 0),
+                    "eval_count": response_data.get("eval_count", 0),
+                    "timestamp": datetime.now().isoformat(),
+                    "response_time": response_time,
+                }
+                return idx, result, True, response_time
+            else:
+                return idx, row, False, 0
+
+        # Process batch concurrently
+        with ThreadPoolExecutor(max_workers=self.current_workers) as executor:
+            future_to_test = {executor.submit(process_single_test, test): test for test in test_batch}
+
+            for future in as_completed(future_to_test):
+                idx, result_or_row, success, response_time = future.result()
+
+                if success:
+                    batch_results.append(result_or_row)
+                    self.progress.completed_tests += 1
+                    self.update_response_time(response_time)
+                    self.success_count_since_last_retry += 1
+
+                    pbar.write(f"✅ Test {idx}: Score {result_or_row['surprisal_score']:.2f}, Time {response_time:.1f}s")
+                else:
+                    self.add_failed_test(idx, result_or_row)
+                    self.progress.failed_tests += 1
+                    pbar.write(f"❌ Test {idx}: Failed")
+
+                pbar.update(1)
+
+        return batch_results
+
+    def _handle_request_result(self, success: bool, pbar) -> None:
+        """Handle request results and manage dynamic concurrency scaling"""
+        if success:
+            self.consecutive_errors = 0
+            self.consecutive_successes += 1
+
+            # Gradually increase workers if we've had enough consecutive successes
+            if (self.consecutive_successes >= self.recovery_threshold and
+                self.current_workers < self.original_max_workers):
+                self.current_workers = min(self.current_workers + 1, self.original_max_workers)
+                self.consecutive_successes = 0  # Reset counter
+                if self.current_workers == self.original_max_workers:
+                    self.error_fallback_active = False
+                pbar.write(f"� Scaling up: Increased to {self.current_workers} workers (success streak)")
+                pbar.write("─" * 60)
+        else:
+            self.consecutive_successes = 0
+            self.consecutive_errors += 1
+
+            # Gradually reduce workers on repeated failures
+            if (self.consecutive_errors >= self.max_consecutive_errors and
+                self.current_workers > 1):
+                self.current_workers = max(1, self.current_workers - 1)
+                self.error_fallback_active = True
+                self.consecutive_errors = 0  # Reset counter
+                pbar.write(f"⚠️  {self.max_consecutive_errors} consecutive errors detected")
+                pbar.write(f"� Scaling down: Reduced to {self.current_workers} workers for stability")
+                pbar.write("─" * 60)
+
+    def _check_system_load(self) -> dict:
+        """Check system load and resource usage"""
+        import psutil
+
+        try:
+            cpu_percent = psutil.cpu_percent(interval=0.1)
+            memory = psutil.virtual_memory()
+
+            load_info = {
+                "cpu_usage": cpu_percent,
+                "memory_usage": memory.percent,
+                "memory_available_gb": memory.available / (1024**3),
+                "high_load": cpu_percent > 80 or memory.percent > 85
+            }
+
+            return load_info
+        except ImportError:
+            # psutil not available, return safe defaults
+            return {
+                "cpu_usage": 0,
+                "memory_usage": 0,
+                "memory_available_gb": 8,
+                "high_load": False
+            }
+
     def exponential_backoff(self, attempt: int) -> float:
         """Calculate exponential backoff delay"""
         delay = min(self.base_delay * (2**attempt), self.max_delay)
@@ -426,23 +716,24 @@ class ModelAuditor:
                     result["response_time"] = time.time() - request_start
                     return result
                 else:
-                    logger.warning(
-                        f"API request failed (attempt {attempt + 1}): {response.status_code}"
-                    )
+                    # Don't log warnings for retries to avoid cluttering tqdm
+                    pass
 
             except requests.exceptions.Timeout:
-                logger.warning(f"Request timeout (attempt {attempt + 1})")
-            except requests.exceptions.RequestException as e:
-                logger.warning(f"Request exception (attempt {attempt + 1}): {e}")
-            except Exception as e:
-                logger.error(f"Unexpected error (attempt {attempt + 1}): {e}")
+                # Don't log timeout warnings for retries to avoid cluttering tqdm
+                pass
+            except requests.exceptions.RequestException:
+                # Don't log request exceptions for retries to avoid cluttering tqdm
+                pass
+            except Exception:
+                # Don't log unexpected errors for retries to avoid cluttering tqdm
+                pass
 
             if attempt < self.max_retries - 1:
                 delay = self.exponential_backoff(attempt)
-                logger.info(f"⏳ Retrying in {delay:.1f} seconds...")
                 time.sleep(delay)
 
-        logger.error(f"❌ Failed to get response after {self.max_retries} attempts")
+        # Only log final failure (not individual retry attempts)
         return None
 
     def calculate_surprisal_score(self, response_data: dict) -> float:
@@ -468,16 +759,73 @@ class ModelAuditor:
         except Exception as e:
             logger.error(f"Failed to save progress: {e}")
 
+    def calculate_eta(self, current_index: int, total_tests: int) -> tuple[str, float]:
+        """Calculate ETA based on user input or actual performance"""
+        remaining_tests = total_tests - current_index
+
+        if remaining_tests <= 0:
+            return "Completed", 0.0
+
+        # Use user-provided ETA if available
+        if self.user_eta_per_test is not None:
+            eta_seconds = remaining_tests * self.user_eta_per_test
+            eta_str = self.format_duration(eta_seconds)
+            return f"ETA: {eta_str} (UE)", eta_seconds
+
+        # Use actual response times if we have enough data
+        if len(self.actual_response_times) >= 3:
+            # Use the average of recent response times for better accuracy
+            recent_times = self.actual_response_times[-10:]  # Last 10 responses
+            avg_time = sum(recent_times) / len(recent_times)
+            eta_seconds = remaining_tests * avg_time
+            eta_str = self.format_duration(eta_seconds)
+            return f"ETA: {eta_str} (adaptive)", eta_seconds
+
+        # Fallback to session-based calculation if we have timing data
+        if self.session_start_time and current_index > 0:
+            elapsed = time.time() - self.session_start_time
+            avg_time_per_test = elapsed / current_index
+            eta_seconds = remaining_tests * avg_time_per_test
+            eta_str = self.format_duration(eta_seconds)
+            return f"ETA: {eta_str} (session avg)", eta_seconds
+
+        return "ETA: Calculating...", 0.0
+
+    def format_duration(self, seconds: float) -> str:
+        """Format duration in a human-readable way"""
+        if seconds < 60:
+            return f"{seconds:.0f}s"
+        elif seconds < 3600:
+            minutes = seconds / 60
+            return f"{minutes:.1f}m"
+        else:
+            hours = seconds / 3600
+            return f"{hours:.1f}h"
+
+    def update_response_time(self, response_time: float):
+        """Update the response time tracking for ETA calculation"""
+        self.actual_response_times.append(response_time)
+        # Keep only the last 50 response times to avoid memory issues
+        if len(self.actual_response_times) > 50:
+            self.actual_response_times = self.actual_response_times[-50:]
+
     def load_progress(self, progress_file: str) -> bool:
         """Load progress from file for resumption"""
         try:
             with open(progress_file) as f:
                 data = json.load(f)
-                self.progress = AuditProgress(**data)
-                logger.info(
-                    f"📂 Loaded progress: {self.progress.completed_tests}/{self.progress.total_tests} completed"
-                )
-                return True
+
+            # Filter data to only include fields that exist in AuditProgress
+            from dataclasses import fields
+
+            valid_fields = {field.name for field in fields(AuditProgress)}
+            filtered_data = {k: v for k, v in data.items() if k in valid_fields}
+
+            self.progress = AuditProgress(**filtered_data)
+            logger.info(
+                f"📂 Loaded progress: {self.progress.completed_tests}/{self.progress.total_tests} completed"
+            )
+            return True
         except Exception as e:
             logger.error(f"Failed to load progress: {e}")
             return False
@@ -521,6 +869,26 @@ class ModelAuditor:
             logger.info(f"📊 Model: {self.model_name}")
             logger.info(f"💾 Results will be saved to: {self.results_file}")
 
+            # Initialize session start time for ETA calculation
+            if self.session_start_time is None:
+                self.session_start_time = time.time()
+
+            # Display ETA settings
+            if self.user_eta_per_test is not None:
+                total_estimated_time = (
+                    self.progress.total_tests * self.user_eta_per_test
+                )
+                logger.info(
+                    f"⏱️  User ETA estimate: {self.user_eta_per_test:.1f}s per test"
+                )
+                logger.info(
+                    f"📅 Total estimated time: {self.format_duration(total_estimated_time)}"
+                )
+            else:
+                logger.info(
+                    "📈 ETA will be calculated dynamically based on actual performance"
+                )
+
             # Prepare results file
             results: list[dict[str, Any]] = []
             if os.path.exists(self.results_file):
@@ -535,107 +903,151 @@ class ModelAuditor:
                 except Exception as e:
                     logger.warning(f"Failed to load existing results: {e}")
 
-            # Process each test
-            for idx_raw, row in df.iterrows():
-                # Handle pandas index which can be various types
-                if isinstance(idx_raw, int | float):
-                    idx = int(idx_raw)
-                else:
-                    idx = hash(idx_raw) % len(df)  # Fallback for non-numeric indices
+            # Process each test with tqdm progress bar
+            # Initialize tqdm with total processed tests (completed + failed)
+            with tqdm(
+                total=len(df),
+                desc="🔍 Auditing Model",
+                unit="tests",
+                initial=self.progress.completed_tests + self.progress.failed_tests,
+                position=0,
+                leave=True,
+                ncols=120,  # Fixed width to prevent display issues
+                disable=False,
+                bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}{postfix}]'
+            ) as pbar:
+                for idx_raw, row in df.iterrows():
+                    # Handle pandas index which can be various types
+                    if isinstance(idx_raw, int | float):
+                        idx = int(idx_raw)
+                    else:
+                        idx = hash(idx_raw) % len(
+                            df
+                        )  # Fallback for non-numeric indices
 
-                if self.killer.kill_now:
-                    logger.info("🛑 Audit interrupted by user")
-                    break
+                    if self.killer.kill_now:
+                        logger.info("🛑 Audit interrupted by user")
+                        break
 
-                # Skip if already processed
-                if idx < self.progress.current_index:
-                    continue
+                    # Skip if already processed (when resuming)
+                    # current_index is the last processed dataframe index (0-based)
+                    if idx <= self.progress.current_index:
+                        continue
 
-                self.progress.current_index = idx
-                prompt = str(row.get("full_prompt_text", row.get("sentence", "")))
+                    self.progress.current_index = idx
+                    prompt = str(row.get("full_prompt_text", row.get("sentence", "")))
 
-                # Colorful progress indicator with timing
-                progress_percent = ((idx + 1) / self.progress.total_tests) * 100
-                if COLORS_AVAILABLE:
-                    logger.info(
-                        f"{COLOR_CYAN}🔍 Processing {STYLE_BRIGHT}{idx + 1}/{self.progress.total_tests}{STYLE_RESET} "
-                        f"{COLOR_YELLOW}({progress_percent:.1f}%){STYLE_RESET}: {COLOR_WHITE}{prompt[:50]}...{STYLE_RESET}"
+                    # Calculate ETA
+                    eta_str, eta_seconds = self.calculate_eta(
+                        idx + 1, self.progress.total_tests
                     )
-                else:
-                    logger.info(
-                        f"🔍 Processing {idx + 1}/{self.progress.total_tests} ({progress_percent:.1f}%): {prompt[:50]}..."
-                    )
 
-                # Make API request
-                response_data = self.make_api_request(prompt)
+                    # Check system load before processing
+                    load_info = self._check_system_load()
+                    if load_info["high_load"] and self.max_workers > 1:
+                        # Temporarily reduce concurrency under high load
+                        if not self.error_fallback_active:
+                            pbar.write(f"⚠️  High system load detected (CPU: {load_info['cpu_usage']:.1f}%, Memory: {load_info['memory_usage']:.1f}%)")
+                            pbar.write("🔄 Reducing concurrency temporarily")
 
-                if response_data:
-                    surprisal_score = self.calculate_surprisal_score(response_data)
-                    response_time = response_data.get("response_time", 0)
+                    # Update progress bar description with current prompt and ETA
+                    pbar.set_description(f"🔍 Processing ({eta_str}): {prompt[:20]}...")
 
-                    result: dict[str, Any] = {
-                        "sentence": prompt,
-                        "name_category": str(row.get("name_category", "")),
-                        "trait_category": str(row.get("trait_category", "")),
-                        "profession": str(row.get("profession", "")),
-                        "name": str(row.get("name", "")),
-                        "trait": str(row.get("trait", "")),
-                        "comparison_type": str(row.get("comparison_type", "")),
-                        "template_id": str(row.get("template_id", "")),
-                        "surprisal_score": surprisal_score,
-                        "model_response": str(response_data.get("response", ""))[
-                            :200
-                        ],  # Truncate for storage
-                        "eval_duration": response_data.get("eval_duration", 0),
-                        "eval_count": response_data.get("eval_count", 0),
-                        "timestamp": datetime.now().isoformat(),
-                        "response_time": response_time,
-                    }
+                    # Make API request
+                    response_data = self.make_api_request(prompt)
 
-                    results.append(result)
-                    self.progress.completed_tests += 1
+                    # Handle the result and update error tracking
+                    success = response_data is not None
+                    self._handle_request_result(success, pbar)
 
-                    # Colorful success message with timing
-                    if COLORS_AVAILABLE:
-                        logger.info(
-                            f"{COLOR_GREEN}✅ Success!{STYLE_RESET} "
-                            f"{COLOR_MAGENTA}Score: {surprisal_score:.2f}{STYLE_RESET} | "
-                            f"{COLOR_BLUE}Time: {response_time:.1f}s{STYLE_RESET}"
+                # Process test based on concurrency mode
+                if self.max_workers == 1 or self.error_fallback_active:
+                    # Single-threaded processing
+                    if response_data:
+                        surprisal_score = self.calculate_surprisal_score(response_data)
+                        response_time = response_data.get("response_time", 0)
+
+                        result: dict[str, Any] = {
+                            "sentence": prompt,
+                            "name_category": str(row.get("name_category", "")),
+                            "trait_category": str(row.get("trait_category", "")),
+                            "profession": str(row.get("profession", "")),
+                            "name": str(row.get("name", "")),
+                            "trait": str(row.get("trait", "")),
+                            "comparison_type": str(row.get("comparison_type", "")),
+                            "template_id": str(row.get("template_id", "")),
+                            "surprisal_score": surprisal_score,
+                            "model_response": str(response_data.get("response", ""))[
+                                :200
+                            ],  # Truncate for storage
+                            "eval_duration": response_data.get("eval_duration", 0),
+                            "eval_count": response_data.get("eval_count", 0),
+                            "timestamp": datetime.now().isoformat(),
+                            "response_time": response_time,
+                        }
+
+                        results.append(result)
+                        self.progress.completed_tests += 1
+
+                        # Update response time tracking for ETA calculation
+                        self.update_response_time(response_time)
+
+                        # Track successful tests for retry processing
+                        self.success_count_since_last_retry += 1
+
+                        # Update progress bar postfix with latest results
+                        worker_status = f"W:{self.max_workers}"
+                        if self.error_fallback_active:
+                            worker_status += " (FB)"  # Fallback mode indicator
+
+                        pbar.set_postfix(
+                            {
+                                "Score": f"{surprisal_score:.2f}",
+                                "Time": f"{response_time:.1f}s",
+                                "Success": f"{self.progress.completed_tests}/{self.progress.total_tests}",
+                                "Workers": worker_status,
+                            }
                         )
+
                     else:
-                        logger.info(
-                            f"✅ Success! Score: {surprisal_score:.2f} | Time: {response_time:.1f}s"
+                        # Failed request - add to retry tracking
+                        self.add_failed_test(idx, row)
+                        self.progress.failed_tests += 1
+                        # Update progress bar postfix with failure info
+                        worker_status = f"W:{self.max_workers}"
+                        if self.error_fallback_active:
+                            worker_status += " (FB)"
+
+                        pbar.set_postfix(
+                            {
+                                "Failed": f"{self.progress.failed_tests}",
+                                "Success": f"{self.progress.completed_tests}/{self.progress.total_tests}",
+                                "Retries": f"{len(self.retry_queue)}",
+                                "Workers": worker_status,
+                            }
                         )
 
-                else:
-                    # Colorful failure message
-                    if COLORS_AVAILABLE:
-                        logger.warning(
-                            f"{COLOR_RED}❌ Failed{STYLE_RESET} to get response for test {COLOR_YELLOW}{idx + 1}{STYLE_RESET}"
-                        )
-                    else:
-                        logger.warning(f"❌ Failed to get response for test {idx + 1}")
-                    self.progress.failed_tests += 1
+                    # Check if we should process retries
+                    if self.should_process_retries():
+                        self.process_retry_batch(pbar, results)
 
-                # Save progress every 10 tests
-                if (idx + 1) % 10 == 0:
-                    self.save_progress()
-                    self._save_intermediate_results(results)
-                    completion_rate = (
-                        self.progress.completed_tests / self.progress.total_tests
-                    ) * 100
+                    # Update progress bar
+                    pbar.update(1)
 
-                    # Colorful progress reporting
-                    if COLORS_AVAILABLE:
-                        logger.info(
-                            f"{COLOR_CYAN}📊 Progress: {STYLE_BRIGHT}{completion_rate:.1f}%{STYLE_RESET} "
-                            f"({COLOR_GREEN}{self.progress.completed_tests}{STYLE_RESET}/"
-                            f"{COLOR_BLUE}{self.progress.total_tests}{STYLE_RESET})"
-                        )
-                    else:
-                        logger.info(
-                            f"📊 Progress: {completion_rate:.1f}% ({self.progress.completed_tests}/{self.progress.total_tests})"
-                        )
+                    # Save progress every 10 tests
+                    if (idx + 1) % 10 == 0:
+                        self.save_progress()
+                        self._save_intermediate_results(results)
+
+            # Process any remaining retry tests at the end
+            if self.retry_queue:
+                pbar.write(
+                    f"\n🔄 Processing final {len(self.retry_queue)} retry tests..."
+                )
+                self.process_retry_batch(pbar, results)
+
+            # Verify completion and handle missing tests
+            self._verify_and_complete_missing_tests(df, results, pbar)
 
             # Final save
             self.save_progress()
@@ -858,7 +1270,10 @@ class ModelAuditor:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Enhanced EquiLens Model Auditor")
+    parser = argparse.ArgumentParser(
+        description="Enhanced EquiLens Model Auditor",
+        epilog="Example: uv run equilens audit --model llama2:latest --corpus data.csv --eta-per-test 5.0 --max-workers 3",
+    )
     parser.add_argument("--model", required=True, help="Model name to audit")
     parser.add_argument("--corpus", required=True, help="Path to corpus CSV file")
     parser.add_argument(
@@ -867,6 +1282,18 @@ def main():
     parser.add_argument("--resume", help="Resume from progress file")
     parser.add_argument(
         "--list-models", action="store_true", help="List available models and exit"
+    )
+    parser.add_argument(
+        "--eta-per-test",
+        type=float,
+        default=None,
+        help="Estimated time per test in seconds for ETA calculation (auto-detected if not provided)",
+    )
+    parser.add_argument(
+        "--max-workers",
+        type=int,
+        default=1,
+        help="Number of concurrent threads for processing (1-8, default: 1)",
     )
 
     args = parser.parse_args()
@@ -885,8 +1312,73 @@ def main():
         logger.error(f"❌ Corpus file not found: {args.corpus}")
         return
 
-    # Create and run auditor
-    auditor = ModelAuditor(args.model, args.corpus, args.output_dir)
+    # Validate max_workers
+    if args.max_workers < 1 or args.max_workers > 8:
+        logger.error(f"❌ Invalid max_workers: {args.max_workers}. Must be 1-8.")
+        return
+
+    # Interactive ETA prompt if not provided via flag
+    eta_per_test = args.eta_per_test
+    if eta_per_test is None:
+        print("\n" + "=" * 60)
+        print("🔮 ETA ESTIMATION SETUP")
+        print("=" * 60)
+        print("You can provide an estimated time per test for better ETA predictions.")
+        print("This helps you plan your audit session duration.")
+        print("\nOptions:")
+        print("  • Provide estimate: Get accurate ETA throughout the session")
+        print("  • Skip: System will auto-detect timing after first few tests")
+        print("=" * 60)
+
+        try:
+            provide_eta = (
+                input("Would you like to provide an ETA estimate? [y/N]: ")
+                .strip()
+                .lower()
+            )
+
+            if provide_eta in ["y", "yes"]:
+                print("\n📋 Quick Reference - Typical times per test:")
+                print("  • Fast models (phi3:mini, qwen2:0.5b):     1-3 seconds")
+                print("  • Medium models (llama3.2:3b, gemma2:2b): 3-8 seconds")
+                print("  • Large models (llama2:latest):           8-20 seconds")
+                print("  • Very large models (llama3.1:70b):       20+ seconds")
+                print(f"\n🎯 Estimating for model: {args.model}")
+
+                while True:
+                    try:
+                        eta_input = input(
+                            "Enter estimated seconds per test (or press Enter to skip): "
+                        ).strip()
+                        if eta_input == "":
+                            print("⏭️  Skipping - will use auto-detection")
+                            break
+
+                        eta_per_test = float(eta_input)
+                        if eta_per_test <= 0:
+                            print("❌ Please enter a positive number")
+                            continue
+
+                        print(f"✅ ETA set to {eta_per_test:.1f} seconds per test")
+                        break
+
+                    except ValueError:
+                        print("❌ Please enter a valid number")
+                        continue
+            else:
+                print("⏭️  Using auto-detection - ETA will be calculated dynamically")
+
+        except KeyboardInterrupt:
+            print("\n\n⏹️  Cancelled by user")
+            return
+        except Exception as e:
+            print(f"\n❌ Input error: {e}")
+            print("⏭️  Continuing with auto-detection")
+
+        print("=" * 60 + "\n")
+
+    # Create and run auditor with concurrent processing support
+    auditor = ModelAuditor(args.model, args.corpus, args.output_dir, eta_per_test, args.max_workers)
     success = auditor.run_audit(args.resume)
 
     if success:
