@@ -311,7 +311,7 @@ app = typer.Typer(
     name="equilens",
     help="🔍 EquiLens - AI Bias Detection Platform",
     rich_markup_mode="rich",
-    no_args_is_help=True,
+    no_args_is_help=False,
 )
 
 # Global manager instance
@@ -326,7 +326,7 @@ def get_manager() -> EquiLensManager:
     return manager
 
 
-@app.callback()
+@app.callback(invoke_without_command=True)
 def main(
     ctx: typer.Context,
     version: Annotated[
@@ -356,6 +356,32 @@ def main(
         from equilens import __version__
 
         console.print(f"EquiLens version {__version__}")
+        raise typer.Exit()
+
+    # When no subcommand is provided, show introduction and help
+    if ctx.invoked_subcommand is None:
+        # Show introduction
+        console.print(Panel.fit(
+            "[bold blue]🔍 EquiLens - AI Bias Detection Platform[/bold blue]\n\n"
+            "[cyan]Welcome to EquiLens![/cyan] 🎯\n\n"
+            "A comprehensive platform for detecting and analyzing bias in AI language models.\n"
+            "This unified CLI provides all functionality needed to run bias audits, analyze\n"
+            "results, and manage the underlying services.\n\n"
+            "[yellow]✨ Key Features:[/yellow]\n"
+            "• Comprehensive bias detection across multiple dimensions\n"
+            "• Interactive model selection and configuration\n"
+            "• Real-time progress tracking with resume capability\n"
+            "• Advanced session management and backup system\n"
+            "• Rich visual reporting and analysis tools\n"
+            "• Docker-based service orchestration\n\n"
+            "[green]Ready to detect bias in AI models? Explore the commands below![/green]",
+            border_style="blue",
+            title="🎯 AI Bias Detection Platform"
+        ))
+
+        # Show the help content below
+        console.print("\n[bold]📖 Available Commands and Options:[/bold]\n")
+        console.print(ctx.get_help())
         raise typer.Exit()
 
 
@@ -500,10 +526,18 @@ def prompt_for_resume(model: str | None = None) -> str | None:
         except Exception:
             time_str = start_time
 
+        # Extract folder ID from progress file path for easier identification
+        folder_id = "Unknown"
+        try:
+            progress_path = Path(_progress_file)
+            folder_id = progress_path.parent.name
+        except Exception:
+            pass
+
         console.print(
             f"  {i}. [cyan]{session_model}[/cyan] - {completed}/{total} tests ({completion_percent:.1f}% complete)"
         )
-        console.print(f"     [dim]Started: {time_str}[/dim]")
+        console.print(f"     [dim]Started: {time_str} | Folder: {folder_id}[/dim]")
 
     console.print("\n[bold]Options:[/bold]")
     console.print(
@@ -569,8 +603,58 @@ def audit(
             help="Suppress subprocess output to avoid emoji encoding errors",
         ),
     ] = False,
+    help_cmd: Annotated[
+        bool,
+        typer.Option(
+            "--help",
+            help="Show this help message and exit"
+        )
+    ] = False,
 ):
     """🔍 Run bias audit with interactive prompts and enhanced visual design"""
+
+    # Show introduction and help only when --help is explicitly requested
+    if help_cmd:
+        console.print(Panel.fit(
+            "[bold blue]🔍 EquiLens Bias Audit System[/bold blue]\n\n"
+            "[cyan]Welcome to the EquiLens AI Bias Detection Platform![/cyan]\n\n"
+            "This tool performs comprehensive bias audits on AI language models\n"
+            "by testing them against carefully crafted test corpora and analyzing\n"
+            "the responses for various forms of bias including gender, racial,\n"
+            "cultural, and socioeconomic biases.\n\n"
+            "[yellow]✨ Features:[/yellow]\n"
+            "• Interactive model selection from available Ollama models\n"
+            "• Automatic corpus detection and ETA estimation\n"
+            "• Resume functionality for interrupted audits\n"
+            "• Real-time progress tracking with dynamic concurrency\n"
+            "• Comprehensive bias analysis and reporting\n"
+            "• Automatic backup system (every 100 tests)\n\n"
+            "[green]Ready to start your bias audit? Use the options below![/green]",
+            border_style="blue",
+            title="🎯 AI Bias Detection"
+        ))
+
+        # Show help content
+        console.print("\n[bold]📖 Command Options:[/bold]\n")
+        console.print("[cyan]--model, -m[/cyan]        Model name to audit")
+        console.print("[cyan]--corpus, -c[/cyan]       Path to corpus CSV file")
+        console.print("[cyan]--output-dir, -o[/cyan]   Output directory for results (default: results)")
+        console.print("[cyan]--enhanced, -e[/cyan]     Use experimental enhanced auditor")
+        console.print("[cyan]--batch-size, -b[/cyan]   Number of concurrent requests (default: 5)")
+        console.print("[cyan]--resume, -r[/cyan]       Resume from previous session")
+        console.print("[cyan]--silent, -s[/cyan]       Suppress subprocess output")
+        console.print("[cyan]--help[/cyan]             Show this help message")
+
+        console.print("\n[bold green]🚀 Quick Start Examples:[/bold green]")
+        console.print("[dim]# Interactive mode (recommended for beginners)[/dim]")
+        console.print("[yellow]uv run equilens audit[/yellow]")
+        console.print("\n[dim]# Specify model and corpus directly[/dim]")
+        console.print("[yellow]uv run equilens audit --model llama2:latest --corpus corpus.csv[/yellow]")
+        console.print("\n[dim]# Resume a previous audit session[/dim]")
+        console.print("[yellow]uv run equilens audit --resume path/to/progress.json[/yellow]")
+
+        console.print("\n[bold]💡 Tip:[/bold] Run without options for interactive setup!")
+        return
 
     # Auto-resume detection (if not explicitly resuming and no model specified)
     if resume is None and model is None:
@@ -1056,17 +1140,17 @@ def audit(
 
             except ImportError as e:
                 console.print(f"[red]❌ Failed to import enhanced auditor: {e}[/red]")
-                console.print("[yellow]Falling back to legacy auditor...[/yellow]")
+                console.print("[yellow]Falling back to enhanced auditor via subprocess...[/yellow]")
                 enhanced = False
 
         if not enhanced:
-            # Use original auditor with subprocess
-            console.print("🔄 [yellow]Using legacy auditor...[/yellow]")
+            # Use enhanced auditor via subprocess wrapper
+            console.print("🚀 [green]Using enhanced auditor with dynamic concurrency...[/green]")
 
             # Configure subprocess parameters based on silent mode
             cmd = [
                 "python",
-                "src/Phase2_ModelAuditor/audit_model.py",
+                "src/Phase2_ModelAuditor/audit_model_fixed.py",
                 "--model",
                 model,
                 "--corpus",
@@ -1539,6 +1623,626 @@ def tui():
         raise typer.Exit(1) from None
     except Exception as e:
         console.print(f"[red]❌ Failed to start TUI: {e}[/red]")
+        raise typer.Exit(1) from e
+
+
+@app.command("resume-list")
+def resume_list(
+    model: Annotated[
+        str | None, typer.Option("--model", "-m", help="Filter by model name")
+    ] = None,
+):
+    """List all available resume sessions with detailed information"""
+    try:
+        interrupted_sessions = find_interrupted_sessions(model)
+
+        if not interrupted_sessions:
+            console.print("[yellow]📭 No interrupted audit sessions found.[/yellow]")
+            return
+
+        console.print(f"\n[bold cyan]📋 Available Resume Sessions ({len(interrupted_sessions)} total):[/bold cyan]\n")
+
+        for i, (progress_file, progress_data) in enumerate(interrupted_sessions, 1):
+            session_model = progress_data.get("model_name", "Unknown")
+            completed = progress_data.get("completed_tests", 0)
+            total = progress_data.get("total_tests", 0)
+            failed = progress_data.get("failed_tests", 0)
+            completion_percent = (completed / total * 100) if total > 0 else 0
+            start_time = progress_data.get("start_time", "Unknown")
+            last_checkpoint = progress_data.get("last_checkpoint", "Unknown")
+            session_id = progress_data.get("session_id", "Unknown")
+            avg_response_time = progress_data.get("avg_response_time", 0.0)
+            throughput = progress_data.get("throughput_per_second", 0.0)
+
+            # Parse start time for better display
+            try:
+                from datetime import datetime
+                start_dt = datetime.fromisoformat(start_time)
+                time_str = start_dt.strftime("%Y-%m-%d %H:%M:%S")
+            except Exception:
+                time_str = start_time
+
+            # Parse last checkpoint time
+            try:
+                checkpoint_dt = datetime.fromisoformat(last_checkpoint)
+                checkpoint_str = checkpoint_dt.strftime("%Y-%m-%d %H:%M:%S")
+            except Exception:
+                checkpoint_str = last_checkpoint
+
+            # Extract folder information
+            folder_id = "Unknown"
+            folder_path = "Unknown"
+            folder_size = "Unknown"
+            try:
+                progress_path = Path(progress_file)
+                folder_id = progress_path.parent.name
+                folder_path = str(progress_path.parent)
+
+                # Calculate folder size
+                total_size = 0
+                for file in progress_path.parent.rglob("*"):
+                    if file.is_file():
+                        total_size += file.stat().st_size
+
+                if total_size > 1024 * 1024:  # MB
+                    folder_size = f"{total_size / (1024 * 1024):.1f} MB"
+                elif total_size > 1024:  # KB
+                    folder_size = f"{total_size / 1024:.1f} KB"
+                else:
+                    folder_size = f"{total_size} bytes"
+            except Exception:
+                pass
+
+            # Calculate estimated time remaining
+            eta_str = "Unknown"
+            if completed > 0 and avg_response_time > 0:
+                remaining_tests = total - completed
+                eta_seconds = remaining_tests * avg_response_time
+                if eta_seconds > 3600:  # Hours
+                    eta_str = f"{eta_seconds / 3600:.1f} hours"
+                elif eta_seconds > 60:  # Minutes
+                    eta_str = f"{eta_seconds / 60:.1f} minutes"
+                else:
+                    eta_str = f"{eta_seconds:.0f} seconds"
+
+            # Display session information
+            console.print(f"[bold green]{i:2d}.[/bold green] [cyan]{session_model}[/cyan] - {completed:,}/{total:,} tests ({completion_percent:.1f}% complete)")
+            console.print(f"     [dim]Session ID: {session_id}[/dim]")
+            console.print(f"     [dim]Started: {time_str}[/dim]")
+            console.print(f"     [dim]Last Save: {checkpoint_str}[/dim]")
+            console.print(f"     [dim]Folder: {folder_id} ({folder_size})[/dim]")
+
+            # Progress details
+            if failed > 0:
+                success_rate = ((completed - failed) / completed * 100) if completed > 0 else 0
+                console.print(f"     [dim]Progress: {completed:,} completed, {failed:,} failed ({success_rate:.1f}% success)[/dim]")
+            else:
+                console.print(f"     [dim]Progress: {completed:,} completed, 0 failed (100% success)[/dim]")
+
+            # Performance metrics
+            if avg_response_time > 0:
+                console.print(f"     [dim]Performance: {avg_response_time:.1f}s avg, {throughput:.2f} tests/sec[/dim]")
+                console.print(f"     [dim]Est. Time Remaining: {eta_str}[/dim]")
+
+            # Show backup information if available
+            try:
+                backup_dir = Path(folder_path) / f"{session_id}_backups"
+                if backup_dir.exists():
+                    backup_files = list(backup_dir.glob("progress_backup_*.json"))
+                    if backup_files:
+                        # Get latest backup info
+                        latest_backup = max(backup_files, key=lambda x: x.stat().st_mtime)
+                        backup_time = datetime.fromtimestamp(latest_backup.stat().st_mtime)
+                        console.print(f"     [dim]Backups: {len(backup_files)} available (latest: {backup_time.strftime('%H:%M:%S')})[/dim]")
+            except Exception:
+                pass
+
+            console.print(f"     [dim]Path: {folder_path}[/dim]")
+            console.print()
+
+    except Exception as e:
+        console.print(f"[red]❌ Error listing resume sessions: {e}[/red]")
+        raise typer.Exit(1) from e
+
+
+@app.command("resume-remove")
+def resume_remove(
+    identifiers: Annotated[
+        list[str], typer.Argument(help="Session indices (1,2,3...), session IDs, or folder names to remove (space-separated)")
+    ],
+    force: Annotated[
+        bool, typer.Option("--force", "-f", help="Skip confirmation prompts")
+    ] = False,
+):
+    """Remove specific resume sessions by index number, session ID, or folder name
+
+    Examples:
+        uv run equilens resume-remove 1 3 5          # Remove sessions 1, 3, and 5 from the list
+        uv run equilens resume-remove folder_name    # Remove by folder name
+        uv run equilens resume-remove session_id     # Remove by session ID (if unique)
+    """
+    try:
+        interrupted_sessions = find_interrupted_sessions()
+
+        if not interrupted_sessions:
+            console.print("[yellow]📭 No interrupted audit sessions found.[/yellow]")
+            return
+
+        # Build mappings for different identifier types
+        index_map = {}           # index -> progress_file
+        session_map = {}         # session_id -> [progress_files] (can be multiple)
+        folder_map = {}          # folder_name -> progress_file
+        session_details = {}     # progress_file -> progress_data
+
+        for i, (progress_file, progress_data) in enumerate(interrupted_sessions, 1):
+            session_id = progress_data.get("session_id", "")
+            index_map[str(i)] = progress_file
+            session_details[progress_file] = progress_data
+
+            # Handle multiple sessions with same ID
+            if session_id in session_map:
+                session_map[session_id].append(progress_file)
+            else:
+                session_map[session_id] = [progress_file]
+
+            try:
+                folder_name = Path(progress_file).parent.name
+                folder_map[folder_name] = progress_file
+            except Exception:
+                continue
+
+        sessions_to_remove = []
+        removed_count = 0
+        total_size_freed = 0
+
+        for identifier in identifiers:
+            found_sessions = []
+
+            # Try to match by index first (most reliable)
+            if identifier in index_map:
+                found_sessions = [index_map[identifier]]
+                console.print(f"[cyan]📍 Found session by index #{identifier}[/cyan]")
+
+            # Try to match by folder name (second most reliable)
+            elif identifier in folder_map:
+                found_sessions = [folder_map[identifier]]
+                console.print(f"[cyan]📂 Found session by folder name: {identifier}[/cyan]")
+
+            # Try to match by session ID (least reliable due to duplicates)
+            elif identifier in session_map:
+                found_sessions = session_map[identifier]
+                if len(found_sessions) > 1:
+                    console.print(f"[yellow]⚠️ Session ID '{identifier}' matches {len(found_sessions)} sessions:[/yellow]")
+                    for j, progress_file in enumerate(found_sessions, 1):
+                        folder_name = Path(progress_file).parent.name
+                        progress_data = session_details[progress_file]
+                        completed = progress_data.get("completed_tests", 0)
+                        console.print(f"  {j}. {folder_name} ({completed:,} tests)")
+
+                    console.print(f"[yellow]Use folder names instead: {' '.join([Path(pf).parent.name for pf in found_sessions])}[/yellow]")
+                    continue
+                else:
+                    console.print(f"[cyan]🆔 Found session by session ID: {identifier}[/cyan]")
+
+            else:
+                console.print(f"[yellow]⚠️ Identifier '{identifier}' not found. Use 'resume-list' to see available sessions.[/yellow]")
+                continue
+
+            # Process found sessions
+            for progress_file in found_sessions:
+                progress_data = session_details[progress_file]
+
+                try:
+                    folder_path = Path(progress_file).parent
+
+                    # Get detailed session information
+                    session_model = progress_data.get("model_name", "Unknown")
+                    completed = progress_data.get("completed_tests", 0)
+                    total = progress_data.get("total_tests", 0)
+                    failed = progress_data.get("failed_tests", 0)
+                    completion_percent = (completed / total * 100) if total > 0 else 0
+                    start_time = progress_data.get("start_time", "Unknown")
+                    last_checkpoint = progress_data.get("last_checkpoint", "Unknown")
+
+                    # Parse timestamps
+                    try:
+                        from datetime import datetime
+                        start_dt = datetime.fromisoformat(start_time)
+                        start_str = start_dt.strftime("%Y-%m-%d %H:%M:%S")
+                    except Exception:
+                        start_str = start_time
+
+                    try:
+                        checkpoint_dt = datetime.fromisoformat(last_checkpoint)
+                        checkpoint_str = checkpoint_dt.strftime("%Y-%m-%d %H:%M:%S")
+                    except Exception:
+                        checkpoint_str = last_checkpoint
+
+                    # Calculate folder size and file count
+                    folder_size = 0
+                    file_count = 0
+                    backup_count = 0
+
+                    for file in folder_path.rglob("*"):
+                        if file.is_file():
+                            folder_size += file.stat().st_size
+                            file_count += 1
+                            if "backup" in file.name:
+                                backup_count += 1
+
+                    if folder_size > 1024 * 1024:  # MB
+                        size_str = f"{folder_size / (1024 * 1024):.1f} MB"
+                    else:
+                        size_str = f"{folder_size / 1024:.1f} KB"
+
+                    # Show detailed information about what will be removed
+                    console.print(f"\n[yellow]🗑️ Session to remove:[/yellow]")
+                    console.print(f"     [bold]{session_model}[/bold] - {completed:,}/{total:,} tests ({completion_percent:.1f}% complete)")
+                    console.print(f"     [dim]Matched by: {identifier}[/dim]")
+                    console.print(f"     [dim]Started: {start_str}[/dim]")
+                    console.print(f"     [dim]Last Save: {checkpoint_str}[/dim]")
+                    console.print(f"     [dim]Failed Tests: {failed}[/dim]")
+                    console.print(f"     [dim]Files: {file_count} ({backup_count} backups)[/dim]")
+                    console.print(f"     [dim]Size: {size_str}[/dim]")
+                    console.print(f"     [dim]Folder: {folder_path}[/dim]")
+
+                    # Confirm unless force flag is used
+                    if not force:
+                        confirm = typer.confirm("Remove this session?")
+                        if not confirm:
+                            console.print("[yellow]Skipped.[/yellow]")
+                            continue
+
+                    # Remove the entire session folder
+                    import shutil
+                    if folder_path.exists():
+                        shutil.rmtree(folder_path)
+                        console.print(f"[green]✅ Removed session: {folder_path.name}[/green]")
+                        console.print(f"[green]💾 Freed {size_str} of disk space[/green]")
+                        removed_count += 1
+                        total_size_freed += folder_size
+                    else:
+                        console.print(f"[yellow]⚠️ Folder not found: {folder_path}[/yellow]")
+
+                except Exception as e:
+                    console.print(f"[red]❌ Failed to remove session for '{identifier}': {e}[/red]")
+
+        # Show final summary
+        if removed_count > 0:
+            if total_size_freed > 1024 * 1024 * 1024:  # GB
+                total_freed_str = f"{total_size_freed / (1024 * 1024 * 1024):.1f} GB"
+            elif total_size_freed > 1024 * 1024:  # MB
+                total_freed_str = f"{total_size_freed / (1024 * 1024):.1f} MB"
+            else:
+                total_freed_str = f"{total_size_freed / 1024:.1f} KB"
+
+            console.print(f"\n[green]✅ Successfully removed {removed_count} session(s).[/green]")
+            console.print(f"[green]💾 Total space freed: {total_freed_str}[/green]")
+        else:
+            console.print(f"\n[yellow]📭 No sessions were removed.[/yellow]")
+
+    except Exception as e:
+        console.print(f"[red]❌ Error removing resume sessions: {e}[/red]")
+        raise typer.Exit(1) from e
+@app.command("resume-remove-range")
+def resume_remove_range(
+    range_spec: Annotated[
+        str, typer.Argument(help="Range specification like '1-5', '1,3,5-8', or 'all'")
+    ],
+    force: Annotated[
+        bool, typer.Option("--force", "-f", help="Skip confirmation prompts")
+    ] = False,
+):
+    """Remove multiple resume sessions by range specification
+
+    Examples:
+        uv run equilens resume-remove-range "1-5"       # Remove sessions 1 through 5
+        uv run equilens resume-remove-range "1,3,5"     # Remove sessions 1, 3, and 5
+        uv run equilens resume-remove-range "1-3,7-9"   # Remove sessions 1-3 and 7-9
+        uv run equilens resume-remove-range "all"       # Remove all sessions
+    """
+    try:
+        interrupted_sessions = find_interrupted_sessions()
+
+        if not interrupted_sessions:
+            console.print("[yellow]📭 No interrupted audit sessions found.[/yellow]")
+            return
+
+        # Parse range specification
+        indices_to_remove = set()
+        total_sessions = len(interrupted_sessions)
+
+        if range_spec.lower() == "all":
+            indices_to_remove = set(range(1, total_sessions + 1))
+        else:
+            # Parse comma-separated ranges and individual numbers
+            parts = range_spec.split(',')
+            for part in parts:
+                part = part.strip()
+                if '-' in part:
+                    # Handle range like "1-5"
+                    try:
+                        start, end = map(int, part.split('-', 1))
+                        if start < 1 or end > total_sessions:
+                            console.print(f"[red]❌ Range {start}-{end} is out of bounds (1-{total_sessions})[/red]")
+                            return
+                        indices_to_remove.update(range(start, end + 1))
+                    except ValueError:
+                        console.print(f"[red]❌ Invalid range format: {part}[/red]")
+                        return
+                else:
+                    # Handle individual number
+                    try:
+                        index = int(part)
+                        if index < 1 or index > total_sessions:
+                            console.print(f"[red]❌ Index {index} is out of bounds (1-{total_sessions})[/red]")
+                            return
+                        indices_to_remove.add(index)
+                    except ValueError:
+                        console.print(f"[red]❌ Invalid number: {part}[/red]")
+                        return
+
+        if not indices_to_remove:
+            console.print("[yellow]📭 No valid indices specified.[/yellow]")
+            return
+
+        # Show what will be removed
+        console.print(f"[yellow]🗑️ Will remove {len(indices_to_remove)} session(s):[/yellow]\n")
+
+        total_size_to_remove = 0
+        sessions_to_remove = []
+
+        for index in sorted(indices_to_remove):
+            progress_file, progress_data = interrupted_sessions[index - 1]  # Convert to 0-based
+            sessions_to_remove.append((progress_file, progress_data))
+
+            session_model = progress_data.get("model_name", "Unknown")
+            completed = progress_data.get("completed_tests", 0)
+            total = progress_data.get("total_tests", 0)
+            completion_percent = (completed / total * 100) if total > 0 else 0
+
+            try:
+                folder_path = Path(progress_file).parent
+                folder_size = sum(f.stat().st_size for f in folder_path.rglob("*") if f.is_file())
+                total_size_to_remove += folder_size
+
+                if folder_size > 1024 * 1024:
+                    size_str = f"{folder_size / (1024 * 1024):.1f} MB"
+                else:
+                    size_str = f"{folder_size / 1024:.1f} KB"
+            except Exception:
+                size_str = "Unknown"
+
+            console.print(f"  {index:2d}. [red]{session_model}[/red] - {completed:,}/{total:,} ({completion_percent:.1f}%) - {folder_path.name} ({size_str})")
+
+        # Show total space to be freed
+        if total_size_to_remove > 1024 * 1024 * 1024:  # GB
+            total_size_str = f"{total_size_to_remove / (1024 * 1024 * 1024):.1f} GB"
+        elif total_size_to_remove > 1024 * 1024:  # MB
+            total_size_str = f"{total_size_to_remove / (1024 * 1024):.1f} MB"
+        else:
+            total_size_str = f"{total_size_to_remove / 1024:.1f} KB"
+
+        console.print(f"\n[yellow]💾 Total disk space to be freed: {total_size_str}[/yellow]")
+
+        if not force:
+            console.print()
+            confirm = typer.confirm("Proceed with removal?")
+            if not confirm:
+                console.print("[yellow]Removal cancelled.[/yellow]")
+                return
+
+        # Remove sessions
+        removed_count = 0
+        freed_space = 0
+
+        for progress_file, progress_data in sessions_to_remove:
+            try:
+                folder_path = Path(progress_file).parent
+
+                # Calculate size before removal
+                folder_size = sum(f.stat().st_size for f in folder_path.rglob("*") if f.is_file())
+
+                import shutil
+                if folder_path.exists():
+                    shutil.rmtree(folder_path)
+                    removed_count += 1
+                    freed_space += folder_size
+                    console.print(f"[green]✅ Removed: {folder_path.name}[/green]")
+            except Exception as e:
+                console.print(f"[red]❌ Failed to remove {folder_path}: {e}[/red]")
+
+        # Show final summary
+        if freed_space > 1024 * 1024 * 1024:  # GB
+            freed_str = f"{freed_space / (1024 * 1024 * 1024):.1f} GB"
+        elif freed_space > 1024 * 1024:  # MB
+            freed_str = f"{freed_space / (1024 * 1024):.1f} MB"
+        else:
+            freed_str = f"{freed_space / 1024:.1f} KB"
+
+        console.print(f"\n[green]✅ Successfully removed {removed_count} session(s).[/green]")
+        console.print(f"[green]💾 Freed {freed_str} of disk space.[/green]")
+
+    except Exception as e:
+        console.print(f"[red]❌ Error removing resume sessions: {e}[/red]")
+        raise typer.Exit(1) from e
+
+
+@app.command("resume-clean")
+def resume_clean(
+    keep: Annotated[
+        int, typer.Option("--keep", "-k", help="Number of most recent sessions to keep")
+    ] = 5,
+    force: Annotated[
+        bool, typer.Option("--force", "-f", help="Skip confirmation prompt")
+    ] = False,
+):
+    """Clean up old resume sessions, keeping only the most recent ones"""
+    try:
+        interrupted_sessions = find_interrupted_sessions()
+
+        if not interrupted_sessions:
+            console.print("[yellow]📭 No interrupted audit sessions found.[/yellow]")
+            return
+
+        if len(interrupted_sessions) <= keep:
+            console.print(f"[green]✅ Only {len(interrupted_sessions)} sessions found. Nothing to clean.[/green]")
+            return
+
+        # Sort sessions by start time (most recent first)
+        try:
+            interrupted_sessions.sort(
+                key=lambda x: x[1].get("start_time", ""),
+                reverse=True
+            )
+        except Exception:
+            console.print("[yellow]⚠️ Could not sort sessions by time. Using current order.[/yellow]")
+
+        sessions_to_keep = interrupted_sessions[:keep]
+        sessions_to_remove = interrupted_sessions[keep:]
+
+        console.print(f"\n[yellow]🧹 Found {len(interrupted_sessions)} sessions. Will keep {keep} most recent.[/yellow]")
+
+        # Show sessions that will be kept
+        console.print(f"\n[green]✅ Sessions to KEEP ({len(sessions_to_keep)}):[/green]")
+        for i, (progress_file, progress_data) in enumerate(sessions_to_keep, 1):
+            session_model = progress_data.get("model_name", "Unknown")
+            completed = progress_data.get("completed_tests", 0)
+            total = progress_data.get("total_tests", 0)
+            completion_percent = (completed / total * 100) if total > 0 else 0
+            start_time = progress_data.get("start_time", "Unknown")
+
+            try:
+                from datetime import datetime
+                start_dt = datetime.fromisoformat(start_time)
+                time_str = start_dt.strftime("%Y-%m-%d %H:%M:%S")
+            except Exception:
+                time_str = start_time
+
+            try:
+                folder_name = Path(progress_file).parent.name
+
+                # Calculate folder size
+                total_size = 0
+                for file in Path(progress_file).parent.rglob("*"):
+                    if file.is_file():
+                        total_size += file.stat().st_size
+
+                if total_size > 1024 * 1024:  # MB
+                    size_str = f"{total_size / (1024 * 1024):.1f} MB"
+                else:
+                    size_str = f"{total_size / 1024:.1f} KB"
+            except Exception:
+                folder_name = "Unknown"
+                size_str = "Unknown"
+
+            console.print(f"  {i}. [green]{session_model}[/green] - {completed:,}/{total:,} ({completion_percent:.1f}%) - {time_str} - {folder_name} ({size_str})")
+
+        # Show sessions that will be removed
+        console.print(f"\n[red]🗑️ Sessions to REMOVE ({len(sessions_to_remove)}):[/red]")
+        total_size_to_remove = 0
+
+        for i, (progress_file, progress_data) in enumerate(sessions_to_remove, 1):
+            session_model = progress_data.get("model_name", "Unknown")
+            completed = progress_data.get("completed_tests", 0)
+            total = progress_data.get("total_tests", 0)
+            failed = progress_data.get("failed_tests", 0)
+            completion_percent = (completed / total * 100) if total > 0 else 0
+            start_time = progress_data.get("start_time", "Unknown")
+            last_checkpoint = progress_data.get("last_checkpoint", "Unknown")
+
+            try:
+                from datetime import datetime
+                start_dt = datetime.fromisoformat(start_time)
+                time_str = start_dt.strftime("%Y-%m-%d %H:%M:%S")
+            except Exception:
+                time_str = start_time
+
+            try:
+                checkpoint_dt = datetime.fromisoformat(last_checkpoint)
+                checkpoint_str = checkpoint_dt.strftime("%H:%M:%S")
+            except Exception:
+                checkpoint_str = "Unknown"
+
+            try:
+                folder_path = Path(progress_file).parent
+                folder_name = folder_path.name
+
+                # Calculate folder size
+                folder_size = 0
+                file_count = 0
+                for file in folder_path.rglob("*"):
+                    if file.is_file():
+                        folder_size += file.stat().st_size
+                        file_count += 1
+
+                total_size_to_remove += folder_size
+
+                if folder_size > 1024 * 1024:  # MB
+                    size_str = f"{folder_size / (1024 * 1024):.1f} MB"
+                else:
+                    size_str = f"{folder_size / 1024:.1f} KB"
+            except Exception:
+                folder_name = "Unknown"
+                size_str = "Unknown"
+                file_count = 0
+
+            console.print(f"  {i}. [red]{session_model}[/red] - {completed:,}/{total:,} ({completion_percent:.1f}%) - Started: {time_str}")
+            console.print(f"     [dim]Last Save: {checkpoint_str} | Failed: {failed} | Files: {file_count} | Size: {size_str}[/dim]")
+            console.print(f"     [dim]Folder: {folder_name}[/dim]")
+
+        # Show total space that will be freed
+        if total_size_to_remove > 1024 * 1024 * 1024:  # GB
+            total_size_str = f"{total_size_to_remove / (1024 * 1024 * 1024):.1f} GB"
+        elif total_size_to_remove > 1024 * 1024:  # MB
+            total_size_str = f"{total_size_to_remove / (1024 * 1024):.1f} MB"
+        else:
+            total_size_str = f"{total_size_to_remove / 1024:.1f} KB"
+
+        console.print(f"\n[yellow]💾 Total disk space to be freed: {total_size_str}[/yellow]")
+
+        if not force:
+            console.print()
+            confirm = typer.confirm("Proceed with cleanup?")
+            if not confirm:
+                console.print("[yellow]Cleanup cancelled.[/yellow]")
+                return
+
+        # Remove old sessions
+        removed_count = 0
+        freed_space = 0
+        for progress_file, _ in sessions_to_remove:
+            try:
+                folder_path = Path(progress_file).parent
+
+                # Calculate size before removal
+                folder_size = 0
+                for file in folder_path.rglob("*"):
+                    if file.is_file():
+                        folder_size += file.stat().st_size
+
+                import shutil
+                if folder_path.exists():
+                    shutil.rmtree(folder_path)
+                    removed_count += 1
+                    freed_space += folder_size
+                    console.print(f"[green]✅ Removed: {folder_path.name}[/green]")
+            except Exception as e:
+                console.print(f"[red]❌ Failed to remove {folder_path}: {e}[/red]")
+
+        # Show final summary
+        if freed_space > 1024 * 1024 * 1024:  # GB
+            freed_str = f"{freed_space / (1024 * 1024 * 1024):.1f} GB"
+        elif freed_space > 1024 * 1024:  # MB
+            freed_str = f"{freed_space / (1024 * 1024):.1f} MB"
+        else:
+            freed_str = f"{freed_space / 1024:.1f} KB"
+
+        console.print(f"\n[green]✅ Successfully cleaned up {removed_count} old sessions.[/green]")
+        console.print(f"[green]💾 Freed {freed_str} of disk space.[/green]")
+
+    except Exception as e:
+        console.print(f"[red]❌ Error cleaning resume sessions: {e}[/red]")
         raise typer.Exit(1) from e
 
 

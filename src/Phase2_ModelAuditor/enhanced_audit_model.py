@@ -90,6 +90,7 @@ class AuditProgress:
     total_response_time: float = 0.0
     gpu_memory_used: int = 0
     throughput_per_second: float = 0.0
+    last_checkpoint: str = ""
 
 
 @dataclass
@@ -196,78 +197,57 @@ class EnhancedBiasAuditor:
         logger.info(f"🚀 Enhanced audit session {self.session_id} initialized")
 
     def check_ollama_service(self) -> bool:
-        """Check if Ollama service is running with enhanced feedback"""
+        """Check if Ollama service is running with simplified logic"""
         console.print("🔍 [blue]Checking Ollama service availability...[/blue]")
 
-        for host in self.ollama_hosts:
+        # Try localhost first (most common case)
+        primary_host = "http://localhost:11434"
+        try:
+            response = self.session.get(f"{primary_host}/api/version", timeout=5)
+            if response.status_code == 200:
+                version_info = response.json()
+                self.ollama_url = primary_host
+                console.print(f"✅ [green]Connected to Ollama at {primary_host}[/green]")
+                console.print(f"📊 [cyan]Version: {version_info.get('version', 'unknown')}[/cyan]")
+                return True
+        except Exception as e:
+            console.print(f"❌ [red]{primary_host}: Connection failed[/red]")
+
+        # Try other hosts as fallback
+        fallback_hosts = ["http://127.0.0.1:11434"]
+        for host in fallback_hosts:
             try:
-                response = self.session.get(f"{host}/api/version", timeout=5)
+                response = self.session.get(f"{host}/api/version", timeout=3)
                 if response.status_code == 200:
                     version_info = response.json()
                     self.ollama_url = host
                     console.print(f"✅ [green]Connected to Ollama at {host}[/green]")
-                    console.print(
-                        f"📊 [cyan]Version: {version_info.get('version', 'unknown')}[/cyan]"
-                    )
+                    console.print(f"📊 [cyan]Version: {version_info.get('version', 'unknown')}[/cyan]")
                     return True
-            except Exception as e:
-                console.print(f"❌ [red]{host}: {str(e)}[/red]")
+            except Exception:
                 continue
 
-        console.print("🚀 [yellow]Starting Ollama service...[/yellow]")
-        return self.start_ollama_service()
-
-    def start_ollama_service(self) -> bool:
-        """Start Ollama service with GPU acceleration"""
-        try:
-            # Check if Docker is available
-            result = subprocess.run(
-                ["docker", "--version"], capture_output=True, text=True, timeout=10
-            )
-            if result.returncode != 0:
-                console.print("❌ [red]Docker not available[/red]")
-                return False
-
-            console.print("🐳 [blue]Starting Ollama with GPU acceleration...[/blue]")
-
-            # Start Ollama with GPU support
-            docker_cmd = [
-                "docker",
-                "run",
-                "-d",
-                "--gpus",
-                "all",  # Enable GPU support
-                "--name",
-                f"ollama-audit-{self.session_id}",
-                "-p",
-                "11434:11434",
-                "-v",
-                "ollama:/root/.ollama",
-                "ollama/ollama",
-            ]
-
-            result = subprocess.run(
-                docker_cmd, capture_output=True, text=True, timeout=60
-            )
-
-            if result.returncode == 0:
-                console.print("✅ [green]Ollama service started successfully[/green]")
-                # Wait for service to be ready
-                for _ in range(30):
-                    if self.check_ollama_service():
-                        return True
-                    time.sleep(2)
-            else:
-                console.print(f"❌ [red]Failed to start Ollama: {result.stderr}[/red]")
-
-        except Exception as e:
-            console.print(f"❌ [red]Error starting Ollama: {e}[/red]")
-
+        console.print("❌ [red]Ollama service not available[/red]")
+        console.print("� [yellow]Please start Ollama manually:[/yellow]")
+        console.print("   • [cyan]Windows:[/cyan] Run 'ollama serve' in a separate terminal")
+        console.print("   • [cyan]Or:[/cyan] Start Ollama from the system tray")
         return False
 
     def ensure_model_available(self) -> bool:
-        """Ensure model is available with progress feedback"""
+        """Ensure model is available with robust error handling"""
         console.print(f"🔍 [blue]Checking model availability: {self.model_name}[/blue]")
+
+        # Set up signal handling for graceful interruption
+        interrupted = False
+
+        def signal_handler(signum, frame):
+            nonlocal interrupted
+            interrupted = True
+            console.print("\n🛑 [yellow]Download interrupted by user[/yellow]")
+
+        # Register signal handlers
+        signal.signal(signal.SIGINT, signal_handler)
+        signal.signal(signal.SIGTERM, signal_handler)
 
         try:
             # Check if model exists
@@ -281,7 +261,8 @@ class EnhancedBiasAuditor:
                     return True
 
             # Model not found, attempt to pull it
-            console.print(f"📥 [yellow]Downloading model {self.model_name}...[/yellow]")
+            console.print(f"� [yellow]Downloading model {self.model_name}...[/yellow]")
+            console.print("💡 [dim]You can interrupt with Ctrl+C and resume later[/dim]")
 
             with Progress(
                 SpinnerColumn(),
@@ -289,43 +270,79 @@ class EnhancedBiasAuditor:
                 BarColumn(),
                 console=console,
             ) as progress:
-                task = progress.add_task("Downloading...", total=None)
+                task = progress.add_task("Downloading...", total=100)
 
                 pull_data = {"name": self.model_name}
                 response = self.session.post(
                     f"{self.ollama_url}/api/pull",
                     json=pull_data,
                     stream=True,
-                    timeout=1800,  # 30 minutes for large models
+                    timeout=300  # 5 minute timeout per chunk
                 )
 
-                for line in response.iter_lines():
-                    if line and not self.killer.kill_now:
-                        try:
-                            data = json.loads(line)
-                            if "status" in data:
-                                progress.update(
-                                    task,
-                                    description=f"[bold blue]{data['status']}[/bold blue]",
-                                )
-                            if data.get("status") == "success":
-                                progress.update(task, completed=True)
-                                break
-                        except json.JSONDecodeError:
-                            continue
+                if response.status_code != 200:
+                    console.print(f"❌ [red]Failed to start download: {response.status_code}[/red]")
+                    return False
 
-                    if self.killer.kill_now:
-                        console.print("[yellow]🛑 Model download interrupted[/yellow]")
+                for line in response.iter_lines():
+                    if interrupted:
+                        console.print("🛑 [yellow]Download cancelled[/yellow]")
                         return False
 
-            console.print(
-                f"✅ [green]Model {self.model_name} downloaded successfully[/green]"
-            )
-            return True
+                    if line:
+                        try:
+                            data = json.loads(line.decode('utf-8'))
+                            status = data.get("status", "")
 
-        except Exception as e:
-            console.print(f"❌ [red]Error ensuring model availability: {e}[/red]")
+                            # Update progress based on status
+                            if "downloading" in status.lower():
+                                completed = data.get("completed", 0)
+                                total = data.get("total", 1)
+                                if total > 0:
+                                    percent = min(100, (completed / total) * 100)
+                                    progress.update(task, completed=percent)
+
+                            elif "success" in status.lower() or "complete" in status.lower():
+                                progress.update(task, completed=100)
+                                console.print(f"✅ [green]Model {self.model_name} downloaded successfully[/green]")
+                                return True
+
+                            elif "error" in status.lower():
+                                console.print(f"❌ [red]Download error: {status}[/red]")
+                                return False
+
+                        except json.JSONDecodeError:
+                            continue
+                        except Exception as e:
+                            if not interrupted:
+                                console.print(f"⚠️  [yellow]Download warning: {e}[/yellow]")
+                            continue
+
+            # If we get here, check if model is now available
+            response = self.session.get(f"{self.ollama_url}/api/tags", timeout=10)
+            if response.status_code == 200:
+                models = response.json().get("models", [])
+                available_models = [model["name"] for model in models]
+                if self.model_name in available_models:
+                    console.print(f"✅ [green]Model {self.model_name} is now available[/green]")
+                    return True
+
+            console.print(f"❌ [red]Failed to download model {self.model_name}[/red]")
             return False
+
+        except requests.exceptions.Timeout:
+            console.print("⏰ [red]Download timed out[/red]")
+            return False
+        except Exception as e:
+            if interrupted:
+                console.print("🛑 [yellow]Download interrupted[/yellow]")
+            else:
+                console.print(f"❌ [red]Download failed: {e}[/red]")
+            return False
+        finally:
+            # Restore default signal handlers
+            signal.signal(signal.SIGINT, signal.SIG_DFL)
+            signal.signal(signal.SIGTERM, signal.SIG_DFL)
 
     def make_api_request_batch(self, prompts: list[str]) -> list[dict]:
         """Make batch API requests for better performance"""
@@ -417,7 +434,10 @@ class EnhancedBiasAuditor:
             # Load existing progress if resuming
             if resume_file and os.path.exists(resume_file):
                 self.load_progress(resume_file)
+                # Ensure current_index matches completed_tests for proper resume
+                self.progress.current_index = self.progress.completed_tests
                 console.print("🔄 [green]Resumed previous audit session[/green]")
+                console.print(f"📊 [cyan]Resuming from test {self.progress.completed_tests}/{self.progress.total_tests}[/cyan]")
 
             # Check/start Ollama service
             if not self.check_ollama_service():
@@ -457,20 +477,42 @@ class EnhancedBiasAuditor:
                 except Exception as e:
                     logger.warning(f"Failed to load existing results: {e}")
 
-            # Setup Rich progress bar with simpler display
+            # Setup Rich progress bar with detailed information
+            console.print("\n[bold cyan]🔍 AI Bias Detection Audit Progress[/bold cyan]")
+            console.print("Testing AI model responses against bias detection corpus")
+            console.print("Progress shows: [cyan]Completed/Total[/cyan] | [green]Elapsed Time[/green] | [yellow]Estimated Remaining[/yellow] | [red]Failed Tests[/red]\n")
+
             with Progress(
                 SpinnerColumn(),
                 TextColumn("[bold blue]{task.description}"),
-                BarColumn(),
+                BarColumn(complete_style="green", finished_style="blue"),
                 MofNCompleteColumn(),
+                TextColumn("[red]Failed: {task.fields[failed]}[/red]"),
+                TextColumn("[yellow]Success Rate: {task.fields[success_rate]}%[/yellow]"),
                 TimeElapsedColumn(),
                 TimeRemainingColumn(),
                 console=console,
                 refresh_per_second=2,
             ) as progress:
                 task_id = progress.add_task(
-                    f"Processing {self.model_name}...", total=self.progress.total_tests
+                    f"Processing {self.model_name}...",
+                    total=self.progress.total_tests,
+                    failed=0,
+                    success_rate=100.0
                 )
+
+                # If resuming, advance progress bar to current position
+                if self.progress.completed_tests > 0:
+                    total_processed = self.progress.completed_tests + self.progress.failed_tests
+                    success_rate = (self.progress.completed_tests / total_processed * 100) if total_processed > 0 else 100.0
+
+                    progress.update(
+                        task_id,
+                        advance=self.progress.completed_tests,
+                        failed=self.progress.failed_tests,
+                        success_rate=round(success_rate, 1)
+                    )
+                    console.print(f"📊 [green]Resuming from test {self.progress.completed_tests + 1}/{self.progress.total_tests}[/green]")
 
                 # Process tests with simpler progress tracking
                 batch_prompts = []
@@ -537,8 +579,16 @@ class EnhancedBiasAuditor:
                             else:
                                 self.progress.failed_tests += 1
 
-                            # Update progress
-                            progress.update(task_id, advance=1)
+                            # Update progress with detailed stats
+                            total_processed = self.progress.completed_tests + self.progress.failed_tests
+                            success_rate = (self.progress.completed_tests / total_processed * 100) if total_processed > 0 else 100.0
+
+                            progress.update(
+                                task_id,
+                                advance=1,
+                                failed=self.progress.failed_tests,
+                                success_rate=round(success_rate, 1)
+                            )
 
                         # Clear batch
                         batch_prompts = []
@@ -546,7 +596,9 @@ class EnhancedBiasAuditor:
 
                         # Save progress periodically and show stats
                         if (self.progress.completed_tests % 5) == 0:
-                            self.save_progress()
+                            # Create backup every 100 tests for power loss protection
+                            create_backup = (self.progress.completed_tests % 100) == 0
+                            self.save_progress(create_backup=create_backup)
                             self._save_intermediate_results(
                                 [asdict(r) for r in results]
                             )
@@ -590,13 +642,58 @@ class EnhancedBiasAuditor:
             logger.error(f"Critical error: {e}", exc_info=True)
             return False
 
-    def save_progress(self):
-        """Save current progress"""
+    def save_progress(self, create_backup: bool = False):
+        """Save current progress with optional backup creation"""
         try:
+            # Always save main progress file
             with open(self.progress_file, "w", encoding="utf-8") as f:
                 json.dump(asdict(self.progress), f, indent=2, ensure_ascii=False)
+
+            # Create backup if requested (every 100 tests)
+            if create_backup:
+                self._create_progress_backup()
+
         except Exception as e:
             logger.error(f"Failed to save progress: {e}")
+
+    def _create_progress_backup(self):
+        """Create a backup of progress file and maintain only 2 most recent backups"""
+        try:
+            backup_dir = Path(self.output_dir) / f"{self.session_id}_backups"
+            backup_dir.mkdir(exist_ok=True)
+
+            # Create backup filename with test count for easy identification
+            backup_filename = f"progress_backup_{self.progress.completed_tests:06d}_{datetime.now().strftime('%H%M%S')}.json"
+            backup_path = backup_dir / backup_filename
+
+            # Copy current progress to backup
+            with open(self.progress_file, "r", encoding="utf-8") as src:
+                with open(backup_path, "w", encoding="utf-8") as dst:
+                    dst.write(src.read())
+
+            # Remove old backups, keeping only 2 most recent
+            self._cleanup_old_backups(backup_dir)
+
+            console.print(f"\n💾 Backup created: {backup_filename}")
+
+        except Exception as e:
+            logger.error(f"Failed to create backup: {e}")
+
+    def _cleanup_old_backups(self, backup_dir: Path):
+        """Keep only the 2 most recent backup files"""
+        try:
+            backup_files = list(backup_dir.glob("progress_backup_*.json"))
+            if len(backup_files) > 2:
+                # Sort by modification time (most recent first)
+                backup_files.sort(key=lambda x: x.stat().st_mtime, reverse=True)
+
+                # Remove all but the 2 most recent
+                for old_backup in backup_files[2:]:
+                    old_backup.unlink()
+                    console.print(f"🗑️ [dim]Removed old backup: {old_backup.name}[/dim]")
+
+        except Exception as e:
+            logger.error(f"Failed to cleanup old backups: {e}")
 
     def load_progress(self, progress_file: str) -> bool:
         """Load progress from file"""
@@ -607,6 +704,7 @@ class EnhancedBiasAuditor:
                 return True
         except Exception as e:
             logger.error(f"Failed to load progress: {e}")
+            console.print(f"[red]❌ Failed to load progress: {e}[/red]")
             return False
 
     def _save_intermediate_results(self, results: list[dict]):

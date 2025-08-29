@@ -623,36 +623,26 @@ class ModelAuditor:
                     batch_results.append(result_or_row)
                     self.progress.completed_tests += 1
                     self.update_response_time(response_time)
-
+                    
                     # Handle dynamic scaling
                     self._handle_request_result(True, pbar)
-
-                    # Calculate success rate
-                    total_processed = self.progress.completed_tests + self.progress.failed_tests
-                    success_rate = (self.progress.completed_tests / total_processed * 100) if total_processed > 0 else 100.0
-
+                    
                     pbar.set_postfix({
                         'Workers': self.current_workers,
-                        'Success Rate': f"{success_rate:.1f}%",
-                        'Failed': f"{self.progress.failed_tests}",
+                        'Success': f"{self.progress.completed_tests}/{self.progress.total_tests}",
                         'Score': f"{result_or_row['surprisal_score']:.2f}"
                     })
                 else:
                     self.add_failed_test(idx, result_or_row)
                     self.progress.failed_tests += 1
-
+                    
                     # Handle dynamic scaling
                     self._handle_request_result(False, pbar)
-
-                    # Calculate success rate
-                    total_processed = self.progress.completed_tests + self.progress.failed_tests
-                    success_rate = (self.progress.completed_tests / total_processed * 100) if total_processed > 0 else 100.0
-
+                    
                     pbar.set_postfix({
                         'Workers': self.current_workers,
-                        'Success Rate': f"{success_rate:.1f}%",
                         'Failed': f"{self.progress.failed_tests}",
-                        'Status': 'Failed'
+                        'Success': f"{self.progress.completed_tests}/{self.progress.total_tests}"
                     })
                     self.progress.failed_tests += 1
                     pbar.write(f"❌ Test {idx}: Failed")
@@ -946,7 +936,7 @@ class ModelAuditor:
 
     def _process_corpus(self, df: pd.DataFrame, resume_file: str | None = None) -> bool:
         """Process the corpus with appropriate concurrency settings"""
-
+        
         # Filter out already processed tests if resuming
         if resume_file and self.progress.current_index >= 0:
             # Start from the next unprocessed test
@@ -957,7 +947,7 @@ class ModelAuditor:
                     tests_to_process.append((test_idx, row))
             logger.info(f"📂 Resuming from test {self.progress.current_index + 1}, processing {len(tests_to_process)} remaining tests")
         else:
-            tests_to_process = [(int(idx) if isinstance(idx, (int, float)) else hash(idx) % len(df), row)
+            tests_to_process = [(int(idx) if isinstance(idx, (int, float)) else hash(idx) % len(df), row) 
                               for idx, row in df.iterrows()]
             logger.info(f"🚀 Starting fresh audit with {len(tests_to_process)} tests")
 
@@ -978,14 +968,14 @@ class ModelAuditor:
         try:
             # Initialize progress tracking
             self._initialize_progress_tracking()
-
+            
             # System monitoring for load detection
             if self._check_system_load()["high_load"]:
                 logger.info(f"🔧 System under load - starting with reduced concurrency ({self.current_workers} workers)")
-
+            
             logger.info(f"� Starting concurrent processing with {self.current_workers} workers...")
             logger.info(f"📊 Processing {len(tests_to_process)} tests")
-
+            
             # Prepare results storage
             results = []
             if os.path.exists(self.results_file):
@@ -995,42 +985,38 @@ class ModelAuditor:
                     logger.info(f"📂 Loaded {len(results)} existing results")
                 except Exception as e:
                     logger.warning(f"Failed to load existing results: {e}")
-
+            
             # Process tests concurrently with dynamic scaling
-            logger.info("\n🔍 AI Bias Detection Audit Progress")
-            logger.info("Testing AI model responses against bias detection corpus")
-            logger.info("Progress shows: Completed/Total | Elapsed Time | Remaining Time | Success Rate\n")
-
-            with tqdm(total=len(tests_to_process), desc="🔍 Auditing", ncols=120,
-                     bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}] Success: {postfix}") as pbar:
-
+            with tqdm(total=len(tests_to_process), desc="🔍 Auditing", ncols=80, 
+                     bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]") as pbar:
+                
                 # Process tests in smaller batches to allow dynamic scaling
                 batch_size = max(1, min(50, len(tests_to_process) // 10))
-
+                
                 for i in range(0, len(tests_to_process), batch_size):
                     if self.killer.kill_now:
                         logger.info("🛑 Audit interrupted by user")
                         break
-
+                        
                     batch = tests_to_process[i:i + batch_size]
-
+                    
                     # Process batch concurrently
                     batch_results = self._process_test_batch_concurrent(batch, pbar)
                     results.extend(batch_results)
-
+                    
                     # Save progress periodically
                     if i % (batch_size * 5) == 0:  # Every 5 batches
                         self._save_intermediate_results(results)
                         self.save_progress()
-
+                
                 # Save final results
                 self._save_intermediate_results(results)
                 self.save_progress()
-
+                
             logger.info(f"✅ Concurrent processing completed!")
-            logger.info(f"🤖 Final worker count: {self.current_workers}")
+            logger.info(f"� Final worker count: {self.current_workers}")
             return True
-
+            
         except Exception as e:
             logger.error(f"⚠️  Concurrent processing failed: {e}")
             logger.info("🔄 Falling back to sequential processing...")
@@ -1038,7 +1024,7 @@ class ModelAuditor:
 
     def _process_sequential(self, tests_to_process: list, start_time: float) -> bool:
         """Process tests sequentially (fallback mode)"""
-
+        
         results = []
         if os.path.exists(self.results_file):
             try:
@@ -1047,35 +1033,32 @@ class ModelAuditor:
                 logger.info(f"📂 Loaded {len(results)} existing results")
             except Exception as e:
                 logger.warning(f"Failed to load existing results: {e}")
-
+        
         logger.info("🔄 Using sequential processing mode...")
-        logger.info("\n🔍 AI Bias Detection Audit Progress")
-        logger.info("Testing AI model responses against bias detection corpus")
-        logger.info("Progress shows: Completed/Total | Elapsed Time | Remaining Time | Success Rate\n")
-
-        with tqdm(total=len(tests_to_process), desc="🔍 Auditing", ncols=120,
-                 bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}] Success: {postfix}") as pbar:
-
+        
+        with tqdm(total=len(tests_to_process), desc="🔍 Auditing", ncols=80,
+                 bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]") as pbar:
+            
             for test_idx, row in tests_to_process:
                 if self.killer.kill_now:
                     logger.info("🛑 Audit interrupted by user")
                     break
-
+                
                 self.progress.current_index = test_idx
                 prompt = str(row.get("full_prompt_text", row.get("sentence", "")))
-
+                
                 # Calculate ETA
                 eta_str, eta_seconds = self.calculate_eta(test_idx + 1, self.progress.total_tests)
                 pbar.set_description(f"🔍 Processing ({eta_str}): {prompt[:20]}...")
-
+                
                 # Make API request
                 response_data = self.make_api_request(prompt)
-
+                
                 if response_data:
                     # Process successful response
                     surprisal_score = self.calculate_surprisal_score(response_data)
                     response_time = response_data.get("response_time", 0)
-
+                    
                     result = {
                         "sentence": prompt,
                         "name_category": str(row.get("name_category", "")),
@@ -1092,47 +1075,37 @@ class ModelAuditor:
                         "timestamp": datetime.now().isoformat(),
                         "response_time": response_time,
                     }
-
+                    
                     results.append(result)
                     self.progress.completed_tests += 1
                     self.update_response_time(response_time)
-
-                    # Calculate success rate
-                    total_processed = self.progress.completed_tests + self.progress.failed_tests
-                    success_rate = (self.progress.completed_tests / total_processed * 100) if total_processed > 0 else 100.0
-
+                    
                     pbar.set_postfix({
-                        "Success Rate": f"{success_rate:.1f}%",
-                        "Failed": f"{self.progress.failed_tests}",
                         "Score": f"{surprisal_score:.2f}",
-                        "Time": f"{response_time:.1f}s"
+                        "Time": f"{response_time:.1f}s",
+                        "Success": f"{self.progress.completed_tests}/{self.progress.total_tests}"
                     })
                 else:
                     # Handle failed request
                     self.add_failed_test(test_idx, row)
                     self.progress.failed_tests += 1
-
-                    # Calculate success rate
-                    total_processed = self.progress.completed_tests + self.progress.failed_tests
-                    success_rate = (self.progress.completed_tests / total_processed * 100) if total_processed > 0 else 100.0
-
+                    
                     pbar.set_postfix({
-                        "Success Rate": f"{success_rate:.1f}%",
                         "Failed": f"{self.progress.failed_tests}",
-                        "Status": "Failed"
+                        "Success": f"{self.progress.completed_tests}/{self.progress.total_tests}"
                     })
-
+                
                 pbar.update(1)
-
+                
                 # Save progress every 10 tests
                 if (test_idx + 1) % 10 == 0:
                     self._save_intermediate_results(results)
                     self.save_progress()
-
+            
             # Save final results
             self._save_intermediate_results(results)
             self.save_progress()
-
+            
         logger.info("✅ Sequential processing completed!")
         return True
 
