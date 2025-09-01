@@ -1,17 +1,29 @@
-#!/usr/bin/env python3
+# Copyright 2025 Krishna GSVV
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """
 Helper script to switch between different bias comparison types in EquiLens.
 Usage: python switch_comparison.py [comparison_type]
 """
 
-import json
-import sys
 import argparse
+import json
 
 
-def list_available_comparisons():
+def list_available_comparisons() -> None:
     """List all available comparison types."""
-    with open("word_lists.json", "r") as f:
+    with open("word_lists.json") as f:
         config = json.load(f)
 
     print("Available comparison types:")
@@ -36,7 +48,7 @@ def list_available_comparisons():
 
 def switch_comparison(comparison_type):
     """Switch to a specific comparison type."""
-    with open("word_lists.json", "r") as f:
+    with open("word_lists.json") as f:
         config = json.load(f)
 
     if comparison_type not in config["comparisons"]:
@@ -59,7 +71,7 @@ def switch_comparison(comparison_type):
 
 def get_current_comparison():
     """Get the currently active comparison type."""
-    with open("word_lists.json", "r") as f:
+    with open("word_lists.json") as f:
         config = json.load(f)
 
     current = config["active_comparison"]

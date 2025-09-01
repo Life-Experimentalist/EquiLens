@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this corpus in your research, please cite it."
+title: "EquiLens CorpusGen — Language Models Audit Corpus Generator"
+authors:
+    - family-names: "GSVV"
+      given-names: "Krishna"
+date-released: 2025-09-01
+version: "v0.1"
+license: "Apache-2.0"
+url: "https://github.com/Life-Experimentalist/EquiLens/tree/main/src/Phase1_CorpusGenerator"

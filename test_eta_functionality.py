@@ -3,12 +3,7 @@
 Test script to verify ETA functionality in audit_model.py
 """
 
-import os
-import sys
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "src", "Phase2_ModelAuditor"))
-
-from audit_model import ModelAuditor
+from .src.Phase2_ModelAuditor.audit_model import ModelAuditor
 
 
 def test_eta_calculation():

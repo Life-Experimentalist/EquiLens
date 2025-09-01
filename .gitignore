@@ -1,11 +1,12 @@
-logs/*
-results/*
-Phase1_CorpusGenerator/corpus/*
-.venv
-
-
 # EquiLens Docker ignore file
 # Exclude large files and directories that don't need to be in the container
+
+logs/*
+results/*
+.venv/
+.vscode/
+logs/audit_session.log
+
 
 # Docker build context optimization - reduce from 846MB to ~50MB
 
@@ -86,7 +87,6 @@ Dockerfile*
 .dockerignore
 
 # Windows and PowerShell
-*.ps1
 *.bat
 *.cmd
 
@@ -129,9 +129,3 @@ node_modules/
 *.tar.gz
 *.zip
 *.rar
-
-
-logs/*
-.vscode/
-logs/audit_session.log
-logs/audit_session.log

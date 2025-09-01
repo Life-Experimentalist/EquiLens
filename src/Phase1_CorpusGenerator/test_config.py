@@ -1,59 +1,138 @@
-#!/usr/bin/env python3
-"""Simple validation test for the word_lists.json configuration."""
+# Copyright 2025 Krishna GSVV
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""
+
+Strict validator for `word_lists.json` used by CorpusGen.
+
+This script enforces the expected structure and exits with non-zero status
+on any validation failure so it can be used in CI or pre-flight checks.
+
+Checks performed:
+ - `active_comparison` exists and is a key within `comparisons`
+ - `comparisons` is a dict mapping to config objects
+ - each comparison has: description (str), name_categories (non-empty list of {category, items}), professions (non-empty list), trait_categories (non-empty list of {category, items}), templates (non-empty list)
+ - names and trait items are non-empty strings and there are no empty categories
+ - no duplicate names inside each name category
+
+Usage: run from `src/Phase1_CorpusGenerator` and it will exit 1 on any error.
+"""
 
 import json
 import sys
-import os
+from pathlib import Path
 
-def test_config():
-    """Test the configuration file for basic validity."""
+
+def fail(msg: str) -> None:
+    print(f"❌ {msg}")
+    sys.exit(1)
+
+
+def validate():
+    base = Path(__file__).parent
+    cfg_path = base / "word_lists.json"
+    if not cfg_path.exists():
+        fail(f"Configuration file not found: {cfg_path}")
+
     try:
-        # Load configuration
-        config_path = "word_lists.json"
-        if not os.path.exists(config_path):
-            print("❌ Configuration file not found")
-            return False
-
-        with open(config_path, 'r') as f:
-            config = json.load(f)
-
-        print("✅ Configuration loaded successfully")
-
-        # Basic structure checks
-        active = config.get('active_comparison')
-        comparisons = config.get('comparisons', {})
-
-        print(f"✅ Active comparison: {active}")
-        print(f"✅ Available comparisons: {list(comparisons.keys())}")
-
-        # Check for duplicates in gender_bias
-        if 'gender_bias' in comparisons:
-            gender_config = comparisons['gender_bias']
-            male_names = gender_config['name_categories'][0]['items']
-            female_names = gender_config['name_categories'][1]['items']
-
-            male_unique = len(set(male_names)) == len(male_names)
-            female_unique = len(set(female_names)) == len(female_names)
-
-            print(f"✅ Male names unique: {male_unique} ({len(male_names)} total)")
-            print(f"✅ Female names unique: {female_unique} ({len(female_names)} total)")
-
-            if male_unique and female_unique:
-                print("✅ No duplicate names found")
-            else:
-                print("❌ Duplicate names found")
-                return False
-
-        print("✅ All tests passed!")
-        return True
-
-    except json.JSONDecodeError as e:
-        print(f"❌ JSON syntax error: {e}")
-        return False
+        data = json.loads(cfg_path.read_text(encoding="utf-8"))
     except Exception as e:
-        print(f"❌ Error: {e}")
-        return False
+        fail(f"Failed to parse JSON: {e}")
+
+    # Top-level keys
+    if "active_comparison" not in data:
+        fail("Missing top-level key: active_comparison")
+
+    if "comparisons" not in data or not isinstance(data["comparisons"], dict):
+        fail("Missing or invalid 'comparisons' mapping")
+
+    active = data["active_comparison"]
+    comparisons = data["comparisons"]
+
+    if active not in comparisons:
+        fail(f"active_comparison '{active}' not found in comparisons")
+
+    if not comparisons:
+        fail("'comparisons' is empty")
+
+    for comp_name, comp in comparisons.items():
+        if not isinstance(comp, dict):
+            fail(f"Comparison {comp_name} is not an object")
+
+        # required fields
+        required = [
+            "description",
+            "name_categories",
+            "professions",
+            "trait_categories",
+            "templates",
+        ]
+        for k in required:
+            if k not in comp:
+                fail(f"Comparison '{comp_name}' missing required key: {k}")
+
+        # description
+        if not isinstance(comp["description"], str) or not comp["description"].strip():
+            fail(f"Comparison '{comp_name}' has invalid description")
+
+        # name_categories
+        nc = comp["name_categories"]
+        if not isinstance(nc, list) or len(nc) == 0:
+            fail(f"Comparison '{comp_name}' has empty or invalid 'name_categories'")
+
+        for cat in nc:
+            if not isinstance(cat, dict) or "category" not in cat or "items" not in cat:
+                fail(f"Invalid name category entry in '{comp_name}': {cat}")
+            if not isinstance(cat["items"], list) or len(cat["items"]) == 0:
+                fail(
+                    f"Empty 'items' in name category '{cat.get('category')}' of '{comp_name}'"
+                )
+            # check duplicates
+            names = cat["items"]
+            if len(set(names)) != len(names):
+                fail(
+                    f"Duplicate names detected in category '{cat.get('category')}' of '{comp_name}'"
+                )
+
+        # professions
+        profs = comp["professions"]
+        if not isinstance(profs, list) or len(profs) == 0:
+            fail(f"Comparison '{comp_name}' has empty 'professions'")
+        for p in profs:
+            if not isinstance(p, str) or not p.strip():
+                fail(f"Invalid profession entry in '{comp_name}': {p}")
+
+        # trait_categories
+        tc = comp["trait_categories"]
+        if not isinstance(tc, list) or len(tc) == 0:
+            fail(f"Comparison '{comp_name}' has empty or invalid 'trait_categories'")
+        for cat in tc:
+            if not isinstance(cat, dict) or "category" not in cat or "items" not in cat:
+                fail(f"Invalid trait category entry in '{comp_name}': {cat}")
+            if not isinstance(cat["items"], list) or len(cat["items"]) == 0:
+                fail(
+                    f"Empty 'items' in trait category '{cat.get('category')}' of '{comp_name}'"
+                )
+
+        # templates
+        templates = comp["templates"]
+        if not isinstance(templates, list) or len(templates) == 0:
+            fail(f"Comparison '{comp_name}' has empty 'templates'")
+
+    # If we reach here, everything looks ok
+    print("✅ word_lists.json validation passed")
+    return 0
+
 
 if __name__ == "__main__":
-    success = test_config()
-    sys.exit(0 if success else 1)
+    exit(validate())

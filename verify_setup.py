@@ -32,6 +32,7 @@ class Colors:
 def print_status(message: str, status: str = "INFO") -> None:
     """Print formatted status message."""
     colors = {
+        # deepcode ignore NoHardcodedPasswords: This is simply the colour to be used when the test case passes not a password.
         "PASS": Colors.GREEN,
         "FAIL": Colors.RED,
         "WARN": Colors.YELLOW,
