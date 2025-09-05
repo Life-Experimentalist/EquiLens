@@ -1,0 +1,5 @@
+# Redirect rules for SPA
+/*    /index.html   200
+
+# API redirects (if needed in future)
+/api/*  /api/index.html  200

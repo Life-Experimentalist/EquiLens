@@ -1,0 +1,30 @@
+name = "equilens"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "public"
+
+[build]
+command = "echo 'No build step required'"
+cwd = "."
+
+[build.upload]
+dir = "public"
+format = "pages"
+
+[[pages_build_config]]
+# Build command (not needed for static site)
+build_command = ""
+
+# Build output directory
+destination_dir = "public"
+
+# Root directory
+root_dir = ""
+
+# Environment variables
+[vars]
+NODE_VERSION = "18"
+
+# Pages configuration
+[[pages_build_config.pages]]
+# Pages-specific configuration
+url = "https://equilens.pages.dev"
