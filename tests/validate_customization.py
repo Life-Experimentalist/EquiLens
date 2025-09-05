@@ -11,7 +11,7 @@ os.chdir(r"v:\Code\ProjectCode\EquiLens")
 sys.path.insert(0, r"v:\Code\ProjectCode\EquiLens\src\Phase2_ModelAuditor")
 
 try:
-    from enhanced_audit_model import (
+    from src.Phase2_ModelAuditor.enhanced_audit_model import (
         ConfigurableEnhancedAuditor,
         SystemInstructionPresets,
     )
