@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+    <!-- Main page -->
+    <url>
+        <loc>https://life-experimentalists.github.io/EquiLens/</loc>
+        <lastmod>2025-09-06</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1.0</priority>
+    </url>
+
+    <!-- Features section -->
+    <url>
+        <loc>https://life-experimentalists.github.io/EquiLens/#features</loc>
+        <lastmod>2025-09-06</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <!-- Architecture section -->
+    <url>
+        <loc>https://life-experimentalists.github.io/EquiLens/#architecture</loc>
+        <lastmod>2025-09-06</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <!-- Phase 1: Corpus Generation -->
+    <url>
+        <loc>https://life-experimentalists.github.io/EquiLens/#phase1-corpus</loc>
+        <lastmod>2025-09-06</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+    </url>
+
+    <!-- Phase 2: Model Auditing -->
+    <url>
+        <loc>https://life-experimentalists.github.io/EquiLens/#phase2-auditor</loc>
+        <lastmod>2025-09-06</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <!-- Phase 3: Analysis & Reporting -->
+    <url>
+        <loc>https://life-experimentalists.github.io/EquiLens/#phase3-analysis</loc>
+        <lastmod>2025-09-06</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+    </url>
+
+    <!-- Getting started section -->
+    <url>
+        <loc>https://life-experimentalists.github.io/EquiLens/#getting-started</loc>
+        <lastmod>2025-09-06</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.9</priority>
+    </url>
+
+    <!-- Demo section -->
+    <url>
+        <loc>https://life-experimentalists.github.io/EquiLens/#demo</loc>
+        <lastmod>2025-09-06</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+</urlset>

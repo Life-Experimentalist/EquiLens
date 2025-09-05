@@ -1,52 +1,129 @@
 # 🚀 EquiLens Quick Start Guide
 
-**Get started with EquiLens AI bias detection in under 5 minutes!**
+**Get started with EquiLens AI bias detection - from installation to first audit in under 10 minutes!**
 
-## 📋 Overview
+## 📋 System Requirements
 
-EquiLens is a comprehensive AI bias detection platform featuring an interactive CLI with Rich UI, automatic session management, and comprehensive performance analytics. This guide gets you up and running quickly.
+### Minimum Requirements
+- **Operating System**: Windows 10+, macOS 10.15+, Ubuntu 18.04+
+- **Python**: 3.11 or newer (3.13 recommended)
+- **RAM**: 4GB (8GB+ recommended for better performance)
+- **Disk Space**: 2GB free space (additional space for models)
+- **Docker**: Latest version with compose support
 
-## ✅ Prerequisites
+### Recommended for Optimal Performance
+- **RAM**: 16GB+ for large model processing
+- **GPU**: NVIDIA GPU with 4GB+ VRAM for acceleration
+- **CUDA**: Latest CUDA drivers for GPU support
+- **SSD**: For faster model loading and data processing
 
-### System Requirements
-- **Python**: 3.11+ (3.13 recommended)
-- **RAM**: 4GB minimum, 8GB+ recommended
-- **Disk**: 2GB free space
-- **OS**: Windows 10+, macOS 10.15+, Ubuntu 18.04+
+### Platform Compatibility
+- ✅ **Windows 10/11** (WSL2 recommended for Docker)
+- ✅ **macOS** (Intel and Apple Silicon supported)
+- ✅ **Linux** (Ubuntu 20.04+, Fedora, Arch, CentOS)
+- ✅ **Docker Desktop** or **Docker Engine**
 
-### Optional (for GPU acceleration)
-- **Docker**: Latest version with GPU support
-- **NVIDIA GPU**: With CUDA drivers
-- **8GB+ RAM**: For enhanced performance
+## ⚡ Installation
 
-## 🎯 One-Command Setup
+### Option 1: UV Package Manager (Recommended)
 
-### 1. Quick Installation
 ```bash
 # Clone the repository
 git clone https://github.com/Life-Experimentalists/EquiLens.git
 cd EquiLens
 
-# Install dependencies with UV (recommended)
+# Install UV (fast Python package manager)
 pip install uv
+
+# Create virtual environment and install dependencies
 uv sync
 
-# Alternative: Install with pip
-pip install -e .
+# Verify installation
+python verify_setup.py
 ```
 
-### 2. Verify Setup
-```bash
-# Run the verification script
-python verify_setup.py
+**Sample verification output:**
+```
+🔍 EquiLens System Verification
 
-# Expected output:
 ✓ Python 3.13.x detected
 ✓ Required packages installed
 ✓ Directory structure validated
 ✓ Docker available
-✓ System resources sufficient
+✓ System resources sufficient (8GB RAM, 15GB disk)
+✓ UV package manager ready
+✓ Virtual environment configured
+
+🎉 EquiLens is ready for use!
+
+💡 Next steps:
+   1. uv run equilens status    # Check system status
+   2. uv run equilens start     # Start Ollama services
+   3. uv run equilens tui       # Launch interactive interface
 ```
+
+### Option 2: Traditional Pip Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/Life-Experimentalists/EquiLens.git
+cd EquiLens
+
+# Create virtual environment
+python -m venv .venv
+
+# Activate virtual environment
+# Windows:
+.venv\Scripts\activate
+# Linux/macOS:
+source .venv/bin/activate
+
+# Install dependencies
+pip install -e .
+
+# Verify installation
+python verify_setup.py
+```
+
+## 🐳 Docker Setup
+
+### Install Docker
+- **Windows/macOS**: Download [Docker Desktop](https://www.docker.com/products/docker-desktop)
+- **Linux**: Install Docker Engine and Docker Compose
+
+### Start Services
+```bash
+# Start Ollama services
+docker compose up -d
+
+# Verify services are running
+docker compose ps
+```
+
+## 🎯 GPU Acceleration (Optional)
+
+### NVIDIA GPU Support
+
+1. **Install NVIDIA Drivers**
+   ```bash
+   # Check if GPU is detected
+   nvidia-smi
+   ```
+
+2. **Install CUDA Toolkit** (if not already installed)
+   - Download from [NVIDIA CUDA Toolkit](https://developer.nvidia.com/cuda-toolkit)
+
+3. **Install Docker GPU Support**
+   ```bash
+   # Install nvidia-docker2 (Linux)
+   sudo apt-get install nvidia-docker2
+   sudo systemctl restart docker
+   ```
+
+**Performance Benefits:**
+- 🚀 **5-10x faster** model inference with GPU
+- ⚡ Automatic GPU detection and configuration
+- 🔄 Graceful fallback to CPU-only mode
 
 ### 3. Start Your First Audit
 ```bash

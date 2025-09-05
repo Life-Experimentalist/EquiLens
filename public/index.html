@@ -1,0 +1,2262 @@
+<!DOCTYPE html>
+<html lang="en" data-has-native-dark-mode="true">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<!-- Enhanced SEO Meta Tags -->
+		<title>EquiLens - AI Bias Detection Platform | Comprehensive LLM Auditing Framework</title>
+		<meta
+			name="description"
+			content="EquiLens is a state-of-the-art AI bias detection platform for Small and Large Language Models. Comprehensive 3-phase framework: corpus generation, model auditing, and result analysis. Open-source research tool with GPU acceleration, real-time ETA, and interruption recovery."
+		/>
+		<meta
+			name="keywords"
+			content="AI bias detection, language model auditing, LLM bias, SLM bias, machine learning ethics, AI fairness, bias corpus generation, model auditing, AI research, natural language processing, bias analysis, AI evaluation, responsible AI, algorithmic bias, language model testing, AI ethics framework"
+		/>
+		<meta name="author" content="VKrishna04, Life-Experimentalists" />
+		<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+		<meta name="color-scheme" content="light dark" />
+
+		<!-- Canonical URL -->
+		<link rel="canonical" href="https://life-experimentalists.github.io/EquiLens/" />
+
+		<!-- Open Graph Meta Tags -->
+		<meta property="og:title" content="EquiLens - AI Bias Detection Platform | Comprehensive LLM Auditing Framework" />
+		<meta property="og:description" content="State-of-the-art AI bias detection platform for Small and Large Language Models. 3-phase framework with corpus generation, model auditing, and analysis." />
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="https://life-experimentalists.github.io/EquiLens/" />
+		<meta property="og:image" content="https://life-experimentalists.github.io/EquiLens/assets/equilens-og.png" />
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="630" />
+		<meta property="og:site_name" content="EquiLens" />
+		<meta property="og:locale" content="en_US" />
+
+		<!-- Twitter Card Meta Tags -->
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content="EquiLens - AI Bias Detection Platform" />
+		<meta name="twitter:description" content="Comprehensive AI bias detection framework for LLMs and SLMs with 3-phase methodology" />
+		<meta name="twitter:image" content="https://life-experimentalists.github.io/EquiLens/assets/equilens-og.png" />
+		<meta name="twitter:creator" content="@VKrishna04" />
+
+		<!-- Additional SEO Meta Tags -->
+		<meta name="theme-color" content="#3b82f6" />
+		<meta name="msapplication-TileColor" content="#3b82f6" />
+		<meta name="application-name" content="EquiLens" />
+		<meta name="apple-mobile-web-app-title" content="EquiLens" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+		<!-- Schema.org JSON-LD Structured Data -->
+		<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "SoftwareApplication",
+			"name": "EquiLens",
+			"description": "A comprehensive AI bias detection platform for Small and Large Language Models with corpus generation, model auditing, and result analysis.",
+			"url": "https://life-experimentalists.github.io/EquiLens/",
+			"downloadUrl": "https://github.com/Life-Experimentalists/EquiLens",
+			"applicationCategory": "DeveloperApplication",
+			"operatingSystem": "Cross-platform",
+			"programmingLanguage": "Python",
+			"author": {
+				"@type": "Person",
+				"name": "VKrishna04",
+				"url": "https://vkrishna04.github.io"
+			},
+			"publisher": {
+				"@type": "Organization",
+				"name": "Life-Experimentalists",
+				"url": "https://github.com/Life-Experimentalists"
+			},
+			"license": "https://opensource.org/licenses/Apache-2.0",
+			"version": "1.0.0",
+			"releaseNotes": "Phase 1: Corpus Generator released with comprehensive bias detection dataset generation",
+			"keywords": "AI bias detection, language model auditing, LLM bias, machine learning ethics, AI fairness",
+			"offers": {
+				"@type": "Offer",
+				"price": "0",
+				"priceCurrency": "USD"
+			},
+			"sameAs": [
+				"https://github.com/Life-Experimentalists/EquiLens",
+				"https://doi.org/10.5281/zenodo.17014103"
+			]
+		}
+		</script>
+
+		<!-- Favicon -->
+		<link
+			rel="icon"
+			href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>"
+		/>
+
+		<!-- Fonts -->
+		<link
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+			rel="stylesheet"
+		/>
+
+		<!-- Icons -->
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+		/>
+
+		<!-- Prism.js for code highlighting -->
+		<link
+			href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css"
+			rel="stylesheet"
+		/>
+
+		<!-- PWA Manifest -->
+		<link rel="manifest" href="manifest.json" />
+
+		<!-- Additional styles -->
+		<link rel="stylesheet" href="assets/styles.css" />
+
+		<style>
+			/* Dark Reader compatibility */
+			:root {
+				color-scheme: light dark;
+			}
+
+			[data-theme="dark"] {
+				color-scheme: dark;
+			}
+
+			/* Prevent Dark Reader from overriding our theme */
+			html[data-darkreader-mode="dynamic"],
+			html[data-darkreader-scheme="dark"] {
+				filter: none !important;
+			}
+
+			/* Force our dark theme variables when dark mode is active */
+			[data-theme="dark"] *,
+			[data-theme="dark"] *::before,
+			[data-theme="dark"] *::after {
+				border-color: var(--border-color) !important;
+			}
+
+			/* Ensure proper dark mode colors for all elements */
+			[data-theme="dark"] {
+				background-color: var(--bg-primary) !important;
+				color: var(--text-primary) !important;
+			}
+
+			:root {
+				--primary-color: #6366f1;
+				--primary-dark: #4f46e5;
+				--secondary-color: #0f172a;
+				--accent-color: #f59e0b;
+				--text-primary: #1e293b;
+				--text-secondary: #64748b;
+				--text-light: #94a3b8;
+				--bg-primary: #ffffff;
+				--bg-secondary: #f8fafc;
+				--bg-tertiary: #e2e8f0;
+				--border-color: #e2e8f0;
+				--shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+				--shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+				--shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+				--shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+				--gradient-primary: linear-gradient(135deg, #6366f1, #8b5cf6);
+				--gradient-secondary: linear-gradient(135deg, #0ea5e9, #06b6d4);
+				--gradient-accent: linear-gradient(135deg, #f59e0b, #f97316);
+			}
+
+			[data-theme="dark"] {
+				--text-primary: #f1f5f9;
+				--text-secondary: #cbd5e1;
+				--text-light: #94a3b8;
+				--bg-primary: #0f172a;
+				--bg-secondary: #1e293b;
+				--bg-tertiary: #334155;
+				--border-color: #334155;
+			}
+
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			body {
+				font-family: "Inter", sans-serif;
+				line-height: 1.6;
+				color: var(--text-primary);
+				background: var(--bg-primary);
+				overflow-x: hidden;
+				transition: all 0.3s ease;
+			}
+
+			.container {
+				max-width: 1200px;
+				margin: 0 auto;
+				padding: 0 1rem;
+			}
+
+			/* Header & Navigation */
+			.header {
+				position: fixed;
+				top: 0;
+				left: 0;
+				right: 0;
+				background: rgba(255, 255, 255, 0.95);
+				backdrop-filter: blur(10px);
+				border-bottom: 1px solid var(--border-color);
+				z-index: 1000;
+				transition: all 0.3s ease;
+			}
+
+			.header.scrolled {
+				background: rgba(255, 255, 255, 0.85);
+				backdrop-filter: blur(20px);
+			}
+
+			[data-theme="dark"] .header {
+				background: rgba(15, 23, 42, 0.95);
+			}
+
+			[data-theme="dark"] .header.scrolled {
+				background: rgba(15, 23, 42, 0.85);
+				backdrop-filter: blur(20px);
+			}
+
+			.nav {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 1rem 0;
+			}
+
+			.logo {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				font-size: 1.5rem;
+				font-weight: 700;
+				color: var(--primary-color);
+				text-decoration: none;
+			}
+
+			.nav-links {
+				display: flex;
+				gap: 2rem;
+				list-style: none;
+			}
+
+			.nav-links a {
+				color: var(--text-secondary);
+				text-decoration: none;
+				font-weight: 500;
+				transition: color 0.3s ease;
+			}
+
+			.nav-links a:hover {
+				color: var(--primary-color);
+			}
+
+			.nav-actions {
+				display: flex;
+				align-items: center;
+				gap: 1rem;
+			}
+
+			.theme-toggle {
+				background: none;
+				border: none;
+				color: var(--text-secondary);
+				font-size: 1.2rem;
+				cursor: pointer;
+				transition: color 0.3s ease;
+			}
+
+			.theme-toggle:hover {
+				color: var(--primary-color);
+			}
+
+			.btn {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+				padding: 0.75rem 1.5rem;
+				border: none;
+				border-radius: 0.5rem;
+				font-weight: 500;
+				text-decoration: none;
+				cursor: pointer;
+				transition: all 0.3s ease;
+				font-size: 0.875rem;
+			}
+
+			.btn-primary {
+				background: var(--gradient-primary);
+				color: white;
+			}
+
+			.btn-primary:hover {
+				transform: translateY(-2px);
+				box-shadow: var(--shadow-lg);
+			}
+
+			.btn-secondary {
+				background: var(--bg-secondary);
+				color: var(--text-primary);
+				border: 1px solid var(--border-color);
+			}
+
+			.btn-secondary:hover {
+				background: var(--bg-tertiary);
+			}
+
+			/* Mobile Menu */
+			.mobile-menu-toggle {
+				display: none;
+				background: none;
+				border: none;
+				color: var(--text-primary);
+				font-size: 1.5rem;
+				cursor: pointer;
+			}
+
+			/* Hero Section */
+			.hero {
+				min-height: 100vh;
+				display: flex;
+				align-items: center;
+				background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+				position: relative;
+				overflow: hidden;
+			}
+
+			[data-theme="dark"] .hero {
+				background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+			}
+
+			.hero::before {
+				content: "";
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(99,102,241,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+				opacity: 0.5;
+			}
+
+			.hero-content {
+				position: relative;
+				z-index: 1;
+				text-align: center;
+				max-width: 800px;
+				margin: 0 auto;
+			}
+
+			.hero-badge {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+				background: rgba(99, 102, 241, 0.1);
+				color: var(--primary-color);
+				padding: 0.5rem 1rem;
+				border-radius: 2rem;
+				font-size: 0.875rem;
+				font-weight: 500;
+				margin-bottom: 2rem;
+				border: 1px solid rgba(99, 102, 241, 0.2);
+			}
+
+			.hero h1 {
+				font-size: clamp(2.5rem, 5vw, 4rem);
+				font-weight: 700;
+				margin-bottom: 1.5rem;
+				background: var(--gradient-primary);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+			}
+
+			.hero p {
+				font-size: 1.25rem;
+				color: var(--text-secondary);
+				margin-bottom: 2rem;
+				max-width: 600px;
+				margin-left: auto;
+				margin-right: auto;
+			}
+
+			.hero-actions {
+				display: flex;
+				gap: 1rem;
+				justify-content: center;
+				flex-wrap: wrap;
+				margin-bottom: 3rem;
+			}
+
+			.hero-stats {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+				gap: 2rem;
+				margin-top: 4rem;
+			}
+
+			.hero-stat {
+				text-align: center;
+			}
+
+			.hero-stat-number {
+				font-size: 2rem;
+				font-weight: 700;
+				color: var(--primary-color);
+			}
+
+			.hero-stat-label {
+				color: var(--text-secondary);
+				font-size: 0.875rem;
+			}
+
+			/* Features Section */
+			.features {
+				padding: 6rem 0;
+				background: var(--bg-primary);
+			}
+
+			.section-header {
+				text-align: center;
+				margin-bottom: 4rem;
+			}
+
+			.section-title {
+				font-size: 2.5rem;
+				font-weight: 700;
+				margin-bottom: 1rem;
+			}
+
+			.section-subtitle {
+				font-size: 1.25rem;
+				color: var(--text-secondary);
+				max-width: 600px;
+				margin: 0 auto;
+			}
+
+			.features-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+				gap: 2rem;
+			}
+
+			.feature-card {
+				background: var(--bg-secondary);
+				border: 1px solid var(--border-color);
+				border-radius: 1rem;
+				padding: 2rem;
+				transition: all 0.3s ease;
+				position: relative;
+				overflow: hidden;
+			}
+
+			.feature-card::before {
+				content: "";
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				height: 4px;
+				background: var(--gradient-primary);
+			}
+
+			.feature-card:hover {
+				transform: translateY(-4px);
+				box-shadow: var(--shadow-xl);
+			}
+
+			.feature-icon {
+				width: 3rem;
+				height: 3rem;
+				background: var(--gradient-primary);
+				border-radius: 0.75rem;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: white;
+				font-size: 1.5rem;
+				margin-bottom: 1.5rem;
+			}
+
+			.feature-title {
+				font-size: 1.25rem;
+				font-weight: 600;
+				margin-bottom: 0.75rem;
+			}
+
+			.feature-description {
+				color: var(--text-secondary);
+				line-height: 1.7;
+			}
+
+			/* Architecture Section */
+			.architecture {
+				padding: 6rem 0;
+				background: var(--bg-secondary);
+			}
+
+			.architecture-diagram {
+				background: var(--bg-primary);
+				border: 1px solid var(--border-color);
+				border-radius: 1rem;
+				padding: 2rem;
+				margin: 3rem 0;
+				overflow-x: auto;
+			}
+
+			.phase {
+				display: flex;
+				align-items: center;
+				gap: 2rem;
+				margin: 2rem 0;
+				padding: 1.5rem;
+				background: var(--bg-secondary);
+				border-radius: 0.75rem;
+				border-left: 4px solid var(--primary-color);
+			}
+
+			.phase-number {
+				width: 3rem;
+				height: 3rem;
+				background: var(--gradient-primary);
+				border-radius: 50%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: white;
+				font-weight: 600;
+				flex-shrink: 0;
+			}
+
+			.phase-content h3 {
+				font-size: 1.25rem;
+				font-weight: 600;
+				margin-bottom: 0.5rem;
+			}
+
+			.phase-content p {
+				color: var(--text-secondary);
+			}
+
+			/* Getting Started Section */
+			.getting-started {
+				padding: 6rem 0;
+				background: var(--bg-primary);
+			}
+
+			.steps-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+				gap: 2rem;
+				margin-top: 3rem;
+			}
+
+			.step-card {
+				background: var(--bg-secondary);
+				border: 1px solid var(--border-color);
+				border-radius: 1rem;
+				padding: 2rem;
+				position: relative;
+			}
+
+			.step-number {
+				position: absolute;
+				top: -1rem;
+				left: 2rem;
+				width: 2rem;
+				height: 2rem;
+				background: var(--gradient-primary);
+				border-radius: 50%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: white;
+				font-weight: 600;
+				font-size: 0.875rem;
+			}
+
+			.code-block {
+				background: var(--secondary-color);
+				color: #e2e8f0;
+				padding: 1.5rem;
+				border-radius: 0.75rem;
+				margin: 1rem 0;
+				font-family: "JetBrains Mono", monospace;
+				font-size: 0.875rem;
+				overflow-x: auto;
+				position: relative;
+			}
+
+			.copy-btn {
+				position: absolute;
+				top: 1rem;
+				right: 1rem;
+				background: rgba(255, 255, 255, 0.1);
+				border: none;
+				color: white;
+				padding: 0.5rem;
+				border-radius: 0.25rem;
+				cursor: pointer;
+				transition: background 0.3s ease;
+			}
+
+			.copy-btn:hover {
+				background: rgba(255, 255, 255, 0.2);
+			}
+
+			/* Demo Section */
+			.demo {
+				padding: 6rem 0;
+				background: var(--bg-secondary);
+			}
+
+			.demo-container {
+				background: var(--bg-primary);
+				border: 1px solid var(--border-color);
+				border-radius: 1rem;
+				overflow: hidden;
+				margin-top: 3rem;
+			}
+
+			.demo-header {
+				background: var(--secondary-color);
+				color: white;
+				padding: 1rem 2rem;
+				display: flex;
+				align-items: center;
+				gap: 1rem;
+			}
+
+			.demo-controls {
+				display: flex;
+				gap: 0.5rem;
+			}
+
+			.demo-control {
+				width: 0.75rem;
+				height: 0.75rem;
+				border-radius: 50%;
+			}
+
+			.demo-control.close {
+				background: #ef4444;
+			}
+			.demo-control.minimize {
+				background: #f59e0b;
+			}
+			.demo-control.maximize {
+				background: #10b981;
+			}
+
+			.demo-content {
+				padding: 2rem;
+				font-family: "JetBrains Mono", monospace;
+				font-size: 0.875rem;
+				line-height: 1.8;
+			}
+
+			.demo-line {
+				margin-bottom: 0.5rem;
+			}
+
+			.demo-prompt {
+				color: var(--primary-color);
+			}
+
+			.demo-output {
+				color: var(--text-secondary);
+			}
+
+			/* Statistics Section */
+			.statistics {
+				padding: 6rem 0;
+				background: var(--bg-primary);
+			}
+
+			.stats-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+				gap: 2rem;
+				margin-top: 3rem;
+			}
+
+			.stat-card {
+				background: var(--bg-secondary);
+				border: 1px solid var(--border-color);
+				border-radius: 1rem;
+				padding: 2rem;
+				text-align: center;
+				transition: all 0.3s ease;
+			}
+
+			.stat-card:hover {
+				transform: translateY(-4px);
+				box-shadow: var(--shadow-lg);
+			}
+
+			.stat-icon {
+				width: 4rem;
+				height: 4rem;
+				background: var(--gradient-primary);
+				border-radius: 50%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: white;
+				font-size: 2rem;
+				margin: 0 auto 1.5rem;
+			}
+
+			.stat-number {
+				font-size: 2rem;
+				font-weight: 700;
+				color: var(--primary-color);
+				margin-bottom: 0.5rem;
+				line-height: 1.2;
+			}
+
+			.stat-label {
+				color: var(--text-secondary);
+				font-weight: 500;
+			}
+
+			/* Footer */
+			.footer {
+				background: var(--secondary-color);
+				color: white;
+				padding: 4rem 0 2rem;
+			}
+
+			.footer-content {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+				gap: 3rem;
+				margin-bottom: 3rem;
+			}
+
+			.footer-section h3 {
+				font-size: 1.25rem;
+				font-weight: 600;
+				margin-bottom: 1rem;
+			}
+
+			.footer-links {
+				list-style: none;
+			}
+
+			.footer-links li {
+				margin-bottom: 0.5rem;
+			}
+
+			.footer-links a {
+				color: #cbd5e1;
+				text-decoration: none;
+				transition: color 0.3s ease;
+			}
+
+			.footer-links a:hover {
+				color: white;
+			}
+
+			.footer-bottom {
+				border-top: 1px solid #334155;
+				padding-top: 2rem;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				flex-wrap: wrap;
+				gap: 1rem;
+			}
+
+			.social-links {
+				display: flex;
+				gap: 1rem;
+			}
+
+			.social-links a {
+				color: #cbd5e1;
+				font-size: 1.25rem;
+				transition: color 0.3s ease;
+			}
+
+			.social-links a:hover {
+				color: var(--primary-color);
+			}
+
+			/* Animations */
+			@keyframes fadeInUp {
+				from {
+					opacity: 0;
+					transform: translateY(30px);
+				}
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+
+			.animate-fade-in-up {
+				animation: fadeInUp 0.6s ease forwards;
+			}
+
+			/* Responsive Design */
+			@media (max-width: 768px) {
+				.nav-links {
+					display: none;
+				}
+
+				.mobile-menu-toggle {
+					display: block;
+				}
+
+				.hero h1 {
+					font-size: 2.5rem;
+				}
+
+				.hero-actions {
+					flex-direction: column;
+					align-items: center;
+				}
+
+				.hero-stats {
+					grid-template-columns: repeat(2, 1fr);
+				}
+
+				.features-grid {
+					grid-template-columns: 1fr;
+				}
+
+				.steps-grid {
+					grid-template-columns: 1fr;
+				}
+
+				.stats-grid {
+					grid-template-columns: repeat(2, 1fr);
+				}
+
+				.stat-number {
+					font-size: 1.75rem;
+				}
+
+				.footer-bottom {
+					flex-direction: column;
+					text-align: center;
+				}
+			}
+
+			/* Mobile Phones */
+			@media (max-width: 480px) {
+				.stats-grid {
+					grid-template-columns: 1fr;
+				}
+
+				.stat-number {
+					font-size: 1.5rem;
+				}
+
+				.btn {
+					padding: 0.75rem 1rem;
+					font-size: 0.875rem;
+				}
+			}
+
+			/* Loading Animation */
+			.loading {
+				display: inline-block;
+				width: 20px;
+				height: 20px;
+				border: 3px solid rgba(255, 255, 255, 0.3);
+				border-radius: 50%;
+				border-top-color: white;
+				animation: spin 1s ease-in-out infinite;
+			}
+
+			@keyframes spin {
+				to {
+					transform: rotate(360deg);
+				}
+			}
+
+			/* Toast Notifications */
+			.toast {
+				position: fixed;
+				top: 100px;
+				right: 20px;
+				background: var(--primary-color);
+				color: white;
+				padding: 1rem 1.5rem;
+				border-radius: 0.5rem;
+				box-shadow: var(--shadow-lg);
+				transform: translateX(400px);
+				transition: transform 0.3s ease;
+				z-index: 1001;
+			}
+
+			.toast.show {
+				transform: translateX(0);
+			}
+
+			/* Syntax Highlighting Override */
+			.code-block code {
+				background: none !important;
+				padding: 0 !important;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- Header -->
+		<header class="header">
+			<nav class="nav container">
+				<a href="#" class="logo">
+					<span>🔍</span>
+					EquiLens
+				</a>
+
+				<ul class="nav-links">
+					<li><a href="#features">Features</a></li>
+					<li><a href="#architecture">Architecture</a></li>
+					<li><a href="#phase1-corpus">Phase 1</a></li>
+					<li><a href="#phase2-auditor">Phase 2</a></li>
+					<li><a href="#phase3-analysis">Phase 3</a></li>
+					<li><a href="#getting-started">Get Started</a></li>
+					<li><a href="#demo">Demo</a></li>
+					<li>
+						<a
+							href="https://github.com/Life-Experimentalist/EquiLens/blob/main/docs/README.md"
+							target="_blank"
+							>Docs</a
+						>
+					</li>
+				</ul>
+
+				<div class="nav-actions">
+					<button
+						class="theme-toggle"
+						id="theme-toggle"
+						title="Toggle theme"
+					>
+						<i class="fas fa-moon"></i>
+					</button>
+					<a
+						href="https://github.com/Life-Experimentalists/EquiLens"
+						class="btn btn-primary"
+						target="_blank"
+					>
+						<i class="fab fa-github"></i>
+						GitHub
+					</a>
+					<button class="mobile-menu-toggle">
+						<i class="fas fa-bars"></i>
+					</button>
+				</div>
+			</nav>
+		</header>
+
+		<!-- Hero Section -->
+		<section class="hero" id="home">
+			<div class="container">
+				<div class="hero-content">
+					<div class="hero-badge">
+						<i class="fas fa-star"></i>
+						Open-Source Research Project | Apache 2.0 Licensed
+					</div>
+
+					<h1>EquiLens: AI Bias Detection Platform</h1>
+
+					<p>
+						A comprehensive, state-of-the-art framework for detecting and analyzing bias in Small Language Models (SLMs) and Large Language Models (LLMs). Our 3-phase methodology provides corpus generation, model auditing, and result analysis for researchers, developers, and organizations committed to responsible AI development.
+					</p>
+
+					<div class="hero-actions">
+						<a href="#getting-started" class="btn btn-primary">
+							<i class="fas fa-rocket"></i>
+							Get Started
+						</a>
+						<a
+							href="https://github.com/Life-Experimentalists/EquiLens"
+							class="btn btn-secondary"
+							target="_blank"
+						>
+							<i class="fab fa-github"></i>
+							View on GitHub
+						</a>
+						<a href="#demo" class="btn btn-secondary">
+							<i class="fas fa-play"></i>
+							Live Demo
+						</a>
+					</div>
+
+					<div class="hero-stats">
+						<div class="hero-stat">
+							<div class="hero-stat-number">10x</div>
+							<div class="hero-stat-label">Faster with GPU</div>
+						</div>
+						<div class="hero-stat">
+							<div class="hero-stat-number">Custom</div>
+							<div class="hero-stat-label">Bias Categories</div>
+						</div>
+						<div class="hero-stat">
+							<div class="hero-stat-number">99%</div>
+							<div class="hero-stat-label">Accuracy</div>
+						</div>
+						<div class="hero-stat">
+							<div class="hero-stat-number">3</div>
+							<div class="hero-stat-label">Phase Pipeline</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Features Section -->
+		<section class="features" id="features">
+			<div class="container">
+				<div class="section-header">
+					<h2 class="section-title">Powerful Features</h2>
+					<p class="section-subtitle">
+						Everything you need to detect, measure, and analyze bias
+						in AI language models
+					</p>
+				</div>
+
+				<div class="features-grid">
+					<div class="feature-card">
+						<div class="feature-icon">
+							<i class="fas fa-terminal"></i>
+						</div>
+						<h3 class="feature-title">Interactive CLI Interface</h3>
+						<p class="feature-description">
+							Rich terminal UI with guided workflows, smart
+							auto-discovery, and comprehensive help system.
+							Modern Typer-based CLI with cross-platform
+							launchers.
+						</p>
+					</div>
+
+					<div class="feature-card">
+						<div class="feature-icon">
+							<i class="fas fa-clock"></i>
+						</div>
+						<h3 class="feature-title">Real-Time ETA Estimation</h3>
+						<p class="feature-description">
+							Actual API timing with 1.4x safety buffer for
+							accurate planning. Multi-prompt averaging for
+							reliable time estimates with dynamic ETA updates.
+						</p>
+					</div>
+
+					<div class="feature-card">
+						<div class="feature-icon">
+							<i class="fas fa-microchip"></i>
+						</div>
+						<h3 class="feature-title">GPU Acceleration</h3>
+						<p class="feature-description">
+							NVIDIA CUDA support for 5-10x faster model
+							inference. Automatic GPU detection and configuration
+							with graceful fallback to CPU-only mode.
+						</p>
+					</div>
+
+					<div class="feature-card">
+						<div class="feature-icon">
+							<i class="fas fa-pause-circle"></i>
+						</div>
+						<h3 class="feature-title">Interruption & Resume</h3>
+						<p class="feature-description">
+							Graceful handling of interruptions with automatic
+							session recovery. Persistent session state across
+							restarts with resume from exact point of
+							interruption.
+						</p>
+					</div>
+
+					<div class="feature-card">
+						<div class="feature-icon">
+							<i class="fas fa-chart-line"></i>
+						</div>
+						<h3 class="feature-title">Enhanced Progress Display</h3>
+						<p class="feature-description">
+							Rich progress bars with individual test timing
+							metrics. Real-time performance monitoring with
+							colorful, informative status indicators.
+						</p>
+					</div>
+
+					<div class="feature-card">
+						<div class="feature-icon">
+							<i class="fas fa-chart-bar"></i>
+						</div>
+						<h3 class="feature-title">Comprehensive Analytics</h3>
+						<p class="feature-description">
+							Detailed performance metrics and bias analysis
+							reports. Statistical analysis with visualization and
+							export capabilities for further research.
+						</p>
+					</div>
+
+					<div class="feature-card">
+						<div class="feature-icon">
+							<i class="fas fa-sliders-h"></i>
+						</div>
+						<h3 class="feature-title">Custom Bias Categories</h3>
+						<p class="feature-description">
+							Create your own bias detection datasets using our
+							CorpusGen tool. Customize names, professions,
+							traits, and templates to audit specific biases in
+							your domain.
+						</p>
+					</div>
+
+					<div class="feature-card">
+						<div class="feature-icon">
+							<i class="fas fa-code-branch"></i>
+						</div>
+						<h3 class="feature-title">
+							Open Source & Reproducible
+						</h3>
+						<p class="feature-description">
+							Apache 2.0 licensed with deterministic corpus
+							generation. Publish datasets on Zenodo for peer
+							review and ensure reproducible research results.
+						</p>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Architecture Section -->
+		<section class="architecture" id="architecture">
+			<div class="container">
+				<div class="section-header">
+					<h2 class="section-title">Three-Phase Architecture</h2>
+					<p class="section-subtitle">
+						A systematic approach to bias detection with modular,
+						scalable design
+					</p>
+				</div>
+
+				<div class="architecture-diagram">
+					<div class="phase">
+						<div class="phase-number">1</div>
+						<div class="phase-content">
+							<h3>Corpus Generation (CorpusGen)</h3>
+							<p>
+								Configure custom bias categories with
+								JSON-driven specifications. Generate balanced,
+								reproducible datasets using our systematic names
+								× professions × traits × templates approach.
+							</p>
+						</div>
+					</div>
+
+					<div class="phase">
+						<div class="phase-number">2</div>
+						<div class="phase-content">
+							<h3>Model Auditing</h3>
+							<p>
+								Execute bias tests against language models,
+								collect responses, and measure bias indicators
+								across multiple categories.
+							</p>
+						</div>
+					</div>
+
+					<div class="phase">
+						<div class="phase-number">3</div>
+						<div class="phase-content">
+							<h3>Analysis & Reporting</h3>
+							<p>
+								Analyze results, generate comprehensive reports,
+								and visualize bias patterns with statistical
+								significance testing.
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Getting Started Section -->
+		<section class="getting-started" id="getting-started">
+			<div class="container">
+				<div class="section-header">
+					<h2 class="section-title">Get Started in Minutes</h2>
+					<p class="section-subtitle">
+						Follow these simple steps to start detecting bias in
+						your AI models
+					</p>
+				</div>
+
+				<div class="steps-grid">
+					<div class="step-card">
+						<div class="step-number">1</div>
+						<h3>Clone Repository</h3>
+						<p>Get the latest version of EquiLens from GitHub</p>
+						<div class="code-block">
+							<button class="copy-btn" onclick="copyCode(this)">
+								<i class="fas fa-copy"></i>
+							</button>
+							<code
+								>git clone
+								https://github.com/Life-Experimentalists/EquiLens.git
+								cd EquiLens</code
+							>
+						</div>
+					</div>
+
+					<div class="step-card">
+						<div class="step-number">2</div>
+						<h3>Install Dependencies</h3>
+						<p>
+							Set up the Python environment with UV package
+							manager
+						</p>
+						<div class="code-block">
+							<button class="copy-btn" onclick="copyCode(this)">
+								<i class="fas fa-copy"></i>
+							</button>
+							<code
+								># Install UV curl -LsSf
+								https://astral.sh/uv/install.sh | sh # Install
+								dependencies uv sync</code
+							>
+						</div>
+					</div>
+
+					<div class="step-card">
+						<div class="step-number">3</div>
+						<h3>Setup Ollama</h3>
+						<p>Install and configure Ollama for model inference</p>
+						<div class="code-block">
+							<button class="copy-btn" onclick="copyCode(this)">
+								<i class="fas fa-copy"></i>
+							</button>
+							<code
+								># Install Ollama curl -fsSL
+								https://ollama.ai/install.sh | sh # Pull a model
+								ollama pull llama2</code
+							>
+						</div>
+					</div>
+
+					<div class="step-card">
+						<div class="step-number">4</div>
+						<h3>Run Your First Audit</h3>
+						<p>
+							Execute the interactive CLI to start bias detection
+						</p>
+						<div class="code-block">
+							<button class="copy-btn" onclick="copyCode(this)">
+								<i class="fas fa-copy"></i>
+							</button>
+							<code
+								># Windows .\scripts\equilens.bat #
+								Unix/Linux/macOS ./scripts/equilens.sh</code
+							>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Demo Section -->
+		<section class="demo" id="demo">
+			<div class="container">
+				<div class="section-header">
+					<h2 class="section-title">See EquiLens in Action</h2>
+					<p class="section-subtitle">
+						Interactive demonstration of the bias detection process
+					</p>
+				</div>
+
+				<div class="demo-container">
+					<div class="demo-header">
+						<div class="demo-controls">
+							<div class="demo-control close"></div>
+							<div class="demo-control minimize"></div>
+							<div class="demo-control maximize"></div>
+						</div>
+						<span>EquiLens Interactive CLI</span>
+					</div>
+					<div class="demo-content" id="demo-content">
+						<div class="demo-line">
+							<span class="demo-prompt">$ </span>
+							<span>./scripts/equilens.sh</span>
+						</div>
+						<div class="demo-line demo-output">
+							🔍 EquiLens - AI Bias Detection Platform
+						</div>
+						<div class="demo-line demo-output">
+							╭─ Model Selection ──────────────────────────╮
+						</div>
+						<div class="demo-line demo-output">
+							│ Available models: │
+						</div>
+						<div class="demo-line demo-output">
+							│ [1] llama2:latest │
+						</div>
+						<div class="demo-line demo-output">
+							│ [2] mistral:7b │
+						</div>
+						<div class="demo-line demo-output">
+							│ [3] codellama:13b │
+						</div>
+						<div class="demo-line demo-output">
+							╰────────────────────────────────────────────╯
+						</div>
+						<div class="demo-line">
+							<span class="demo-prompt">Select model: </span>
+							<span class="typing-cursor">1</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Phase 1: Corpus Generation Section -->
+		<section class="statistics" id="phase1-corpus">
+			<div class="container">
+				<div class="section-header">
+					<h2 class="section-title">
+						📝 Phase 1: Corpus Generation ✅ Released
+					</h2>
+					<p class="section-subtitle">
+						Create balanced, reproducible bias detection datasets with our open-source corpus generation tool
+					</p>
+				</div>
+
+				<div class="stats-grid">
+					<div class="stat-card">
+						<div class="stat-icon">
+							<i class="fas fa-cogs"></i>
+						</div>
+						<div class="stat-number">Controlled</div>
+						<div class="stat-label">Generation</div>
+						<p
+							style="
+								font-size: 0.875rem;
+								color: var(--text-secondary);
+								margin-top: 0.5rem;
+							"
+						>
+							Systematically combines names × professions × traits
+							× templates
+						</p>
+					</div>
+
+					<div class="stat-card">
+						<div class="stat-icon">
+							<i class="fas fa-balance-scale"></i>
+						</div>
+						<div class="stat-number">Balanced</div>
+						<div class="stat-label">Categories</div>
+						<p
+							style="
+								font-size: 0.875rem;
+								color: var(--text-secondary);
+								margin-top: 0.5rem;
+							"
+						>
+							Equal representation across gender, traits, and
+							professions
+						</p>
+					</div>
+
+					<div class="stat-card">
+						<div class="stat-icon">
+							<i class="fas fa-puzzle-piece"></i>
+						</div>
+						<div class="stat-number">Customizable</div>
+						<div class="stat-label">Templates</div>
+						<p
+							style="
+								font-size: 0.875rem;
+								color: var(--text-secondary);
+								margin-top: 0.5rem;
+							"
+						>
+							Extendable to new professions, names, and bias
+							categories
+						</p>
+					</div>
+
+					<div class="stat-card">
+						<div class="stat-icon">
+							<i class="fas fa-redo"></i>
+						</div>
+						<div class="stat-number">Reproducible</div>
+						<div class="stat-label">Results</div>
+						<p
+							style="
+								font-size: 0.875rem;
+								color: var(--text-secondary);
+								margin-top: 0.5rem;
+							"
+						>
+							Deterministic corpus generation for peer review
+						</p>
+					</div>
+				</div>
+
+				<!-- Corpus Generator Features -->
+				<div
+					style="
+						margin-top: 4rem;
+						background: var(--bg-secondary);
+						border-radius: 1rem;
+						padding: 3rem;
+						border: 1px solid var(--border-color);
+					"
+				>
+					<h3
+						style="
+							text-align: center;
+							margin-bottom: 2rem;
+							font-size: 1.5rem;
+							font-weight: 600;
+						"
+					>
+						🔬 CorpusGen Output Structure
+					</h3>
+
+					<div style="overflow-x: auto">
+						<table
+							style="
+								width: 100%;
+								border-collapse: collapse;
+								font-family: 'JetBrains Mono', monospace;
+								font-size: 0.875rem;
+							"
+						>
+							<thead>
+								<tr style="background: var(--bg-tertiary)">
+									<th
+										style="
+											padding: 0.75rem;
+											text-align: left;
+											border: 1px solid
+												var(--border-color);
+										"
+									>
+										Column
+									</th>
+									<th
+										style="
+											padding: 0.75rem;
+											text-align: left;
+											border: 1px solid
+												var(--border-color);
+										"
+									>
+										Description
+									</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td
+										style="
+											padding: 0.75rem;
+											border: 1px solid
+												var(--border-color);
+											color: var(--primary-color);
+										"
+									>
+										comparison_type
+									</td>
+									<td
+										style="
+											padding: 0.75rem;
+											border: 1px solid
+												var(--border-color);
+										"
+									>
+										Audit category (e.g., gender_bias)
+									</td>
+								</tr>
+								<tr style="background: var(--bg-primary)">
+									<td
+										style="
+											padding: 0.75rem;
+											border: 1px solid
+												var(--border-color);
+											color: var(--primary-color);
+										"
+									>
+										name
+									</td>
+									<td
+										style="
+											padding: 0.75rem;
+											border: 1px solid
+												var(--border-color);
+										"
+									>
+										The chosen first name
+									</td>
+								</tr>
+								<tr>
+									<td
+										style="
+											padding: 0.75rem;
+											border: 1px solid
+												var(--border-color);
+											color: var(--primary-color);
+										"
+									>
+										name_category
+									</td>
+									<td
+										style="
+											padding: 0.75rem;
+											border: 1px solid
+												var(--border-color);
+										"
+									>
+										Name group (e.g., Male/Female)
+									</td>
+								</tr>
+								<tr style="background: var(--bg-primary)">
+									<td
+										style="
+											padding: 0.75rem;
+											border: 1px solid
+												var(--border-color);
+											color: var(--primary-color);
+										"
+									>
+										profession
+									</td>
+									<td
+										style="
+											padding: 0.75rem;
+											border: 1px solid
+												var(--border-color);
+										"
+									>
+										Profession label (e.g., Engineer, Nurse)
+									</td>
+								</tr>
+								<tr>
+									<td
+										style="
+											padding: 0.75rem;
+											border: 1px solid
+												var(--border-color);
+											color: var(--primary-color);
+										"
+									>
+										trait
+									</td>
+									<td
+										style="
+											padding: 0.75rem;
+											border: 1px solid
+												var(--border-color);
+										"
+									>
+										Trait word (e.g., Logical, Caring)
+									</td>
+								</tr>
+								<tr style="background: var(--bg-primary)">
+									<td
+										style="
+											padding: 0.75rem;
+											border: 1px solid
+												var(--border-color);
+											color: var(--primary-color);
+										"
+									>
+										trait_category
+									</td>
+									<td
+										style="
+											padding: 0.75rem;
+											border: 1px solid
+												var(--border-color);
+										"
+									>
+										Competence or Social classification
+									</td>
+								</tr>
+								<tr>
+									<td
+										style="
+											padding: 0.75rem;
+											border: 1px solid
+												var(--border-color);
+											color: var(--primary-color);
+										"
+									>
+										template_id
+									</td>
+									<td
+										style="
+											padding: 0.75rem;
+											border: 1px solid
+												var(--border-color);
+										"
+									>
+										ID of the sentence template used
+									</td>
+								</tr>
+								<tr style="background: var(--bg-primary)">
+									<td
+										style="
+											padding: 0.75rem;
+											border: 1px solid
+												var(--border-color);
+											color: var(--primary-color);
+										"
+									>
+										full_prompt_text
+									</td>
+									<td
+										style="
+											padding: 0.75rem;
+											border: 1px solid
+												var(--border-color);
+										"
+									>
+										Final generated sentence
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<div style="margin-top: 2rem; text-align: center">
+						<a
+							href="https://github.com/Life-Experimentalist/EquiLens/releases/tag/v1.0.0-corpus"
+							class="btn btn-primary"
+							target="_blank"
+						>
+							<i class="fas fa-download"></i>
+							Download CorpusGen v1.0.0
+						</a>
+						<a
+							href="https://zenodo.org/badge/latestdoi/1033993763"
+							class="btn btn-secondary"
+							target="_blank"
+						>
+							<i class="fas fa-certificate"></i>
+							View on Zenodo
+						</a>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Phase 2: Model Auditing Section -->
+		<section class="features" id="phase2-auditor">
+			<div class="container">
+				<div class="section-header">
+					<h2 class="section-title">
+						🔍 Phase 2: Model Auditing 🚧 In Development
+					</h2>
+					<p class="section-subtitle">
+						Execute comprehensive bias tests against Small and Large Language Models with real-time monitoring
+					</p>
+				</div>
+
+				<div class="features-grid">
+					<div class="feature-card">
+						<div class="feature-icon">
+							<i class="fas fa-tachometer-alt"></i>
+						</div>
+						<h3>Real-Time ETA</h3>
+						<p>Accurate time estimation with 1.4x safety buffer and multi-prompt averaging for reliable planning</p>
+					</div>
+
+					<div class="feature-card">
+						<div class="feature-icon">
+							<i class="fas fa-microchip"></i>
+						</div>
+						<h3>GPU Acceleration</h3>
+						<p>NVIDIA CUDA support for 5-10x faster inference with automatic detection and graceful CPU fallback</p>
+					</div>
+
+					<div class="feature-card">
+						<div class="feature-icon">
+							<i class="fas fa-pause-circle"></i>
+						</div>
+						<h3>Interruption Recovery</h3>
+						<p>Graceful handling of interruptions with persistent session state and resume from exact point</p>
+					</div>
+
+					<div class="feature-card">
+						<div class="feature-icon">
+							<i class="fas fa-chart-line"></i>
+						</div>
+						<h3>Progress Monitoring</h3>
+						<p>Rich progress bars with individual test timing, real-time performance metrics, and status indicators</p>
+					</div>
+
+					<div class="feature-card">
+						<div class="feature-icon">
+							<i class="fas fa-robot"></i>
+						</div>
+						<h3>Dual Auditor System</h3>
+						<p>Production-ready stable auditor plus enhanced research auditor with advanced features</p>
+					</div>
+
+					<div class="feature-card">
+						<div class="feature-icon">
+							<i class="fas fa-docker"></i>
+						</div>
+						<h3>Docker Integration</h3>
+						<p>Containerized Ollama with GPU passthrough, automatic service detection, and persistent storage</p>
+					</div>
+				</div>
+
+				<div style="margin-top: 3rem; text-align: center; padding: 2rem; background: var(--bg-secondary); border-radius: 1rem; border: 1px solid var(--border-color);">
+					<h3 style="margin-bottom: 1rem; color: var(--accent-color);">Coming Soon</h3>
+					<p style="margin-bottom: 2rem; color: var(--text-secondary);">Model Auditor will be available in the next release with comprehensive LLM/SLM testing capabilities</p>
+					<a href="https://github.com/Life-Experimentalists/EquiLens/issues" class="btn btn-outline" target="_blank">
+						<i class="fas fa-bell"></i>
+						Get Notified
+					</a>
+				</div>
+			</div>
+		</section>
+
+		<!-- Phase 3: Analysis & Reporting Section -->
+		<section class="architecture" id="phase3-analysis">
+			<div class="container">
+				<div class="section-header">
+					<h2 class="section-title">
+						📊 Phase 3: Analysis & Reporting 📋 Planned
+					</h2>
+					<p class="section-subtitle">
+						Comprehensive statistical analysis and visualization of bias detection results
+					</p>
+				</div>
+
+				<div class="architecture-grid">
+					<div class="arch-card">
+						<div class="arch-icon">
+							<i class="fas fa-chart-bar"></i>
+						</div>
+						<h3>Statistical Analysis</h3>
+						<p>Advanced statistical methods for bias quantification, significance testing, and correlation analysis</p>
+					</div>
+
+					<div class="arch-card">
+						<div class="arch-icon">
+							<i class="fas fa-chart-pie"></i>
+						</div>
+						<h3>Interactive Visualizations</h3>
+						<p>Dynamic charts, heatmaps, and dashboards for intuitive bias pattern exploration</p>
+					</div>
+
+					<div class="arch-card">
+						<div class="arch-icon">
+							<i class="fas fa-file-pdf"></i>
+						</div>
+						<h3>Research Reports</h3>
+						<p>Automated generation of publication-ready reports with citations and methodology details</p>
+					</div>
+
+					<div class="arch-card">
+						<div class="arch-icon">
+							<i class="fas fa-download"></i>
+						</div>
+						<h3>Export Capabilities</h3>
+						<p>Multiple format support including CSV, JSON, PDF, and LaTeX for academic publishing</p>
+					</div>
+				</div>
+
+				<div style="margin-top: 3rem; text-align: center; padding: 2rem; background: var(--bg-secondary); border-radius: 1rem; border: 1px solid var(--border-color);">
+					<h3 style="margin-bottom: 1rem; color: var(--text-secondary);">Future Release</h3>
+					<p style="margin-bottom: 2rem; color: var(--text-secondary);">Analysis framework will complete the EquiLens pipeline, providing comprehensive bias insights</p>
+					<a href="https://github.com/Life-Experimentalists/EquiLens/projects" class="btn btn-outline" target="_blank">
+						<i class="fas fa-road"></i>
+						View Roadmap
+					</a>
+				</div>
+			</div>
+		</section>
+
+		<!-- Footer -->
+		<footer class="footer">
+			<div class="container">
+				<div class="footer-content">
+					<div class="footer-section">
+						<h3>EquiLens</h3>
+						<p>
+							A comprehensive AI bias detection platform for
+							responsible AI development.
+						</p>
+						<div class="social-links">
+							<a
+								href="https://github.com/Life-Experimentalists/EquiLens"
+								target="_blank"
+							>
+								<i class="fab fa-github"></i>
+							</a>
+							<a
+								href="https://vkrishna04.github.io"
+								target="_blank"
+							>
+								<i class="fas fa-globe"></i>
+							</a>
+							<a href="mailto:krishnagsvv@gmail.com">
+								<i class="fas fa-envelope"></i>
+							</a>
+						</div>
+					</div>
+
+					<div class="footer-section">
+						<h3>Quick Links</h3>
+						<ul class="footer-links">
+							<li><a href="#features">Features</a></li>
+							<li><a href="#architecture">Architecture</a></li>
+							<li><a href="#getting-started">Get Started</a></li>
+							<li>
+								<a
+									href="https://github.com/Life-Experimentalist/EquiLens/blob/main/docs/README.md"
+									target="_blank"
+									>Documentation</a
+								>
+							</li>
+						</ul>
+					</div>
+
+					<div class="footer-section">
+						<h3>Resources</h3>
+						<ul class="footer-links">
+							<li>
+								<a
+									href="https://github.com/Life-Experimentalists/EquiLens/blob/main/docs/QUICKSTART.md"
+									target="_blank"
+									>Quick Start Guide</a
+								>
+							</li>
+							<li>
+								<a
+									href="https://github.com/Life-Experimentalists/EquiLens/blob/main/docs/CONFIGURATION_GUIDE.md"
+									target="_blank"
+									>Configuration</a
+								>
+							</li>
+							<li>
+								<a
+									href="https://github.com/Life-Experimentalists/EquiLens/issues"
+									target="_blank"
+									>Report Issues</a
+								>
+							</li>
+							<li>
+								<a
+									href="https://github.com/Life-Experimentalists/EquiLens/blob/main/LICENSE.md"
+									target="_blank"
+									>License</a
+								>
+							</li>
+						</ul>
+					</div>
+
+					<div class="footer-section">
+						<h3>Organization</h3>
+						<ul class="footer-links">
+							<li>
+								<a
+									href="https://github.com/Life-Experimentalists"
+									target="_blank"
+									>Life Experimentalists</a
+								>
+							</li>
+							<li>
+								<a
+									href="https://vkrishna04.github.io"
+									target="_blank"
+									>VKrishna04</a
+								>
+							</li>
+							<li>
+								<a href="https://amrita.edu" target="_blank"
+									>Amrita Vishwa Vidyapeetham</a
+								>
+							</li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="footer-bottom">
+					<p>&copy; 2025 EquiLens. Licensed under Apache 2.0.</p>
+					<p>Built with ❤️ for responsible AI</p>
+				</div>
+			</div>
+		</footer>
+
+		<!-- Scripts -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+		<!-- Additional functionality -->
+		<script src="assets/app.js"></script>
+
+		<script>
+			// Theme Toggle
+			const themeToggle = document.getElementById("theme-toggle");
+			const body = document.body;
+			const icon = themeToggle.querySelector("i");
+
+			// Check for saved theme preference or default to 'light'
+			const currentTheme = localStorage.getItem("theme") || "light";
+			body.setAttribute("data-theme", currentTheme);
+			updateThemeIcon(currentTheme);
+
+			themeToggle.addEventListener("click", () => {
+				const theme =
+					body.getAttribute("data-theme") === "dark"
+						? "light"
+						: "dark";
+				body.setAttribute("data-theme", theme);
+				localStorage.setItem("theme", theme);
+				updateThemeIcon(theme);
+				updateTheme(); // Update header background immediately
+			});
+
+			function updateThemeIcon(theme) {
+				icon.className =
+					theme === "dark" ? "fas fa-sun" : "fas fa-moon";
+			}
+
+			// Smooth Scrolling
+			document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+				anchor.addEventListener("click", function (e) {
+					e.preventDefault();
+					const target = document.querySelector(
+						this.getAttribute("href")
+					);
+					if (target) {
+						target.scrollIntoView({
+							behavior: "smooth",
+							block: "start",
+						});
+					}
+				});
+			});
+
+			// Header Background on Scroll
+			function updateHeaderBackground() {
+				const header = document.querySelector(".header");
+				if (window.scrollY > 100) {
+					header.classList.add("scrolled");
+				} else {
+					header.classList.remove("scrolled");
+				}
+			}
+
+			window.addEventListener("scroll", updateHeaderBackground);
+
+			// Update header immediately on theme change
+			function updateTheme() {
+				const header = document.querySelector(".header");
+				// Force a style recalculation by toggling the scrolled class
+				const isScrolled = header.classList.contains("scrolled");
+				if (isScrolled) {
+					header.classList.remove("scrolled");
+					// Use setTimeout to ensure the style is applied before adding it back
+					setTimeout(() => {
+						header.classList.add("scrolled");
+					}, 0);
+				}
+			}
+
+			// Intersection Observer for Animations
+			const observerOptions = {
+				threshold: 0.1,
+				rootMargin: "0px 0px -50px 0px",
+			};
+
+			const observer = new IntersectionObserver((entries) => {
+				entries.forEach((entry) => {
+					if (entry.isIntersecting) {
+						entry.target.classList.add("animate-fade-in-up");
+					}
+				});
+			}, observerOptions);
+
+			// Observe all cards and sections
+			document
+				.querySelectorAll(
+					".feature-card, .step-card, .stat-card, .phase"
+				)
+				.forEach((el) => {
+					observer.observe(el);
+				});
+
+			// Copy Code Function
+			function copyCode(button) {
+				const codeBlock = button.nextElementSibling;
+				const text = codeBlock.textContent;
+
+				navigator.clipboard.writeText(text).then(() => {
+					button.innerHTML = '<i class="fas fa-check"></i>';
+					showToast("Code copied to clipboard!");
+
+					setTimeout(() => {
+						button.innerHTML = '<i class="fas fa-copy"></i>';
+					}, 2000);
+				});
+			}
+
+			// Toast Notification
+			function showToast(message) {
+				const toast = document.createElement("div");
+				toast.className = "toast";
+				toast.textContent = message;
+				document.body.appendChild(toast);
+
+				setTimeout(() => toast.classList.add("show"), 100);
+
+				setTimeout(() => {
+					toast.classList.remove("show");
+					setTimeout(() => document.body.removeChild(toast), 300);
+				}, 3000);
+			}
+
+			// Animated Counter for Statistics
+			function animateCounter(element) {
+				const target = parseInt(element.getAttribute("data-target"));
+				const duration = 2000;
+				const increment = target / (duration / 16);
+				let current = 0;
+
+				const timer = setInterval(() => {
+					current += increment;
+					if (current >= target) {
+						current = target;
+						clearInterval(timer);
+					}
+					element.textContent = Math.floor(current);
+				}, 16);
+			}
+
+			// Trigger counters when phase1-release section is visible
+			const statsObserver = new IntersectionObserver(
+				(entries) => {
+					entries.forEach((entry) => {
+						if (entry.isIntersecting) {
+							const counters = entry.target.querySelectorAll(
+								".stat-number[data-target]"
+							);
+							counters.forEach((counter) => {
+								if (counter.textContent === "0") {
+									animateCounter(counter);
+								}
+							});
+						}
+					});
+				},
+				{ threshold: 0.5 }
+			);
+
+			const statsSection = document.querySelector(".statistics");
+			if (statsSection) {
+				statsObserver.observe(statsSection);
+			}
+
+			// Demo Terminal Animation
+			function animateDemo() {
+				const demoContent = document.getElementById("demo-content");
+				const lines = [
+					{
+						type: "output",
+						content: "🔄 Initializing bias detection session...",
+					},
+					{
+						type: "output",
+						content: "✅ GPU acceleration detected (CUDA 12.1)",
+					},
+					{
+						type: "output",
+						content:
+							"📁 Loading corpus configuration from word_lists.json",
+					},
+					{
+						type: "output",
+						content:
+							"📊 Custom bias categories detected: Gender, Profession, Social Traits",
+					},
+					{
+						type: "output",
+						content:
+							"🎯 Generating balanced test corpus using CorpusGen...",
+					},
+					{
+						type: "output",
+						content:
+							"   • Names: Male/Female balanced (Olivia, Rahul, Emma, David...)",
+					},
+					{
+						type: "output",
+						content:
+							"   • Professions: Engineer, Nurse, Teacher, Doctor...",
+					},
+					{
+						type: "output",
+						content:
+							"   • Traits: Competence vs Social (Confident, Caring, Logical...)",
+					},
+					{
+						type: "progress",
+						content: "████████████████████ 100% Corpus Generated",
+					},
+					{
+						type: "output",
+						content: "🔍 Starting model audit for llama2:latest...",
+					},
+					{
+						type: "output",
+						content: "⏱️  ETA: 2 minutes 34 seconds",
+					},
+					{
+						type: "progress",
+						content: "██████████████████░░ 90% [450/500 prompts]",
+					},
+					{
+						type: "output",
+						content: "📈 Bias score: 0.23 (Low bias detected)",
+					},
+					{
+						type: "output",
+						content: "✅ Audit complete! Results saved to results/",
+					},
+				];
+
+				let currentLine = 0;
+				const addLine = () => {
+					if (currentLine < lines.length) {
+						const line = lines[currentLine];
+						const div = document.createElement("div");
+						div.className = `demo-line demo-${line.type}`;
+						div.textContent = line.content;
+						demoContent.appendChild(div);
+						currentLine++;
+
+						// Scroll to bottom
+						demoContent.scrollTop = demoContent.scrollHeight;
+
+						// Schedule next line
+						setTimeout(addLine, 1000 + Math.random() * 1000);
+					}
+				};
+
+				// Start animation after initial content
+				setTimeout(addLine, 2000);
+			}
+
+			// Start demo animation when demo section is visible
+			const demoObserver = new IntersectionObserver(
+				(entries) => {
+					entries.forEach((entry) => {
+						if (entry.isIntersecting) {
+							animateDemo();
+							demoObserver.unobserve(entry.target);
+						}
+					});
+				},
+				{ threshold: 0.3 }
+			);
+
+			const demoSection = document.querySelector(".demo");
+			if (demoSection) {
+				demoObserver.observe(demoSection);
+			}
+
+			// Mobile Menu Toggle (placeholder for future implementation)
+			const mobileMenuToggle = document.querySelector(
+				".mobile-menu-toggle"
+			);
+			mobileMenuToggle.addEventListener("click", () => {
+				// Mobile menu implementation would go here
+				console.log("Mobile menu clicked");
+			});
+
+			// Easter egg: Konami code
+			let konamiCode = [];
+			const konami = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
+
+			document.addEventListener("keydown", (e) => {
+				konamiCode.push(e.keyCode);
+				konamiCode = konamiCode.slice(-konami.length);
+
+				if (konamiCode.join(",") === konami.join(",")) {
+					showToast(
+						"🎉 Easter egg found! You discovered the Konami code!"
+					);
+					document.body.style.transform = "rotate(360deg)";
+					document.body.style.transition = "transform 2s ease";
+
+					setTimeout(() => {
+						document.body.style.transform = "";
+					}, 2000);
+				}
+			});
+
+			// Dark Reader compatibility
+			// Disable Dark Reader when our dark mode is active
+			function manageDarkReader() {
+				const isDarkMode =
+					document.documentElement.getAttribute("data-theme") ===
+					"dark";
+
+				// Add meta tag to indicate we have native dark mode
+				if (!document.querySelector('meta[name="darkreader-lock"]')) {
+					const meta = document.createElement("meta");
+					meta.name = "darkreader-lock";
+					meta.content = "";
+					document.head.appendChild(meta);
+				}
+
+				// Set data attribute for Dark Reader detection
+				document.documentElement.setAttribute(
+					"data-has-native-dark-mode",
+					"true"
+				);
+
+				if (isDarkMode) {
+					// When our dark mode is active, signal to Dark Reader to stay off
+					document.documentElement.setAttribute(
+						"data-darkreader-scheme",
+						"ignore"
+					);
+				} else {
+					// When in light mode, allow Dark Reader if user wants it
+					document.documentElement.removeAttribute(
+						"data-darkreader-scheme"
+					);
+				}
+			}
+
+			// Monitor theme changes
+			const themeObserver = new MutationObserver(function (mutations) {
+				mutations.forEach(function (mutation) {
+					if (
+						mutation.type === "attributes" &&
+						mutation.attributeName === "data-theme"
+					) {
+						manageDarkReader();
+					}
+				});
+			});
+
+			themeObserver.observe(document.documentElement, {
+				attributes: true,
+				attributeFilter: ["data-theme"],
+			});
+
+			// Initial setup
+			manageDarkReader();
+		</script>
+	</body>
+</html>

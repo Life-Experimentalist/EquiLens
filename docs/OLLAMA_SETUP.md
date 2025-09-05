@@ -1,54 +1,121 @@
-# EquiLens Ollama Setup Guide
+# 🤖 Ollama Setup & Troubleshooting Guide
 
-## Overview
-This guide will help you set up Ollama to work with EquiLens for bias detection using your RTX 2050 GPU acceleration.
+**Complete guide to setting up and troubleshooting Ollama for EquiLens bias detection**
 
-## Setup Method: Host Network Mode
+## 📋 Overview
 
-We've configured the dev container to use **host network mode**, which allows direct access to services running on your Windows host. This is the most reliable approach for your setup.
+This guide covers Ollama installation, configuration, and troubleshooting for EquiLens. Includes GPU acceleration setup, connection issue resolution, and concurrent processing optimization.
 
-## Step-by-Step Setup
+## 🚀 Installation & Setup
 
 ### 1. Install Ollama on Windows Host
 
-1. **Download Ollama**: Go to [https://ollama.ai/download](https://ollama.ai/download)
+1. **Download Ollama**: Go to [https://ollama.ai/download](https://ollama.ai/download) or from the docker hub [https://hub.docker.com/r/ollama/ollama](https://hub.docker.com/r/ollama/ollama).
 2. **Install**: Run the installer with Administrator privileges
 3. **Verify**: Open PowerShell and run `ollama --version`
 
 ### 2. Start Ollama Server
 
-**Option A: Using our script**
-```powershell
-# In PowerShell as Administrator
-cd /workspace
-./tools/start_ollama_windows.ps1
+**Option A: Using EquiLens (Recommended)**
+```bash
+# Start Ollama services through EquiLens
+uv run equilens start
 ```
 
 **Option B: Manual start**
-```powershell
+```bash
 # In PowerShell as Administrator
 ollama serve
 ```
 
-The server will start on `http://localhost:11434` and be accessible to your dev container.
+The server will start on `http://localhost:11434` and be accessible to EquiLens.
 
 ### 3. Download Models
 
-**Option A: Using our script**
-```powershell
-# In another PowerShell window (while ollama serve is running)
-cd /workspace
-./tools/download_models.ps1
+**Option A: Using EquiLens**
+```bash
+# Download recommended models
+uv run equilens models pull phi3:mini
+uv run equilens models pull llama3.2:1b
+
+# List available models
+uv run equilens models list
 ```
 
 **Option B: Manual download**
-```powershell
+```bash
 # Download recommended model for bias detection
 ollama pull phi3:mini
 
 # Verify
 ollama list
 ```
+
+## 🔍 Understanding Connection Issues
+
+### Why Do Connection Issues Occur?
+
+**1. Resource Limitations**
+- **Memory Constraints**: Large language models require significant RAM/VRAM
+- **CPU/GPU Bottlenecks**: Models compete for computational resources
+- **Disk I/O**: Model loading and context caching strain storage systems
+
+**2. Network-Level Issues**
+- **Port Conflicts**: Multiple processes trying to use the same ports
+- **Timeout Settings**: Default timeouts may be too aggressive for large models
+- **Connection Pooling**: Limited number of simultaneous connections
+
+**3. Ollama Service Management**
+- **Startup Time**: Large models take time to load into memory
+- **Context Management**: Ollama manages conversation context which uses memory
+- **Model Switching**: Loading different models requires resource reallocation
+
+**4. Concurrent Request Challenges**
+- **Queue Saturation**: Too many simultaneous requests overwhelm the service
+- **Memory Fragmentation**: Multiple concurrent contexts fragment available memory
+- **Lock Contention**: Internal Ollama locks can cause request blocking
+
+## 🚀 Concurrent Processing Optimization
+
+### ✅ Benefits of Concurrent Processing
+
+**Performance Gains:**
+- **3-5x Speed Improvement**: Multiple requests processed simultaneously
+- **Better Resource Utilization**: CPU cores and memory bandwidth used efficiently
+- **Reduced Wall-Clock Time**: Large corpus processing completes faster
+
+**When It Works Best:**
+- **Small Models** (phi3:mini, qwen2:0.5b): Handle concurrency well
+- **Powerful Hardware**: 16GB+ RAM, modern CPUs
+- **Fast Storage**: NVMe SSDs for model loading
+
+### ⚠️ Risks & Challenges
+
+**Resource Exhaustion:**
+- **Memory Overflow**: Multiple model instances can exceed available RAM
+- **GPU Memory Limits**: VRAM exhaustion causes crashes
+- **Connection Timeouts**: Overwhelmed service drops connections
+
+**Quality Issues:**
+- **Inconsistent Responses**: Overloaded service may return lower quality results
+- **Failed Requests**: Increased error rates under high load
+
+## 🛠️ Network Configuration
+
+### Host Network Mode Setup
+
+We've configured EquiLens to use **host network mode** for direct access to Ollama services:
+
+```yaml
+# docker-compose.yml
+services:
+  ollama:
+    network_mode: host
+    ports:
+      - "11434:11434"
+```
+
+This provides the most reliable approach for accessing Ollama from EquiLens containers.
 
 ### 4. Rebuild Dev Container
 
