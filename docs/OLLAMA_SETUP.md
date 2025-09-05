@@ -158,3 +158,29 @@ If you encounter issues:
 ---
 
 **Note**: This setup provides production-ready bias detection with GPU acceleration while maintaining persistent model storage and reliable connectivity.
+
+# Ollama Setup
+
+EquiLens uses Ollama as the primary LLM runtime. Ollama can run in Docker or locally.
+
+Quick start (Docker)
+```powershell
+# Start Ollama container
+docker compose up -d
+
+# Pull a model (example)
+curl -X POST http://localhost:11434/api/pull -d '{"name":"phi3:mini"}'
+```
+
+Verify
+```powershell
+curl http://localhost:11434/api/tags
+```
+
+Advanced
+- Use GPU-enabled compose file for acceleration
+- Configure model options via `--custom-ollama-options` or config files
+
+Troubleshooting
+- Check container logs: `docker compose logs -f equilens-ollama-1`
+- Ensure Docker GPU runtime is enabled for GPU support

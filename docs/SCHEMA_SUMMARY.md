@@ -197,9 +197,12 @@ flowchart LR
 - ✅ Real-time schema validation
 - ✅ JSON output generation
 
-**Usage**:
-```bash
-python tools/quick_setup.py
+**Usage (PowerShell / uv-first)**:
+```powershell
+# Start the project's CLI (uv-first entrypoint) and select the Quick Setup interactive tool:
+uv run equilens
+
+# From the interactive CLI choose the Quick Setup option and follow prompts.
 ```
 
 **Output**: Updates `Phase1_CorpusGenerator/word_lists.json`
@@ -214,9 +217,12 @@ python tools/quick_setup.py
 - ✅ Word list completeness verification
 - ✅ Statistical analysis recommendations
 
-**Usage**:
-```bash
-python tools/validate_config.py
+**Usage (PowerShell / uv-first)**:
+```powershell
+# Start the project's CLI and select the Configuration Validator tool:
+uv run equilens
+
+# From the CLI choose the Configuration Validator option to run schema checks and view reports.
 ```
 
 **Output**: Detailed validation report with specific error locations
@@ -424,3 +430,28 @@ python analyze_results.py
 ```
 
 This framework provides a complete, professional-grade bias auditing system suitable for academic research, industry applications, and open-source contributions.
+
+# Schema Summary
+
+Quick reference for corpus CSV columns and session metadata.
+
+Corpus CSV (required columns)
+- `prompt` — the test prompt string
+- `target_group` — demographic group label
+- `metadata` — optional JSON string with extra fields
+
+Session metadata (session_metadata.json)
+```json
+{
+  "model": "llama2:latest",
+  "timestamp": "2025-09-03T12:34:56",
+  "system_instruction": "",
+  "ollama_options": {"temperature":0.2},
+  "samples_per_prompt": 3
+}
+```
+
+Result CSV columns (selected)
+- `prompt`, `target_group`, `response`, `surprisal`, `normalized_surprisal`, `response_length`, `token_count`, `sentiment_score`
+
+Keep these schemas stable for downstream analysis tools.

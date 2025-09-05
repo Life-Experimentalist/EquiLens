@@ -6,7 +6,7 @@ results/*
 .venv/
 .vscode/
 logs/audit_session.log
-
+.github/instructions
 
 # Docker build context optimization - reduce from 846MB to ~50MB
 
@@ -123,6 +123,9 @@ coverage.xml
 
 # Node modules (if any)
 node_modules/
+
+# UV cache directory
+.uv-cache/
 
 # Archives
 *.tar

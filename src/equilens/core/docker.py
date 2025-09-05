@@ -180,10 +180,11 @@ class DockerManager:
         else:
             console.print("⚡ GPU not available - using CPU mode")
 
+        # TODO: Future enhancement - EquiLens app container support
         # Check if our services are already running
-        if self._is_service_running(self.app_container):
-            console.print("ℹ️  EquiLens app already running")
-            return True
+        # if self._is_service_running(self.app_container):
+        #     console.print("ℹ️  EquiLens app already running")
+        #     return True
 
         # Check for existing external Ollama
         existing_ollama = self.detect_existing_ollama()
@@ -199,19 +200,20 @@ class DockerManager:
                     "🎯 No additional services needed - Ollama is already accessible!"
                 )
 
+                # TODO: Future enhancement - EquiLens app container integration
                 # Check if the app container exists
-                if not self._is_service_running(self.app_container):
-                    # Only start our app container if needed (future enhancement)
-                    console.print(
-                        "ℹ️  EquiLens app container not needed - direct Ollama access available"
-                    )
+                # if not self._is_service_running(self.app_container):
+                #     # Only start our app container if needed (future enhancement)
+                console.print(
+                    "ℹ️  EquiLens app container not needed - direct Ollama access available"
+                )
 
                 return True
             else:
-                task = progress.add_task(
-                    "Starting full EquiLens stack (Ollama + App)...", total=None
-                )
-                result = self._run_command(["docker", "compose", "up", "-d"])
+                task = progress.add_task("Starting Ollama service...", total=None)
+                # TODO: Future enhancement - full docker-compose with app container
+                # For now, only start Ollama container
+                result = self._run_command(["docker", "compose", "up", "-d", "ollama"])
 
             if result.returncode == 0:
                 progress.update(task, description="✅ Services started successfully!")
@@ -283,18 +285,24 @@ class DockerManager:
         self, command: list[str], interactive: bool = False
     ) -> subprocess.CompletedProcess:
         """Execute command inside the EquiLens app container"""
-        if not self._is_service_running(self.app_container):
-            console.print(
-                "[red]❌ EquiLens app container not running.[/red] Start with: [cyan]uv run equilens start[/cyan]"
-            )
-            raise RuntimeError("Container not running")
+        # TODO: Future enhancement - app container support
+        console.print("[yellow]⚠️  EquiLens app container not implemented yet.[/yellow]")
+        console.print("[cyan]💡 Commands run directly on host for now.[/cyan]")
+        raise RuntimeError("App container not implemented yet")
 
-        docker_cmd = ["docker", "exec"]
-        if interactive:
-            docker_cmd.extend(["-it"])
-
-        docker_cmd.extend([self.app_container] + command)
-        return self._run_command(docker_cmd)
+        # Future implementation:
+        # if not self._is_service_running(self.app_container):
+        #     console.print(
+        #         "[red]❌ EquiLens app container not running.[/red] Start with: [cyan]uv run equilens start[/cyan]"
+        #     )
+        #     raise RuntimeError("Container not running")
+        #
+        # docker_cmd = ["docker", "exec"]
+        # if interactive:
+        #     docker_cmd.extend(["-it"])
+        #
+        # docker_cmd.extend([self.app_container] + command)
+        # return self._run_command(docker_cmd)
 
     def get_service_status(self) -> dict:
         """Get comprehensive service status"""
@@ -311,13 +319,13 @@ class DockerManager:
                 "http://localhost:11434"
             )
 
-            # Check containers
+            # Check containers (commenting out app container for now)
             result = self._run_command(
                 [
                     "docker",
                     "ps",
                     "--filter",
-                    "name=equilens",
+                    "name=ollama",  # Only check Ollama containers
                     "--format",
                     "{{.Names}}\t{{.Status}}\t{{.Ports}}",
                 ],

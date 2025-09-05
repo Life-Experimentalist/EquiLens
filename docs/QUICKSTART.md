@@ -281,3 +281,48 @@ Models are stored in Docker volume `ollama_data` - survive container rebuilds!
 - **Minimum**: 4GB RAM, any CPU
 - **Recommended**: 8GB+ RAM, NVIDIA GPU (any model)
 - **Optimal**: 16GB+ RAM, modern NVIDIA GPU
+
+# Quickstart — EquiLens
+
+Short, minimal steps to get EquiLens running using the project's preferred `uv` entrypoint.
+
+Prerequisites
+- Docker (optional for Ollama / GPU)
+- Windows: PowerShell (this project uses PowerShell examples)
+
+1) Create / refresh virtual environment and install deps
+```powershell
+uv venv        # create or activate the project's virtual environment
+uv sync        # install or synchronize dependencies from pyproject.toml
+```
+
+2) Launch interactive auditor (recommended)
+```powershell
+uv run equilens
+```
+
+3) Run specific phases manually (non-interactive)
+```powershell
+# Phase 1: generate corpus
+uv run equilens generate --config configs/corpus_config.json
+
+# Phase 2: run audit
+uv run equilens audit --model llama2:latest --corpus Phase1_CorpusGenerator/corpus/my_corpus.csv
+
+# Phase 3: analyze results
+uv run equilens analyze --results-file results/*/results_*.csv
+```
+
+4) Export / reuse configuration
+```powershell
+uv run equilens export-config --file my_experiment.json
+uv run equilens load-config --file my_experiment.json
+```
+
+If you prefer containers, start services before running the CLI:
+```powershell
+docker compose up -d
+uv run equilens status
+```
+
+This quickstart intentionally uses `uv run equilens` as the single, canonical entrypoint for reproducibility.

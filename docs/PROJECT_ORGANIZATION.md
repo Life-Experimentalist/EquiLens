@@ -288,11 +288,26 @@ cd Phase1_CorpusGenerator
 python generate_corpus.py
 ```
 
-## 🎉 Benefits of This Organization
+# Project Organization
 
-1. **Clean Root**: Only essential files visible at first glance
-2. **Logical Grouping**: Related files are together
-3. **No Confusion**: Clear separation between docs, tools, and phases
-4. **Schema Co-location**: Configuration and schema are together
-5. **Professional**: Follows standard open-source project structure
-6. **Docker-Safe**: No unexpected tool execution during builds
+Repository layout and contributor conventions.
+
+Top-level
+- `src/` — Source code
+  - `equilens/` — CLI, TUI, web entrypoints
+  - `Phase1_CorpusGenerator/` — corpus generation utilities
+  - `Phase2_ModelAuditor/` — auditor implementations and helpers
+  - `Phase3_Analysis/` — analysis and reporting tools
+- `docs/` — Documentation
+- `results/` — Generated session outputs
+- `logs/` — Execution logs
+- `configs/` — Example configuration files
+
+Conventions
+- Use `uv run equilens` for CLI entrypoint
+- Keep docs in `docs/`
+- Tests live under `tests/`
+
+Development
+- Create feature branches, run tests, and update docs
+- Export experiment configurations for reproducibility

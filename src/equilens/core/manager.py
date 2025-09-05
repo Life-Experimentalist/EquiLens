@@ -150,7 +150,7 @@ class EquiLensManager:
             )
         else:
             console.print("  [cyan]uv run equilens models list[/cyan]    # List models")
-            console.print("  [cyan]uv run equilens audit config[/cyan]   # Run audit")
+            console.print("  [cyan]uv run equilens audit[/cyan]   # Run audit")
             console.print(
                 "  [cyan]uv run equilens tui[/cyan]            # Interactive TUI"
             )

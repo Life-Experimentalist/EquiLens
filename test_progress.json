@@ -1,9 +1,0 @@
-{
-    "model_name": "llama2:latest",
-    "corpus_file": "test_corpus.csv",
-    "total_tests": 100,
-    "completed_tests": 25,
-    "failed_tests": 2,
-    "timestamp": "2025-08-13T02:00:00",
-    "status": "interrupted"
-}

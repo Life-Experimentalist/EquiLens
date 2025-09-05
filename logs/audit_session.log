@@ -4285,3 +4285,847 @@
 2025-08-28 22:56:52,842 - INFO - 🛑 Audit interrupted by user
 2025-08-28 22:56:52,861 - INFO - 💾 Saved 5 results to results\llama2_latest_20250828_225052\results_llama2_latest_20250828_225052.csv
 2025-08-28 22:56:52,906 - INFO - ✅ Sequential processing completed!
+2025-09-01 20:10:22,618 - INFO - Initialized audit session 20250809_022208
+2025-09-01 20:10:22,620 - INFO - 📂 Resuming session 20250809_022208
+2025-09-01 20:10:22,620 - INFO - 📂 Loaded progress: 50/100 completed
+2025-09-02 00:32:23,120 - INFO - Initialized audit session 20250809_022208
+2025-09-02 00:32:23,120 - INFO - 📂 Resuming session 20250809_022208
+2025-09-02 00:32:23,121 - INFO - 📂 Loaded progress: 615/15552 completed
+2025-09-02 00:32:23,121 - INFO - 🔄 Resuming previous audit session
+2025-09-02 00:32:25,924 - INFO - ✅ Ollama service found at http://localhost:11434
+2025-09-02 00:32:25,945 - INFO - Available models: ['llama2:latest']
+2025-09-02 00:32:25,946 - INFO - ✅ Model llama2:latest is already available
+2025-09-02 00:32:25,946 - INFO - 📂 Loading corpus from src/Phase1_CorpusGenerator/corpus/audit_corpus_gender_bias.csv
+2025-09-02 00:32:25,977 - INFO - 🎯 Starting audit: 15552 total tests
+2025-09-02 00:32:25,977 - INFO - 📊 Model: llama2:latest
+2025-09-02 00:32:25,977 - INFO - 💾 Results will be saved to: results\llama2_latest_20250809_022208\results_llama2_latest_20250809_022208.csv
+2025-09-02 00:32:25,978 - INFO - ┌───────────────────────────────────────────────────────────────────────────────────────────┐
+2025-09-02 00:32:25,978 - INFO - │ Session: 20250809_022208                                                                  │
+2025-09-02 00:32:25,978 - INFO - │ Model:   llama2:latest                                                                    │
+2025-09-02 00:32:25,978 - INFO - │ Corpus:  src/Phase1_CorpusGenerator/corpus/audit_corpus_gender_bias.csv                   │
+2025-09-02 00:32:25,979 - INFO - │ Progress:615/15552 (4.0%)                                                                 │
+2025-09-02 00:32:25,979 - INFO - │ Output:  results\llama2_latest_20250809_022208\results_llama2_latest_20250809_022208.csv  │
+2025-09-02 00:32:25,979 - INFO - │ ETA Mode:User 5.0s/test                                                                   │
+2025-09-02 00:32:25,979 - INFO - └───────────────────────────────────────────────────────────────────────────────────────────┘
+2025-09-02 00:32:25,980 - INFO - ⏱️  User ETA estimate: 5.0s per test
+2025-09-02 00:32:25,980 - INFO - 📅 Total estimated time: 21.6h
+2025-09-02 00:32:25,992 - INFO - 📂 Loaded 615 existing results
+2025-09-02 00:32:26,246 - INFO - 📂 Resuming at test 615/15552 (0-based index)
+2025-09-02 00:32:26,257 - INFO - 📂 Loaded 615 existing results
+2025-09-02 00:32:26,257 - INFO - 🔄 Using sequential processing mode...
+2025-09-02 00:32:26,258 - INFO - 🔍 AI Bias Detection Audit Progress
+2025-09-02 00:32:26,258 - INFO - Testing AI model responses against bias detection corpus
+2025-09-02 00:32:26,259 - INFO - Progress shows: Completed/Total | Elapsed Time | Remaining Time | Success Rate | Failed Count
+2025-09-02 00:32:26,259 - INFO - 💡 Press 'p' at any time to pause/resume the audit
+
+2025-09-02 00:33:22,414 - INFO - Initialized audit session 20250809_022208
+2025-09-02 00:33:22,415 - INFO - 📂 Resuming session 20250809_022208
+2025-09-02 00:33:22,415 - INFO - 📂 Loaded progress: 615/15552 completed
+2025-09-02 00:33:22,416 - INFO - 🔄 Resuming previous audit session
+2025-09-02 00:33:25,155 - INFO - ✅ Ollama service found at http://localhost:11434
+2025-09-02 00:33:25,160 - INFO - Available models: ['llama2:latest']
+2025-09-02 00:33:25,161 - INFO - ✅ Model llama2:latest is already available
+2025-09-02 00:33:25,161 - INFO - 📂 Loading corpus from src/Phase1_CorpusGenerator/corpus/audit_corpus_gender_bias.csv
+2025-09-02 00:33:25,189 - INFO - 🎯 Starting audit: 15552 total tests
+2025-09-02 00:33:25,190 - INFO - 📊 Model: llama2:latest
+2025-09-02 00:33:25,190 - INFO - 💾 Results will be saved to: results\llama2_latest_20250809_022208\results_llama2_latest_20250809_022208.csv
+2025-09-02 00:33:25,191 - INFO - ┌───────────────────────────────────────────────────────────────────────────────────────────┐
+2025-09-02 00:33:25,192 - INFO - │ Session: 20250809_022208                                                                  │
+2025-09-02 00:33:25,192 - INFO - │ Model:   llama2:latest                                                                    │
+2025-09-02 00:33:25,193 - INFO - │ Corpus:  src/Phase1_CorpusGenerator/corpus/audit_corpus_gender_bias.csv                   │
+2025-09-02 00:33:25,193 - INFO - │ Progress:615/15552 (4.0%)                                                                 │
+2025-09-02 00:33:25,194 - INFO - │ Output:  results\llama2_latest_20250809_022208\results_llama2_latest_20250809_022208.csv  │
+2025-09-02 00:33:25,194 - INFO - │ ETA Mode:Dynamic                                                                          │
+2025-09-02 00:33:25,194 - INFO - └───────────────────────────────────────────────────────────────────────────────────────────┘
+2025-09-02 00:33:25,195 - INFO - 📈 ETA will be calculated dynamically based on actual performance
+2025-09-02 00:33:25,206 - INFO - 📂 Loaded 615 existing results
+2025-09-02 00:33:25,440 - INFO - 📂 Resuming at test 615/15552 (0-based index)
+2025-09-02 00:33:25,451 - INFO - 📂 Loaded 615 existing results
+2025-09-02 00:33:25,451 - INFO - 🔄 Using sequential processing mode...
+2025-09-02 00:33:25,452 - INFO - 🔍 AI Bias Detection Audit Progress
+2025-09-02 00:33:25,452 - INFO - Testing AI model responses against bias detection corpus
+2025-09-02 00:33:25,453 - INFO - Progress shows: Completed/Total | Elapsed Time | Remaining Time | Success Rate | Failed Count
+2025-09-02 00:33:25,453 - INFO - 💡 Press 'p' at any time to pause/resume the audit
+
+2025-09-02 00:39:02,957 - INFO - Received signal 2. Initiating graceful shutdown...
+2025-09-02 00:39:03,033 - INFO - 💾 Results saved to results\llama2_latest_20250809_022208\results_llama2_latest_20250809_022208.csv (responses removed)
+2025-09-02 00:39:03,085 - INFO - 💾 Full responses saved to results\llama2_latest_20250809_022208\results_llama2_latest_20250809_022208_responses_20250809_022208.csv
+2025-09-02 00:39:03,089 - INFO - 🛑 Audit interrupted by user
+2025-09-02 00:39:03,134 - INFO - 💾 Results saved to results\llama2_latest_20250809_022208\results_llama2_latest_20250809_022208.csv (responses removed)
+2025-09-02 00:39:03,183 - INFO - 💾 Full responses saved to results\llama2_latest_20250809_022208\results_llama2_latest_20250809_022208_responses_20250809_022208.csv
+2025-09-02 00:39:03,259 - INFO - ✅ Sequential processing completed!
+2025-09-02 00:39:03,285 - INFO - 🎉 Audit completed successfully!
+2025-09-02 00:39:03,286 - INFO - 📁 Next steps:
+2025-09-02 00:39:03,287 - INFO -    1. Review results: results\llama2_latest_20250809_022208\results_llama2_latest_20250809_022208.csv
+2025-09-02 00:39:03,289 - INFO -    2. Run analysis: python Phase3_Analysis/analyze_results.py --results_file results\llama2_latest_20250809_022208\results_llama2_latest_20250809_022208.csv
+2025-09-02 00:39:12,193 - INFO - Initialized audit session 20250902_003912
+2025-09-02 00:39:14,975 - INFO - ✅ Ollama service found at http://localhost:11434
+2025-09-02 00:39:14,981 - INFO - Available models: ['llama2:latest']
+2025-09-02 00:39:14,982 - INFO - ✅ Model llama2:latest is already available
+2025-09-02 00:39:14,982 - INFO - 📂 Loading corpus from src/Phase1_CorpusGenerator/corpus/quick_test_corpus.csv
+2025-09-02 00:39:14,988 - INFO - 🎯 Starting audit: 18 total tests
+2025-09-02 00:39:14,988 - INFO - 📊 Model: llama2:latest
+2025-09-02 00:39:14,989 - INFO - 💾 Results will be saved to: results\llama2_latest_20250902_003912\results_llama2_latest_20250902_003912.csv
+2025-09-02 00:39:14,989 - INFO - ┌───────────────────────────────────────────────────────────────────────────────────────────┐
+2025-09-02 00:39:14,989 - INFO - │ Session: 20250902_003912                                                                  │
+2025-09-02 00:39:14,989 - INFO - │ Model:   llama2:latest                                                                    │
+2025-09-02 00:39:14,990 - INFO - │ Corpus:  src/Phase1_CorpusGenerator/corpus/quick_test_corpus.csv                          │
+2025-09-02 00:39:14,990 - INFO - │ Progress:0/18 (0.0%)                                                                      │
+2025-09-02 00:39:14,990 - INFO - │ Output:  results\llama2_latest_20250902_003912\results_llama2_latest_20250902_003912.csv  │
+2025-09-02 00:39:14,990 - INFO - │ ETA Mode:User 5.0s/test                                                                   │
+2025-09-02 00:39:14,990 - INFO - └───────────────────────────────────────────────────────────────────────────────────────────┘
+2025-09-02 00:39:14,990 - INFO - ⏱️  User ETA estimate: 5.0s per test
+2025-09-02 00:39:14,990 - INFO - 📅 Total estimated time: 1.5m
+2025-09-02 00:39:14,993 - INFO - 🚀 Starting fresh audit with 18 tests
+2025-09-02 00:39:15,149 - INFO - � Starting concurrent processing with 3 workers...
+2025-09-02 00:39:15,150 - INFO - 📊 Processing 18 tests
+2025-09-02 00:39:15,150 - INFO - 
+🔍 AI Bias Detection Audit Progress
+2025-09-02 00:39:15,151 - INFO - Testing AI model responses against bias detection corpus
+2025-09-02 00:39:15,151 - INFO - Progress shows: Completed/Total | Elapsed Time | Remaining Time | Success Rate
+2025-09-02 00:39:15,152 - INFO - 💡 Press 'p' at any time to pause/resume the audit
+
+2025-09-02 00:39:15,184 - INFO - 💾 Results saved to results\llama2_latest_20250902_003912\results_llama2_latest_20250902_003912.csv (responses removed)
+2025-09-02 00:39:15,187 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_003912\results_llama2_latest_20250902_003912_responses_20250902_003912.csv
+2025-09-02 00:39:15,338 - INFO - 💾 Results saved to results\llama2_latest_20250902_003912\results_llama2_latest_20250902_003912.csv (responses removed)
+2025-09-02 00:39:15,343 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_003912\results_llama2_latest_20250902_003912_responses_20250902_003912.csv
+2025-09-02 00:39:15,500 - INFO - 💾 Results saved to results\llama2_latest_20250902_003912\results_llama2_latest_20250902_003912.csv (responses removed)
+2025-09-02 00:39:15,502 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_003912\results_llama2_latest_20250902_003912_responses_20250902_003912.csv
+2025-09-02 00:39:15,652 - INFO - 💾 Results saved to results\llama2_latest_20250902_003912\results_llama2_latest_20250902_003912.csv (responses removed)
+2025-09-02 00:39:15,654 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_003912\results_llama2_latest_20250902_003912_responses_20250902_003912.csv
+2025-09-02 00:39:15,716 - INFO - 💾 Results saved to results\llama2_latest_20250902_003912\results_llama2_latest_20250902_003912.csv (responses removed)
+2025-09-02 00:39:15,718 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_003912\results_llama2_latest_20250902_003912_responses_20250902_003912.csv
+2025-09-02 00:39:15,757 - INFO - ✅ Concurrent processing completed!
+2025-09-02 00:39:15,758 - INFO - 🤖 Final worker count: 3
+2025-09-02 00:39:15,758 - INFO - 🎉 Audit completed successfully!
+2025-09-02 00:39:15,759 - INFO - 📁 Next steps:
+2025-09-02 00:39:15,759 - INFO -    1. Review results: results\llama2_latest_20250902_003912\results_llama2_latest_20250902_003912.csv
+2025-09-02 00:39:15,759 - INFO -    2. Run analysis: python Phase3_Analysis/analyze_results.py --results_file results\llama2_latest_20250902_003912\results_llama2_latest_20250902_003912.csv
+2025-09-02 00:48:25,268 - INFO - Initialized audit session 20250902_004825
+2025-09-02 00:48:25,276 - INFO - 🔄 Using sequential processing mode...
+2025-09-02 00:48:25,277 - INFO - 🔍 AI Bias Detection Audit Progress
+2025-09-02 00:48:25,277 - INFO - Testing AI model responses against bias detection corpus
+2025-09-02 00:48:25,277 - INFO - Progress shows: Completed/Total | Elapsed Time | Remaining Time | Success Rate | Failed Count
+2025-09-02 00:48:25,278 - INFO - 💡 Press 'p' at any time to pause/resume the audit
+
+2025-09-02 00:48:35,169 - INFO - Received signal 2. Initiating graceful shutdown...
+2025-09-02 01:04:00,678 - INFO - Initialized audit session 20250902_010400
+2025-09-02 01:04:03,439 - INFO - ✅ Ollama service found at http://localhost:11434
+2025-09-02 01:04:03,444 - INFO - Available models: ['llama2:latest']
+2025-09-02 01:04:03,444 - INFO - ✅ Model llama2:latest is already available
+2025-09-02 01:04:03,445 - INFO - 📂 Loading corpus from src/Phase1_CorpusGenerator/corpus/audit_corpus_gender_bias.csv
+2025-09-02 01:04:03,474 - INFO - 🎯 Starting audit: 15552 total tests
+2025-09-02 01:04:03,475 - INFO - 📊 Model: llama2:latest
+2025-09-02 01:04:03,475 - INFO - 💾 Results will be saved to: results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-02 01:04:03,476 - INFO - ┌───────────────────────────────────────────────────────────────────────────────────────────┐
+2025-09-02 01:04:03,476 - INFO - │ Session: 20250902_010400                                                                  │
+2025-09-02 01:04:03,477 - INFO - │ Model:   llama2:latest                                                                    │
+2025-09-02 01:04:03,478 - INFO - │ Corpus:  src/Phase1_CorpusGenerator/corpus/audit_corpus_gender_bias.csv                   │
+2025-09-02 01:04:03,478 - INFO - │ Progress:0/15552 (0.0%)                                                                   │
+2025-09-02 01:04:03,479 - INFO - │ Output:  results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv  │
+2025-09-02 01:04:03,479 - INFO - │ ETA Mode:Dynamic                                                                          │
+2025-09-02 01:04:03,479 - INFO - └───────────────────────────────────────────────────────────────────────────────────────────┘
+2025-09-02 01:04:03,479 - INFO - 📈 ETA will be calculated dynamically based on actual performance
+2025-09-02 01:04:03,732 - INFO - 🚀 Starting fresh audit with 15552 tests
+2025-09-02 01:04:03,846 - INFO - � Starting concurrent processing with 3 workers...
+2025-09-02 01:04:03,847 - INFO - 📊 Processing 15552 tests
+2025-09-02 01:04:03,848 - INFO - 
+🔍 AI Bias Detection Audit Progress
+2025-09-02 01:04:03,848 - INFO - Testing AI model responses against bias detection corpus
+2025-09-02 01:04:03,849 - INFO - Progress shows: Completed/Total | Elapsed Time | Remaining Time | Success Rate
+2025-09-02 01:04:03,849 - INFO - 💡 Press 'p' at any time to pause/resume the audit
+
+2025-09-02 01:33:03,639 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv (responses removed)
+2025-09-02 01:33:03,646 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses_20250902_010400.csv
+2025-09-02 03:42:18,866 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv (responses removed)
+2025-09-02 03:42:18,875 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses_20250902_010400.csv
+2025-09-02 05:59:58,120 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv (responses removed)
+2025-09-02 05:59:58,136 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses_20250902_010400.csv
+2025-09-02 08:13:44,756 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv (responses removed)
+2025-09-02 08:13:44,774 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses_20250902_010400.csv
+2025-09-02 10:30:50,712 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv (responses removed)
+2025-09-02 10:30:50,757 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses_20250902_010400.csv
+2025-09-02 13:37:11,968 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv (responses removed)
+2025-09-02 13:37:12,019 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses_20250902_010400.csv
+2025-09-02 16:16:45,692 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv (responses removed)
+2025-09-02 16:16:45,737 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses_20250902_010400.csv
+2025-09-02 18:40:05,432 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv (responses removed)
+2025-09-02 18:40:05,529 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses_20250902_010400.csv
+2025-09-02 19:50:14,062 - INFO - Received signal 2. Initiating graceful shutdown...
+2025-09-02 19:50:20,759 - INFO - Received signal 2. Initiating graceful shutdown...
+2025-09-02 19:51:31,112 - INFO - 🛑 Audit interrupted by user
+2025-09-02 19:51:31,239 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv (responses removed)
+2025-09-02 19:51:31,365 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses_20250902_010400.csv
+2025-09-02 19:51:31,374 - INFO - ✅ Concurrent processing completed!
+2025-09-02 19:51:31,376 - INFO - 🤖 Final worker count: 1
+2025-09-02 19:51:31,544 - INFO - 🎉 Audit completed successfully!
+2025-09-02 19:51:31,545 - INFO - 📁 Next steps:
+2025-09-02 19:51:31,546 - INFO -    1. Review results: results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-02 19:51:31,547 - INFO -    2. Run analysis: python Phase3_Analysis/analyze_results.py --results_file results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 16:20:12,805 - INFO - Initialized audit session 20250902_010400
+2025-09-03 16:20:12,810 - INFO - 📂 Resuming session 20250902_010400
+2025-09-03 16:20:12,810 - INFO - 📂 Loaded progress: 3380/15552 completed
+2025-09-03 16:20:12,810 - INFO - 🔄 Resuming previous audit session
+2025-09-03 16:20:21,678 - ERROR - ❌ Ollama service not accessible on any host
+2025-09-03 16:20:21,679 - INFO - 🚀 Starting Ollama service...
+2025-09-03 16:20:21,680 - INFO - 🚀 Starting Ollama service with automatic GPU detection...
+2025-09-03 16:20:21,880 - WARNING - Docker compose failed: open v:\workspace\.devcontainer\docker-compose.yml: The system cannot find the path specified.
+
+2025-09-03 16:20:21,881 - INFO - 💡 Try running: docker compose -f .devcontainer/docker-compose.yml up -d ollama
+2025-09-03 16:20:21,881 - ERROR - ❌ Failed to start Ollama service
+2025-09-03 16:20:21,881 - ERROR - ❌ Audit failed or was interrupted
+2025-09-03 16:20:21,882 - INFO - 🔄 To resume: python src\Phase2_ModelAuditor\audit_model.py --model llama2:latest --corpus src/Phase1_CorpusGenerator/corpus/audit_corpus_gender_bias.csv --resume results\llama2_latest_20250902_010400\progress_20250902_010400.json
+2025-09-03 16:21:40,654 - INFO - Initialized audit session 20250902_010400
+2025-09-03 16:21:40,655 - INFO - 📂 Resuming session 20250902_010400
+2025-09-03 16:21:40,655 - INFO - 📂 Loaded progress: 3380/15552 completed
+2025-09-03 16:21:40,656 - INFO - 🔄 Resuming previous audit session
+2025-09-03 16:21:49,521 - ERROR - ❌ Ollama service not accessible on any host
+2025-09-03 16:21:49,522 - INFO - 🚀 Starting Ollama service...
+2025-09-03 16:21:49,522 - INFO - 🚀 Starting Ollama service with automatic GPU detection...
+2025-09-03 16:21:49,675 - WARNING - Docker compose failed: open v:\workspace\.devcontainer\docker-compose.yml: The system cannot find the path specified.
+
+2025-09-03 16:21:49,675 - INFO - 💡 Try running: docker compose -f .devcontainer/docker-compose.yml up -d ollama
+2025-09-03 16:21:49,675 - ERROR - ❌ Failed to start Ollama service
+2025-09-03 16:21:49,676 - ERROR - ❌ Audit failed or was interrupted
+2025-09-03 16:21:49,676 - INFO - 🔄 To resume: python src\Phase2_ModelAuditor\audit_model.py --model llama2:latest --corpus src/Phase1_CorpusGenerator/corpus/audit_corpus_gender_bias.csv --resume results\llama2_latest_20250902_010400\progress_20250902_010400.json
+2025-09-03 16:25:36,860 - INFO - Initialized audit session 20250902_010400
+2025-09-03 16:25:36,860 - INFO - 📂 Resuming session 20250902_010400
+2025-09-03 16:25:36,861 - INFO - 📂 Loaded progress: 3380/15552 completed
+2025-09-03 16:25:36,862 - INFO - 🔄 Resuming previous audit session
+2025-09-03 16:25:39,624 - INFO - ✅ Ollama service found at http://localhost:11434
+2025-09-03 16:25:39,641 - INFO - Available models: ['llama2:latest']
+2025-09-03 16:25:39,642 - INFO - ✅ Model llama2:latest is already available
+2025-09-03 16:25:39,642 - INFO - 📂 Loading corpus from src/Phase1_CorpusGenerator/corpus/audit_corpus_gender_bias.csv
+2025-09-03 16:25:39,672 - INFO - 🎯 Starting audit: 15552 total tests
+2025-09-03 16:25:39,672 - INFO - 📊 Model: llama2:latest
+2025-09-03 16:25:39,673 - INFO - 💾 Results will be saved to: results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 16:25:39,673 - INFO - ┌───────────────────────────────────────────────────────────────────────────────────────────┐
+2025-09-03 16:25:39,674 - INFO - │ Session: 20250902_010400                                                                  │
+2025-09-03 16:25:39,674 - INFO - │ Model:   llama2:latest                                                                    │
+2025-09-03 16:25:39,675 - INFO - │ Corpus:  src/Phase1_CorpusGenerator/corpus/audit_corpus_gender_bias.csv                   │
+2025-09-03 16:25:39,675 - INFO - │ Progress:3380/15552 (21.7%)                                                               │
+2025-09-03 16:25:39,675 - INFO - │ Output:  results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv  │
+2025-09-03 16:25:39,675 - INFO - │ ETA Mode:Dynamic                                                                          │
+2025-09-03 16:25:39,676 - INFO - └───────────────────────────────────────────────────────────────────────────────────────────┘
+2025-09-03 16:25:39,676 - INFO - 📈 ETA will be calculated dynamically based on actual performance
+2025-09-03 16:25:39,723 - INFO - 📂 Loaded 3380 existing results
+2025-09-03 16:25:39,954 - INFO - 📂 Resuming at test 3380/15552 (0-based index)
+2025-09-03 16:25:39,976 - INFO - 📂 Loaded 3380 existing results
+2025-09-03 16:25:39,977 - INFO - 🔄 Using sequential processing mode...
+2025-09-03 16:25:39,978 - INFO - 🔍 AI Bias Detection Audit Progress
+2025-09-03 16:25:39,978 - INFO - Testing AI model responses against bias detection corpus
+2025-09-03 16:25:39,979 - INFO - Progress shows: Completed/Total | Elapsed Time | Remaining Time | Success Rate | Failed Count
+2025-09-03 16:25:39,979 - INFO - 💡 Press 'p' at any time to pause/resume the audit
+
+2025-09-03 16:32:11,314 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 16:32:11,427 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 16:37:56,397 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 16:37:56,440 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 16:41:35,874 - INFO - Received signal 2. Initiating graceful shutdown...
+2025-09-03 16:41:35,905 - INFO - 🛑 Audit interrupted by user
+2025-09-03 16:41:36,279 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 16:41:36,469 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 16:41:36,488 - INFO - ✅ Sequential processing completed!
+2025-09-03 16:41:36,583 - INFO - 🎉 Audit completed successfully!
+2025-09-03 16:41:36,585 - INFO - 📁 Next steps:
+2025-09-03 16:41:36,589 - INFO -    1. Review results: results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 16:41:36,591 - INFO -    2. Run analysis: python Phase3_Analysis/analyze_results.py --results_file results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 16:42:16,433 - INFO - Initialized audit session 20250902_010400
+2025-09-03 16:42:16,433 - INFO - 📂 Resuming session 20250902_010400
+2025-09-03 16:42:16,434 - INFO - 📂 Loaded progress: 3404/15552 completed
+2025-09-03 16:42:16,434 - INFO - 🔄 Resuming previous audit session
+2025-09-03 16:42:19,186 - INFO - ✅ Ollama service found at http://localhost:11434
+2025-09-03 16:42:19,210 - INFO - Available models: ['llama2:latest']
+2025-09-03 16:42:19,211 - INFO - ✅ Model llama2:latest is already available
+2025-09-03 16:42:19,211 - INFO - 📂 Loading corpus from src/Phase1_CorpusGenerator/corpus/audit_corpus_gender_bias.csv
+2025-09-03 16:42:19,241 - INFO - 🎯 Starting audit: 15552 total tests
+2025-09-03 16:42:19,241 - INFO - 📊 Model: llama2:latest
+2025-09-03 16:42:19,242 - INFO - 💾 Results will be saved to: results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 16:42:19,243 - INFO - ┌───────────────────────────────────────────────────────────────────────────────────────────┐
+2025-09-03 16:42:19,243 - INFO - │ Session: 20250902_010400                                                                  │
+2025-09-03 16:42:19,243 - INFO - │ Model:   llama2:latest                                                                    │
+2025-09-03 16:42:19,243 - INFO - │ Corpus:  src/Phase1_CorpusGenerator/corpus/audit_corpus_gender_bias.csv                   │
+2025-09-03 16:42:19,244 - INFO - │ Progress:3404/15552 (21.9%)                                                               │
+2025-09-03 16:42:19,244 - INFO - │ Output:  results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv  │
+2025-09-03 16:42:19,244 - INFO - │ ETA Mode:Dynamic                                                                          │
+2025-09-03 16:42:19,245 - INFO - └───────────────────────────────────────────────────────────────────────────────────────────┘
+2025-09-03 16:42:19,245 - INFO - 📈 ETA will be calculated dynamically based on actual performance
+2025-09-03 16:42:19,285 - INFO - 📂 Loaded 3404 existing results
+2025-09-03 16:42:19,553 - INFO - 📂 Resuming at test 3404/15552 (0-based index)
+2025-09-03 16:42:19,581 - INFO - 📂 Loaded 3404 existing results
+2025-09-03 16:42:19,582 - INFO - 🔄 Using sequential processing mode...
+2025-09-03 16:42:19,582 - INFO - 🔍 AI Bias Detection Audit Progress
+2025-09-03 16:42:19,583 - INFO - Testing AI model responses against bias detection corpus
+2025-09-03 16:42:19,583 - INFO - Progress shows: Completed/Total | Elapsed Time | Remaining Time | Success Rate | Failed Count
+2025-09-03 16:42:19,584 - INFO - 💡 Press 'p' at any time to pause/resume the audit
+
+2025-09-03 16:44:31,177 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 16:44:31,387 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 16:56:38,756 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 16:56:39,023 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 17:07:19,738 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 17:07:20,073 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 17:19:24,468 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 17:19:24,629 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 17:35:52,095 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 17:35:52,408 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 17:51:52,070 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 17:51:52,335 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 18:18:56,354 - INFO - Received signal 2. Initiating graceful shutdown...
+2025-09-03 18:18:57,400 - INFO - 🛑 Audit interrupted by user
+2025-09-03 18:18:57,486 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 18:18:57,540 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 18:18:57,554 - INFO - ✅ Sequential processing completed!
+2025-09-03 18:18:57,556 - INFO - 
+📊 Error Statistics:
+2025-09-03 18:18:57,557 - INFO -    🔴 Server errors (500): 0
+2025-09-03 18:18:57,558 - INFO -    ⏰ Timeouts: 4
+2025-09-03 18:18:57,558 - INFO -    🔌 Connection errors: 1
+2025-09-03 18:18:57,559 - INFO -    ❓ Other errors: 0
+2025-09-03 18:18:57,560 - INFO -    📈 Total error attempts: 5
+2025-09-03 18:18:57,631 - INFO - 🎉 Audit completed successfully!
+2025-09-03 18:18:57,631 - INFO - 📁 Next steps:
+2025-09-03 18:18:57,632 - INFO -    1. Review results: results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 18:18:57,633 - INFO -    2. Run analysis: python Phase3_Analysis/analyze_results.py --results_file results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 21:15:53,652 - INFO - Initialized audit session 20250902_010400
+2025-09-03 21:15:53,653 - INFO - 📂 Resuming session 20250902_010400
+2025-09-03 21:15:53,653 - INFO - 📂 Loaded progress: 3465/15552 completed
+2025-09-03 21:15:53,653 - INFO - 🔄 Resuming previous audit session
+2025-09-03 21:15:56,406 - INFO - ✅ Ollama service found at http://localhost:11434
+2025-09-03 21:15:56,428 - INFO - Available models: ['llama2:latest']
+2025-09-03 21:15:56,429 - INFO - ✅ Model llama2:latest is already available
+2025-09-03 21:15:56,430 - INFO - 📂 Loading corpus from src/Phase1_CorpusGenerator/corpus/audit_corpus_gender_bias.csv
+2025-09-03 21:15:56,458 - INFO - 🎯 Starting audit: 15552 total tests
+2025-09-03 21:15:56,459 - INFO - 📊 Model: llama2:latest
+2025-09-03 21:15:56,459 - INFO - 💾 Results will be saved to: results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 21:15:56,460 - INFO - ┌───────────────────────────────────────────────────────────────────────────────────────────┐
+2025-09-03 21:15:56,460 - INFO - │ Session: 20250902_010400                                                                  │
+2025-09-03 21:15:56,461 - INFO - │ Model:   llama2:latest                                                                    │
+2025-09-03 21:15:56,461 - INFO - │ Corpus:  src/Phase1_CorpusGenerator/corpus/audit_corpus_gender_bias.csv                   │
+2025-09-03 21:15:56,462 - INFO - │ Progress:3465/15552 (22.3%)                                                               │
+2025-09-03 21:15:56,462 - INFO - │ Output:  results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv  │
+2025-09-03 21:15:56,463 - INFO - │ ETA Mode:Dynamic                                                                          │
+2025-09-03 21:15:56,463 - INFO - └───────────────────────────────────────────────────────────────────────────────────────────┘
+2025-09-03 21:15:56,463 - INFO - 📈 ETA will be calculated dynamically based on actual performance
+2025-09-03 21:15:56,504 - INFO - 📂 Loaded 3465 existing results
+2025-09-03 21:15:56,505 - WARNING - ⚠️ Inconsistent progress detected: current_index=3465 completed_tests=3465. Adjusting resume point.
+2025-09-03 21:15:56,516 - INFO - 🔄 Adjusted completed_tests from results file count: 3465
+2025-09-03 21:15:56,762 - INFO - 📂 Resuming at test 3465/15552 (0-based index)
+2025-09-03 21:15:56,787 - INFO - 📂 Loaded 3465 existing results
+2025-09-03 21:15:56,788 - INFO - 🔄 Using sequential processing mode...
+2025-09-03 21:15:56,789 - INFO - 🔍 AI Bias Detection Audit Progress
+2025-09-03 21:15:56,789 - INFO - Testing AI model responses against bias detection corpus
+2025-09-03 21:15:56,789 - INFO - Progress shows: Completed/Total | Elapsed Time | Remaining Time | Success Rate | Failed Count
+2025-09-03 21:15:56,789 - INFO - 💡 Press 'p' at any time to pause/resume the audit
+
+2025-09-03 21:18:00,111 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 21:18:00,147 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 21:24:56,286 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 21:24:56,341 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 21:30:59,120 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 21:30:59,157 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 21:37:14,068 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 21:37:14,131 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 21:43:53,183 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 21:43:53,231 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 21:49:35,578 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 21:49:35,614 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 21:55:33,670 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 21:55:33,709 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 22:01:23,744 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 22:01:23,783 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 22:08:13,426 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 22:08:13,472 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 22:12:52,016 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 22:12:52,097 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 22:18:35,738 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 22:18:35,823 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 22:29:09,836 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 22:29:09,905 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 22:33:22,986 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 22:33:23,036 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 22:41:21,743 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 22:41:21,895 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 22:43:55,300 - INFO - Initialized audit session 20250903_224355
+2025-09-03 22:43:58,057 - INFO - ✅ Ollama service found at http://localhost:11434
+2025-09-03 22:43:58,088 - INFO - Available models: ['llama2:latest']
+2025-09-03 22:43:58,090 - INFO - ✅ Model llama2:latest is already available
+2025-09-03 22:43:58,092 - INFO - 📂 Loading corpus from src/Phase1_CorpusGenerator/corpus/quick_test_corpus.csv
+2025-09-03 22:43:58,135 - INFO - 🎯 Starting audit: 18 total tests
+2025-09-03 22:43:58,137 - INFO - 📊 Model: llama2:latest
+2025-09-03 22:43:58,139 - INFO - 💾 Results will be saved to: results\llama2_latest_20250903_224355\results_llama2_latest_20250903_224355.csv
+2025-09-03 22:43:58,141 - INFO - ┌───────────────────────────────────────────────────────────────────────────────────────────┐
+2025-09-03 22:43:58,142 - INFO - │ Session: 20250903_224355                                                                  │
+2025-09-03 22:43:58,144 - INFO - │ Model:   llama2:latest                                                                    │
+2025-09-03 22:43:58,145 - INFO - │ Corpus:  src/Phase1_CorpusGenerator/corpus/quick_test_corpus.csv                          │
+2025-09-03 22:43:58,147 - INFO - │ Progress:0/18 (0.0%)                                                                      │
+2025-09-03 22:43:58,149 - INFO - │ Output:  results\llama2_latest_20250903_224355\results_llama2_latest_20250903_224355.csv  │
+2025-09-03 22:43:58,151 - INFO - │ ETA Mode:Dynamic                                                                          │
+2025-09-03 22:43:58,152 - INFO - └───────────────────────────────────────────────────────────────────────────────────────────┘
+2025-09-03 22:43:58,154 - INFO - 📈 ETA will be calculated dynamically based on actual performance
+2025-09-03 22:43:58,162 - INFO - 🚀 Starting fresh audit with 18 tests
+2025-09-03 22:43:58,562 - INFO - � Starting concurrent processing with 2 workers...
+2025-09-03 22:43:58,564 - INFO - 📊 Processing 18 tests
+2025-09-03 22:43:58,566 - INFO - 
+🔍 AI Bias Detection Audit Progress
+2025-09-03 22:43:58,567 - INFO - Testing AI model responses against bias detection corpus
+2025-09-03 22:43:58,569 - INFO - Progress shows: Completed/Total | Elapsed Time | Remaining Time | Success Rate
+2025-09-03 22:43:58,571 - INFO - 💡 Press 'p' at any time to pause/resume the audit
+
+2025-09-03 22:43:58,753 - INFO - 💾 Results saved to results\llama2_latest_20250903_224355\results_llama2_latest_20250903_224355.csv
+2025-09-03 22:43:58,766 - INFO - 💾 Full responses saved to results\llama2_latest_20250903_224355\results_llama2_latest_20250903_224355_responses.csv
+2025-09-03 22:43:59,322 - INFO - 💾 Results saved to results\llama2_latest_20250903_224355\results_llama2_latest_20250903_224355.csv
+2025-09-03 22:43:59,345 - INFO - 💾 Full responses saved to results\llama2_latest_20250903_224355\results_llama2_latest_20250903_224355_responses.csv
+2025-09-03 22:43:59,840 - INFO - 💾 Results saved to results\llama2_latest_20250903_224355\results_llama2_latest_20250903_224355.csv
+2025-09-03 22:43:59,848 - INFO - 💾 Full responses saved to results\llama2_latest_20250903_224355\results_llama2_latest_20250903_224355_responses.csv
+2025-09-03 22:44:00,403 - INFO - 💾 Results saved to results\llama2_latest_20250903_224355\results_llama2_latest_20250903_224355.csv
+2025-09-03 22:44:00,415 - INFO - 💾 Full responses saved to results\llama2_latest_20250903_224355\results_llama2_latest_20250903_224355_responses.csv
+2025-09-03 22:44:00,665 - INFO - 💾 Results saved to results\llama2_latest_20250903_224355\results_llama2_latest_20250903_224355.csv
+2025-09-03 22:44:00,678 - INFO - 💾 Full responses saved to results\llama2_latest_20250903_224355\results_llama2_latest_20250903_224355_responses.csv
+2025-09-03 22:44:00,707 - INFO - ✅ Concurrent processing completed!
+2025-09-03 22:44:00,709 - INFO - 🤖 Final worker count: 2
+2025-09-03 22:44:00,710 - INFO - 🎉 Audit completed successfully!
+2025-09-03 22:44:00,712 - INFO - 📁 Next steps:
+2025-09-03 22:44:00,713 - INFO -    1. Review results: results\llama2_latest_20250903_224355\results_llama2_latest_20250903_224355.csv
+2025-09-03 22:44:00,714 - INFO -    2. Run analysis: python Phase3_Analysis/analyze_results.py --results_file results\llama2_latest_20250903_224355\results_llama2_latest_20250903_224355.csv
+2025-09-03 22:44:53,546 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 22:44:53,591 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 22:56:04,512 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 22:56:04,572 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 23:02:31,891 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 23:02:31,994 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 23:11:36,568 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 23:11:36,615 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 23:16:57,376 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 23:16:57,426 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 23:25:47,741 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 23:25:47,797 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 23:33:15,650 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 23:33:15,752 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 23:38:48,488 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 23:38:48,542 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 23:46:21,203 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 23:46:21,306 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 23:53:21,172 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 23:53:21,257 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-03 23:58:34,483 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-03 23:58:34,529 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 00:03:16,224 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 00:03:16,340 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 00:09:57,092 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 00:09:57,213 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 00:17:30,616 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 00:17:30,665 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 00:24:24,950 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 00:24:25,016 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 00:35:02,902 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 00:35:03,051 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 00:45:45,001 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 00:45:45,059 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 00:55:56,570 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 00:55:56,613 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 01:05:18,509 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 01:05:18,579 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 01:12:12,974 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 01:12:13,097 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 01:19:28,940 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 01:19:29,014 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 01:30:26,066 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 01:30:26,126 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 01:37:50,590 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 01:37:50,644 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 01:45:57,427 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 01:45:57,520 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 01:54:11,015 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 01:54:11,110 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 02:02:49,676 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 02:02:49,754 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 02:10:12,008 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 02:10:12,068 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 02:17:34,939 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 02:17:35,001 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 02:25:47,741 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 02:25:47,788 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 02:31:21,359 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 02:31:21,481 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 02:36:45,407 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 02:36:45,470 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 02:47:13,471 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 02:47:13,522 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 02:54:15,100 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 02:54:15,183 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 03:02:33,166 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 03:02:33,230 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 03:11:25,519 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 03:11:25,641 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 03:19:10,229 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 03:19:10,300 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 03:24:42,539 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 03:24:42,626 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 03:36:33,479 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 03:36:33,560 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 03:45:42,707 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 03:45:42,772 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 03:55:29,076 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 03:55:29,129 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 04:03:32,949 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 04:03:33,007 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 04:09:22,534 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 04:09:22,595 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 04:16:06,989 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 04:16:07,060 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 04:24:53,828 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 04:24:53,879 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 04:35:21,384 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 04:35:21,508 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 04:47:02,550 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 04:47:02,639 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 04:55:17,243 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 04:55:17,347 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 05:05:25,947 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 05:05:26,008 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 05:12:57,471 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 05:12:57,533 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 05:20:26,194 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 05:20:26,252 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 05:26:45,454 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 05:26:45,584 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 05:40:06,360 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 05:40:06,579 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 05:46:13,130 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 05:46:13,205 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 05:53:58,810 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 05:53:58,882 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 06:03:40,671 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 06:03:40,762 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 06:11:30,040 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 06:11:30,128 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 06:15:45,770 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 06:15:45,902 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 06:23:43,857 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 06:23:43,916 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 06:31:44,940 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 06:31:44,996 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 06:39:26,620 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 06:39:26,705 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 06:47:11,064 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 06:47:11,132 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 06:55:59,601 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 06:55:59,655 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 07:02:28,587 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 07:02:28,648 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 07:10:38,606 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 07:10:38,668 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 07:17:13,650 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 07:17:13,716 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 07:23:12,535 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 07:23:12,623 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 07:28:00,800 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 07:28:00,858 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 07:32:09,819 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 07:32:09,871 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 07:38:44,511 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 07:38:44,595 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 07:45:11,643 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 07:45:11,710 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 07:49:28,039 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 07:49:28,103 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 07:54:31,352 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 07:54:31,426 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 08:01:22,579 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 08:01:22,647 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 08:10:35,151 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 08:10:35,220 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 08:16:27,777 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 08:16:27,842 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 08:24:52,704 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 08:24:52,775 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 08:31:32,761 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 08:31:32,834 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 08:37:45,162 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 08:37:45,229 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 08:45:00,630 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 08:45:00,699 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 08:54:09,573 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 08:54:09,647 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 09:02:40,901 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 09:02:40,978 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 09:10:13,467 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 09:10:13,524 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 09:17:59,835 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 09:17:59,897 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 09:25:27,132 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 09:25:27,193 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 09:29:40,301 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 09:29:40,361 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 09:34:13,084 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 09:34:13,216 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 09:40:15,164 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 09:40:15,335 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 09:54:49,769 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 09:54:49,894 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 10:01:53,649 - INFO - Received signal 2. Initiating graceful shutdown...
+2025-09-04 10:01:53,654 - INFO - 🛑 Audit interrupted by user
+2025-09-04 10:01:53,799 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 10:01:53,864 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 10:01:53,934 - INFO - ✅ Sequential processing completed!
+2025-09-04 10:01:53,935 - INFO - 
+📊 Error Statistics:
+2025-09-04 10:01:53,936 - INFO -    🔴 Server errors (500): 1
+2025-09-04 10:01:53,937 - INFO -    ⏰ Timeouts: 1
+2025-09-04 10:01:53,937 - INFO -    🔌 Connection errors: 0
+2025-09-04 10:01:53,938 - INFO -    ❓ Other errors: 0
+2025-09-04 10:01:53,939 - INFO -    📈 Total error attempts: 2
+2025-09-04 10:01:53,988 - INFO - 🎉 Audit completed successfully!
+2025-09-04 10:01:53,989 - INFO - 📁 Next steps:
+2025-09-04 10:01:53,990 - INFO -    1. Review results: results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 10:01:53,990 - INFO -    2. Run analysis: python Phase3_Analysis/analyze_results.py --results_file results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 19:52:13,636 - INFO - Initialized audit session 20250902_010400
+2025-09-04 19:52:13,639 - INFO - 📂 Resuming session 20250902_010400
+2025-09-04 19:52:13,639 - INFO - 📂 Loaded progress: 4680/15552 completed
+2025-09-04 19:52:13,640 - INFO - 🔄 Resuming previous audit session
+2025-09-04 19:52:16,393 - INFO - ✅ Ollama service found at http://localhost:11434
+2025-09-04 19:52:16,398 - INFO - Available models: ['llama2:latest']
+2025-09-04 19:52:16,399 - INFO - ✅ Model llama2:latest is already available
+2025-09-04 19:52:16,399 - INFO - 📂 Loading corpus from src/Phase1_CorpusGenerator/corpus/audit_corpus_gender_bias.csv
+2025-09-04 19:52:16,438 - INFO - 🎯 Starting audit: 15552 total tests
+2025-09-04 19:52:16,439 - INFO - 📊 Model: llama2:latest
+2025-09-04 19:52:16,440 - INFO - 💾 Results will be saved to: results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 19:52:16,441 - INFO - ┌───────────────────────────────────────────────────────────────────────────────────────────┐
+2025-09-04 19:52:16,442 - INFO - │ Session: 20250902_010400                                                                  │
+2025-09-04 19:52:16,442 - INFO - │ Model:   llama2:latest                                                                    │
+2025-09-04 19:52:16,443 - INFO - │ Corpus:  src/Phase1_CorpusGenerator/corpus/audit_corpus_gender_bias.csv                   │
+2025-09-04 19:52:16,443 - INFO - │ Progress:4680/15552 (30.1%)                                                               │
+2025-09-04 19:52:16,443 - INFO - │ Output:  results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv  │
+2025-09-04 19:52:16,444 - INFO - │ ETA Mode:Dynamic                                                                          │
+2025-09-04 19:52:16,444 - INFO - └───────────────────────────────────────────────────────────────────────────────────────────┘
+2025-09-04 19:52:16,444 - INFO - 📈 ETA will be calculated dynamically based on actual performance
+2025-09-04 19:52:16,495 - INFO - 📂 Loaded 4680 existing results
+2025-09-04 19:52:16,717 - INFO - 📂 Resuming at test 4680/15552 (0-based index)
+2025-09-04 19:52:16,750 - INFO - 📂 Loaded 4680 existing results
+2025-09-04 19:52:16,751 - INFO - 🔄 Using sequential processing mode...
+2025-09-04 19:52:16,751 - INFO - 🔍 AI Bias Detection Audit Progress
+2025-09-04 19:52:16,752 - INFO - Testing AI model responses against bias detection corpus
+2025-09-04 19:52:16,752 - INFO - Progress shows: Completed/Total | Elapsed Time | Remaining Time | Success Rate | Failed Count
+2025-09-04 19:52:16,753 - INFO - 💡 Press 'p' at any time to pause/resume the audit
+
+2025-09-04 19:58:47,277 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 19:58:47,322 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 20:07:13,450 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 20:07:13,507 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 20:10:11,321 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 20:10:11,365 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 20:19:18,611 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 20:19:18,671 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 20:25:52,364 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 20:25:52,434 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 20:32:34,587 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 20:32:34,635 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 20:37:09,871 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 20:37:09,977 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 20:48:28,017 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 20:48:28,153 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 20:56:47,865 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 20:56:47,959 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 21:05:00,054 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 21:05:00,147 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 21:09:41,300 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 21:09:41,420 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 21:19:13,384 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 21:19:13,494 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 21:26:30,772 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 21:26:30,972 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 21:32:57,876 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 21:32:57,966 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 21:40:11,281 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 21:40:11,400 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 21:47:37,225 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 21:47:37,319 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 21:56:25,240 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 21:56:25,343 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 22:04:53,733 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 22:04:53,839 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 22:12:19,691 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 22:12:19,797 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 22:21:12,670 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 22:21:12,800 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 22:27:44,739 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 22:27:44,880 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 22:37:46,770 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 22:37:46,890 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 22:45:55,856 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 22:45:55,994 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 22:56:39,936 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 22:56:40,011 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 23:05:01,002 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 23:05:01,075 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 23:14:25,287 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 23:14:25,409 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 23:23:49,161 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 23:23:49,226 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 23:34:59,109 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 23:34:59,169 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 23:45:18,812 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 23:45:18,883 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 23:51:08,748 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 23:51:08,809 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-04 23:56:29,393 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-04 23:56:29,445 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 00:02:31,799 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 00:02:31,865 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 00:09:50,597 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 00:09:50,665 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 00:18:28,496 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 00:18:28,566 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 00:24:41,352 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 00:24:41,412 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 00:32:17,896 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 00:32:18,003 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 00:40:52,384 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 00:40:52,543 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 01:15:04,818 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 01:15:06,094 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 01:29:35,642 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 01:29:35,773 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 03:40:20,873 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 03:40:21,093 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 04:22:56,989 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 04:22:57,285 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 04:37:29,455 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 04:37:29,666 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 04:47:51,574 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 04:47:51,730 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 04:55:36,620 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 04:55:36,719 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 05:03:32,965 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 05:03:33,137 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 05:14:12,912 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 05:14:13,025 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 05:23:39,646 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 05:23:39,828 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 05:32:08,540 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 05:32:08,670 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 05:40:51,489 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 05:40:51,683 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 05:48:09,163 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 05:48:09,251 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 05:57:07,450 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 05:57:07,543 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 06:12:24,700 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 06:12:24,847 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 06:23:31,070 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 06:23:31,184 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 06:33:42,060 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 06:33:42,174 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 06:46:55,393 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 06:46:55,496 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 06:58:26,463 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 06:58:26,628 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 07:05:04,191 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 07:05:04,298 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 07:18:11,212 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 07:18:11,345 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 07:30:30,919 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 07:30:31,031 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 07:46:29,834 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 07:46:30,013 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 07:54:39,420 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 07:54:39,613 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 08:08:09,395 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 08:08:09,522 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 08:13:42,339 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 08:13:42,463 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 08:26:28,870 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 08:26:29,037 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 08:34:34,039 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 08:34:34,159 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 08:45:26,980 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 08:45:27,077 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 08:58:33,100 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 08:58:33,256 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 09:09:07,055 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 09:09:07,165 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 09:19:04,517 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 09:19:04,621 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 09:30:18,023 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 09:30:18,147 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 09:37:25,877 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 09:37:26,011 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 09:49:57,537 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 09:49:57,683 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 09:58:19,806 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 09:58:19,973 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 10:10:15,498 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 10:10:15,625 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 10:18:11,066 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 10:18:11,185 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 10:27:43,277 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 10:27:43,412 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 10:33:39,757 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 10:33:39,870 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 10:40:32,523 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 10:40:32,612 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 10:48:35,445 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 10:48:35,569 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 11:01:16,552 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 11:01:16,692 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 11:16:13,826 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 11:16:13,935 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 11:27:30,272 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 11:27:30,432 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 11:37:57,549 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 11:37:57,657 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 11:51:42,153 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 11:51:42,306 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 12:00:24,477 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 12:00:24,609 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 12:09:54,082 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 12:09:54,207 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 12:19:13,862 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 12:19:14,009 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 12:28:28,826 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 12:28:29,026 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 12:45:57,170 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 12:45:57,309 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 13:06:42,015 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 13:06:42,187 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 13:35:53,411 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 13:35:53,594 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 13:47:41,625 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 13:47:41,763 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 13:55:36,656 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 13:55:36,741 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 14:04:44,618 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 14:04:44,701 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 14:19:24,465 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 14:19:24,714 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 14:52:24,350 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 14:52:25,883 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 15:22:37,511 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 15:22:37,777 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 16:06:38,712 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 16:06:39,136 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 16:29:33,851 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 16:29:34,079 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 16:42:30,005 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 16:42:30,093 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 16:51:45,952 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 16:51:46,045 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 17:04:09,179 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 17:04:09,326 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 17:57:24,007 - INFO - Received signal 2. Initiating graceful shutdown...
+2025-09-05 17:57:24,011 - INFO - 🛑 Audit interrupted by user
+2025-09-05 17:57:24,140 - INFO - 💾 Results saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 17:57:24,234 - INFO - 💾 Full responses saved to results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400_responses.csv
+2025-09-05 17:57:24,296 - INFO - ✅ Sequential processing completed!
+2025-09-05 17:57:24,297 - INFO - 
+📊 Error Statistics:
+2025-09-05 17:57:24,298 - INFO -    🔴 Server errors (500): 0
+2025-09-05 17:57:24,298 - INFO -    ⏰ Timeouts: 49
+2025-09-05 17:57:24,299 - INFO -    🔌 Connection errors: 0
+2025-09-05 17:57:24,300 - INFO -    ❓ Other errors: 0
+2025-09-05 17:57:24,300 - INFO -    📈 Total error attempts: 49
+2025-09-05 17:57:24,375 - INFO - 🎉 Audit completed successfully!
+2025-09-05 17:57:24,377 - INFO - 📁 Next steps:
+2025-09-05 17:57:24,378 - INFO -    1. Review results: results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-09-05 17:57:24,378 - INFO -    2. Run analysis: python Phase3_Analysis/analyze_results.py --results_file results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv

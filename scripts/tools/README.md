@@ -28,10 +28,10 @@ uv run equilens status
 uv run equilens models pull phi3:mini
 
 # Run bias audit
-uv run equilens audit config.json
+uv run equilens audit
 
 # Generate corpus
-uv run equilens generate config.json
+uv run equilens generate
 
 # Analyze results
 uv run equilens analyze results.csv

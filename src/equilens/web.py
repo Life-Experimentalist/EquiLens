@@ -99,7 +99,7 @@ async def root():
             <ol>
                 <li>Check GPU: <code>uv run equilens gpu-check</code></li>
                 <li>Start services: <code>uv run equilens start</code></li>
-                <li>Run audit: <code>uv run equilens audit config.json</code></li>
+                <li>Run audit: <code>uv run equilens audit</code></li>
                 <li>Analyze results: <code>uv run equilens analyze results.csv</code></li>
             </ol>
         </div>

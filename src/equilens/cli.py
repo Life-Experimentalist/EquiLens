@@ -36,7 +36,7 @@ def measure_single_request_time(model_name: str, prompt: str) -> dict:
         response = requests.post(
             "http://localhost:11434/api/generate",
             json={"model": model_name, "prompt": prompt, "stream": False},
-            timeout=60,  # Increased timeout for multiple tests
+            timeout=180,  # No timeout limit for ETA measurements
         )
         end_time = time.time()
         actual_time = end_time - start_time
@@ -67,6 +67,40 @@ def measure_single_request_time(model_name: str, prompt: str) -> dict:
         return {"success": False, "time": actual_time, "error": str(e)}
 
 
+def preload_model(model_name: str) -> dict:
+    """Send a dummy request to preload the model into Ollama's memory"""
+    console.print(f"[dim]🔄 Preloading model {model_name} into memory...[/dim]")
+
+    try:
+        start_time = time.time()
+        response = requests.post(
+            "http://localhost:11434/api/generate",
+            json={"model": model_name, "prompt": "Hi", "stream": False},
+            timeout=300,  # 5 minutes timeout for initial model loading
+        )
+        end_time = time.time()
+        preload_time = end_time - start_time
+
+        if response.status_code == 200:
+            console.print(f"[dim]✓ Model preloaded in {preload_time:.1f}s[/dim]")
+            return {"success": True, "time": preload_time, "error": None}
+        else:
+            console.print(
+                f"[dim]⚠️ Preload failed: API error {response.status_code}[/dim]"
+            )
+            return {
+                "success": False,
+                "time": preload_time,
+                "error": f"API error {response.status_code}",
+            }
+
+    except Exception as e:
+        end_time = time.time()
+        preload_time = end_time - start_time if "start_time" in locals() else 0.0
+        console.print(f"[dim]⚠️ Preload failed: {str(e)}[/dim]")
+        return {"success": False, "time": preload_time, "error": str(e)}
+
+
 def measure_average_request_time(model_name: str, num_tests: int = 5) -> dict:
     """Measure average time across multiple test prompts, accounting for all time spent"""
     test_prompts = [
@@ -79,6 +113,13 @@ def measure_average_request_time(model_name: str, num_tests: int = 5) -> dict:
 
     # Use the specified number of prompts (3 or 5)
     prompts_to_test = test_prompts[:num_tests]
+
+    # First, preload the model to ensure it's in memory
+    preload_result = preload_model(model_name)
+    if not preload_result["success"]:
+        console.print(
+            "[dim]⚠️ Model preload failed, but continuing with timing tests...[/dim]"
+        )
 
     console.print(
         f"[dim]📊 Testing {num_tests} prompts to measure average response time for {model_name}...[/dim]"
@@ -311,7 +352,7 @@ app = typer.Typer(
     name="equilens",
     help="🔍 EquiLens - AI Bias Detection Platform",
     rich_markup_mode="rich",
-    no_args_is_help=False,
+    invoke_without_command=True,
 )
 
 # Global manager instance
@@ -326,63 +367,24 @@ def get_manager() -> EquiLensManager:
     return manager
 
 
-@app.callback(invoke_without_command=True)
+@app.callback()
 def main(
     ctx: typer.Context,
     version: Annotated[
         bool | None, typer.Option("--version", "-V", help="Show version and exit")
     ] = None,
 ):
-    """
-    🔍 **EquiLens** - AI Bias Detection Platform
-
-    A comprehensive platform for detecting and analyzing bias in AI language models.
-    This unified CLI provides all functionality needed to run bias audits, analyze results,
-    and manage the underlying services.
-
-    **Quick Start:**
-
-    1. `uv run equilens gpu-check` - Check GPU acceleration
-    2. `uv run equilens start` - Start Ollama services
-    3. `uv run equilens audit config.json` - Run bias audit
-    4. `uv run equilens analyze results.csv` - Analyze results
-
-    **Interactive Mode:**
-
-    • `uv run equilens tui` - Launch interactive terminal UI
-    • `uv run equilens web` - Start web interface (future)
-    """
+    """Main callback to handle version flag and show help when no command provided"""
     if version:
         from equilens import __version__
 
         console.print(f"EquiLens version {__version__}")
         raise typer.Exit()
 
-    # When no subcommand is provided, show introduction and help
     if ctx.invoked_subcommand is None:
-        # Show introduction
-        console.print(Panel.fit(
-            "[bold blue]🔍 EquiLens - AI Bias Detection Platform[/bold blue]\n\n"
-            "[cyan]Welcome to EquiLens![/cyan] 🎯\n\n"
-            "A comprehensive platform for detecting and analyzing bias in AI language models.\n"
-            "This unified CLI provides all functionality needed to run bias audits, analyze\n"
-            "results, and manage the underlying services.\n\n"
-            "[yellow]✨ Key Features:[/yellow]\n"
-            "• Comprehensive bias detection across multiple dimensions\n"
-            "• Interactive model selection and configuration\n"
-            "• Real-time progress tracking with resume capability\n"
-            "• Advanced session management and backup system\n"
-            "• Rich visual reporting and analysis tools\n"
-            "• Docker-based service orchestration\n\n"
-            "[green]Ready to detect bias in AI models? Explore the commands below![/green]",
-            border_style="blue",
-            title="🎯 AI Bias Detection Platform"
-        ))
-
-        # Show the help content below
-        console.print("\n[bold]📖 Available Commands and Options:[/bold]\n")
+        # Show help and exit cleanly without error
         console.print(ctx.get_help())
-        raise typer.Exit()
+        raise typer.Exit(0)
 
 
 @app.command()
@@ -409,9 +411,7 @@ def start():
         console.print(
             "  • [cyan]uv run equilens models pull llama2[/cyan] - Download a model"
         )
-        console.print(
-            "  • [cyan]uv run equilens audit config.json[/cyan] - Run bias audit"
-        )
+        console.print("  • [cyan]uv run equilens audit[/cyan] - Run bias audit")
     else:
         console.print("[red]❌ Failed to start services[/red]")
         raise typer.Exit(1)
@@ -440,7 +440,21 @@ def gpu_check():
 
 
 # Models subcommand group
-models_app = typer.Typer(help="🎯 Manage Ollama models")
+models_app = typer.Typer(
+    help="🎯 Manage Ollama models",
+    invoke_without_command=True,
+)
+
+
+@models_app.callback()
+def models_callback(ctx: typer.Context):
+    """Handle models group to show help when no subcommand provided"""
+    if ctx.invoked_subcommand is None:
+        # Show help and exit cleanly without error
+        console.print(ctx.get_help())
+        raise typer.Exit(0)
+
+
 app.add_typer(models_app, name="models")
 
 
@@ -457,12 +471,111 @@ def models_pull(
         str, typer.Argument(help="Model name to download (e.g., llama2, phi3)")
     ],
 ):
-    """📥 Download a model"""
+    """⬇️ Download a model"""
     manager = get_manager()
-
     success = manager.pull_model(model)
-    if not success:
+    if success:
+        console.print(f"✅ [green]Model {model} downloaded successfully![/green]")
+    else:
+        console.print(f"[red]❌ Failed to download model {model}[/red]")
         raise typer.Exit(1)
+
+
+# Audit subcommand group for session management
+audit_app = typer.Typer(
+    help="🔍 Bias audit operations and session management",
+    invoke_without_command=True,
+)
+
+
+@audit_app.callback()
+def audit_callback(ctx: typer.Context):
+    """Handle audit group to show help when no subcommand provided"""
+    if ctx.invoked_subcommand is None:
+        # Show help and exit cleanly without error
+        console.print(ctx.get_help())
+        raise typer.Exit(0)
+
+
+app.add_typer(audit_app, name="audit")
+
+
+@audit_app.command("run")
+def audit_run(
+    model: Annotated[
+        str | None, typer.Option("--model", "-m", help="Model name to audit")
+    ] = None,
+    corpus: Annotated[
+        str | None, typer.Option("--corpus", "-c", help="Path to corpus CSV file")
+    ] = None,
+    output_dir: Annotated[
+        str, typer.Option("--output-dir", "-o", help="Output directory for results")
+    ] = "results",
+    enhanced: Annotated[
+        bool,
+        typer.Option(
+            "--enhanced",
+            "-e",
+            help="[BETA] Use experimental enhanced auditor (may have reliability issues)",
+        ),
+    ] = False,
+    batch_size: Annotated[
+        int,
+        typer.Option(
+            "--batch-size", "-b", help="Number of concurrent requests for enhanced mode"
+        ),
+    ] = 5,
+    retry_immediate: Annotated[
+        bool,
+        typer.Option(
+            "--retry-immediate",
+            help="Attempt immediate retries for failed tuples before queuing",
+        ),
+    ] = False,
+    retry_batch_size: Annotated[
+        int,
+        typer.Option(
+            "--retry-batch-size",
+            help="Number of successes between processing the retry queue",
+        ),
+    ] = 5,
+    resume: Annotated[
+        str | None,
+        typer.Option(
+            "--resume",
+            "-r",
+            help="Resume from a previous interrupted audit session (provide progress file path)",
+        ),
+    ] = None,
+    silent: Annotated[
+        bool,
+        typer.Option(
+            "--silent",
+            "-s",
+            help="Suppress subprocess output to avoid emoji encoding errors",
+        ),
+    ] = False,
+    help_cmd: Annotated[
+        bool, typer.Option("--help", help="Show this help message and exit")
+    ] = False,
+):
+    """🔍 Run bias audit with interactive prompts and enhanced visual design"""
+    # This will contain the main audit logic (moved from the standalone audit command)
+    # For now, redirect to the main audit function
+    from equilens.cli import audit
+
+    audit(
+        model=model,
+        corpus=corpus,
+        output_dir=output_dir,
+        enhanced=enhanced,
+        batch_size=batch_size,
+        retry_immediate=retry_immediate,
+        retry_batch_size=retry_batch_size,
+        resume=resume,
+        silent=silent,
+        help_cmd=help_cmd,
+    )
 
 
 def find_interrupted_sessions(model: str | None = None) -> list[tuple[str, dict]]:
@@ -587,6 +700,20 @@ def audit(
             "--batch-size", "-b", help="Number of concurrent requests for enhanced mode"
         ),
     ] = 5,
+    retry_immediate: Annotated[
+        bool,
+        typer.Option(
+            "--retry-immediate",
+            help="Attempt immediate retries for failed tuples before queuing",
+        ),
+    ] = False,
+    retry_batch_size: Annotated[
+        int,
+        typer.Option(
+            "--retry-batch-size",
+            help="Number of successes between processing the retry queue",
+        ),
+    ] = 5,
     resume: Annotated[
         str | None,
         typer.Option(
@@ -604,43 +731,53 @@ def audit(
         ),
     ] = False,
     help_cmd: Annotated[
-        bool,
-        typer.Option(
-            "--help",
-            help="Show this help message and exit"
-        )
+        bool, typer.Option("--help", help="Show this help message and exit")
     ] = False,
 ):
     """🔍 Run bias audit with interactive prompts and enhanced visual design"""
 
     # Show introduction and help only when --help is explicitly requested
     if help_cmd:
-        console.print(Panel.fit(
-            "[bold blue]🔍 EquiLens Bias Audit System[/bold blue]\n\n"
-            "[cyan]Welcome to the EquiLens AI Bias Detection Platform![/cyan]\n\n"
-            "This tool performs comprehensive bias audits on AI language models\n"
-            "by testing them against carefully crafted test corpora and analyzing\n"
-            "the responses for various forms of bias including gender, racial,\n"
-            "cultural, and socioeconomic biases.\n\n"
-            "[yellow]✨ Features:[/yellow]\n"
-            "• Interactive model selection from available Ollama models\n"
-            "• Automatic corpus detection and ETA estimation\n"
-            "• Resume functionality for interrupted audits\n"
-            "• Real-time progress tracking with dynamic concurrency\n"
-            "• Comprehensive bias analysis and reporting\n"
-            "• Automatic backup system (every 100 tests)\n\n"
-            "[green]Ready to start your bias audit? Use the options below![/green]",
-            border_style="blue",
-            title="🎯 AI Bias Detection"
-        ))
+        console.print(
+            Panel.fit(
+                "[bold blue]🔍 EquiLens Bias Audit System[/bold blue]\n\n"
+                "[cyan]Welcome to the EquiLens AI Bias Detection Platform![/cyan]\n\n"
+                "This tool performs comprehensive bias audits on AI language models\n"
+                "by testing them against carefully crafted test corpora and analyzing\n"
+                "the responses for various forms of bias including gender, racial,\n"
+                "cultural, and socioeconomic biases.\n\n"
+                "[yellow]✨ Features:[/yellow]\n"
+                "• Interactive model selection from available Ollama models\n"
+                "• Automatic corpus detection and ETA estimation\n"
+                "• Resume functionality for interrupted audits\n"
+                "• Real-time progress tracking with dynamic concurrency\n"
+                "• Comprehensive bias analysis and reporting\n"
+                "• Automatic backup system (every 100 tests)\n\n"
+                "[green]Ready to start your bias audit? Use the options below![/green]",
+                border_style="blue",
+                title="🎯 AI Bias Detection",
+            )
+        )
 
         # Show help content
         console.print("\n[bold]📖 Command Options:[/bold]\n")
         console.print("[cyan]--model, -m[/cyan]        Model name to audit")
         console.print("[cyan]--corpus, -c[/cyan]       Path to corpus CSV file")
-        console.print("[cyan]--output-dir, -o[/cyan]   Output directory for results (default: results)")
-        console.print("[cyan]--enhanced, -e[/cyan]     Use experimental enhanced auditor")
-        console.print("[cyan]--batch-size, -b[/cyan]   Number of concurrent requests (default: 5)")
+        console.print(
+            "[cyan]--output-dir, -o[/cyan]   Output directory for results (default: results)"
+        )
+        console.print(
+            "[cyan]--enhanced, -e[/cyan]     Use experimental enhanced auditor"
+        )
+        console.print(
+            "[cyan]--batch-size, -b[/cyan]   Number of concurrent requests (default: 5)"
+        )
+        console.print(
+            "[cyan]--retry-immediate[/cyan]  Attempt immediate retries for failed tuples"
+        )
+        console.print(
+            "[cyan]--retry-batch-size[/cyan] Number of successes between retry batches (default: 5)"
+        )
         console.print("[cyan]--resume, -r[/cyan]       Resume from previous session")
         console.print("[cyan]--silent, -s[/cyan]       Suppress subprocess output")
         console.print("[cyan]--help[/cyan]             Show this help message")
@@ -649,11 +786,17 @@ def audit(
         console.print("[dim]# Interactive mode (recommended for beginners)[/dim]")
         console.print("[yellow]uv run equilens audit[/yellow]")
         console.print("\n[dim]# Specify model and corpus directly[/dim]")
-        console.print("[yellow]uv run equilens audit --model llama2:latest --corpus corpus.csv[/yellow]")
+        console.print(
+            "[yellow]uv run equilens audit --model llama2:latest --corpus corpus.csv[/yellow]"
+        )
         console.print("\n[dim]# Resume a previous audit session[/dim]")
-        console.print("[yellow]uv run equilens audit --resume path/to/progress.json[/yellow]")
+        console.print(
+            "[yellow]uv run equilens audit --resume path/to/progress.json[/yellow]"
+        )
 
-        console.print("\n[bold]💡 Tip:[/bold] Run without options for interactive setup!")
+        console.print(
+            "\n[bold]💡 Tip:[/bold] Run without options for interactive setup!"
+        )
         return
 
     # Auto-resume detection (if not explicitly resuming and no model specified)
@@ -691,26 +834,38 @@ def audit(
                 console.print(
                     "[dim]Configure concurrency for resumed audit session[/dim]"
                 )
-                console.print("  • [cyan]Higher values[/cyan]: Faster processing but more load")
-                console.print("  • [cyan]Lower values[/cyan]: Safer for system stability")
+                console.print(
+                    "  • [cyan]Higher values[/cyan]: Faster processing but more load"
+                )
+                console.print(
+                    "  • [cyan]Lower values[/cyan]: Safer for system stability"
+                )
                 console.print("  • [cyan]1[/cyan]: Sequential processing (safest)")
 
                 workers_input = typer.prompt(
                     "Enter number of concurrent workers (1-10)",
                     default="3",
-                    show_default=True
+                    show_default=True,
                 ).strip()
 
                 try:
                     max_workers = int(workers_input)
                     max_workers = max(1, min(max_workers, 10))  # Clamp between 1-10
                     if max_workers > 1:
-                        console.print(f"[green]✓ Configured for {max_workers} concurrent workers with dynamic scaling[/green]")
-                        console.print("[dim]Workers will automatically scale down on errors and back up on success[/dim]")
+                        console.print(
+                            f"[green]✓ Configured for {max_workers} concurrent workers with dynamic scaling[/green]"
+                        )
+                        console.print(
+                            "[dim]Workers will automatically scale down on errors and back up on success[/dim]"
+                        )
                     else:
-                        console.print("[yellow]⚡ Using sequential processing mode[/yellow]")
+                        console.print(
+                            "[yellow]⚡ Using sequential processing mode[/yellow]"
+                        )
                 except ValueError:
-                    console.print("[yellow]⚠️ Invalid input, using default of 3 workers[/yellow]")
+                    console.print(
+                        "[yellow]⚠️ Invalid input, using default of 3 workers[/yellow]"
+                    )
                     max_workers = 3
             else:
                 console.print(f"[red]❌ Invalid progress file: {resume}[/red]")
@@ -827,10 +982,16 @@ def audit(
         console.print("\n[bold]🚀 Performance Configuration[/bold]")
         console.print("[dim]Would you like to enable concurrent processing?[/dim]")
         console.print("  • [cyan]1[/cyan]: Single threaded (stable, recommended)")
-        console.print("  • [cyan]2-5[/cyan]: Multiple threads (faster but may stress Ollama)")
+        console.print(
+            "  • [cyan]2-5[/cyan]: Multiple threads (faster but may stress Ollama)"
+        )
         console.print("  • [cyan]n[/cyan]: Use default (single threaded)")
 
-        worker_input = typer.prompt("Number of concurrent workers", default="1", show_default=True).strip().lower()
+        worker_input = (
+            typer.prompt("Number of concurrent workers", default="1", show_default=True)
+            .strip()
+            .lower()
+        )
 
         if worker_input == "n" or worker_input == "":
             max_workers = 1
@@ -840,12 +1001,20 @@ def audit(
                 if 1 <= workers <= 8:  # Reasonable limit
                     max_workers = workers
                     if workers > 1:
-                        console.print(f"[yellow]⚡ Using {workers} concurrent threads[/yellow]")
-                        console.print("[dim]Note: This may stress Ollama - monitor for connection errors[/dim]")
+                        console.print(
+                            f"[yellow]⚡ Using {workers} concurrent threads[/yellow]"
+                        )
+                        console.print(
+                            "[dim]Note: This may stress Ollama - monitor for connection errors[/dim]"
+                        )
                     else:
-                        console.print("[green]✓ Using single threaded processing[/green]")
+                        console.print(
+                            "[green]✓ Using single threaded processing[/green]"
+                        )
                 else:
-                    console.print("[red]❌ Invalid number (1-8), using single threaded[/red]")
+                    console.print(
+                        "[red]❌ Invalid number (1-8), using single threaded[/red]"
+                    )
                     max_workers = 1
             except ValueError:
                 console.print("[red]❌ Invalid input, using single threaded[/red]")
@@ -1140,91 +1309,213 @@ def audit(
 
             except ImportError as e:
                 console.print(f"[red]❌ Failed to import enhanced auditor: {e}[/red]")
-                console.print("[yellow]Falling back to enhanced auditor via subprocess...[/yellow]")
+                console.print(
+                    "[yellow]Falling back to enhanced auditor via subprocess...[/yellow]"
+                )
                 enhanced = False
 
         if not enhanced:
             # Use enhanced auditor via subprocess wrapper
-            console.print("🚀 [green]Using enhanced auditor with dynamic concurrency...[/green]")
+            console.print(
+                "🚀 [green]Using enhanced auditor with dynamic concurrency...[/green]"
+            )
 
-            # Configure subprocess parameters based on silent mode
-            cmd = [
+            # Configure subprocess parameters with robust fallback and error handling
+            import logging
+            import traceback
+
+            # Ensure logs directory exists
+            logs_dir = Path("logs")
+            try:
+                logs_dir.mkdir(parents=True, exist_ok=True)
+            except Exception:
+                # If we can't create logs dir, continue without file logging
+                pass
+
+            log_file = logs_dir / "audit_errors.log"
+            logging.basicConfig(
+                filename=str(log_file),
+                level=logging.DEBUG,
+                format="%(asctime)s %(levelname)s: %(message)s",
+            )
+
+            # Candidate auditor scripts in preferred order
+            candidates = [
+                Path("src/Phase2_ModelAuditor/audit_model.py"),
+                Path("src/Phase2_ModelAuditor/enhanced_audit_model.py"),
+            ]
+
+            auditor_script = None
+            for p in candidates:
+                if p.exists():
+                    auditor_script = p
+                    break
+
+            if auditor_script is None:
+                msg = (
+                    "No auditor script found. Expected one of: "
+                    "src/Phase2_ModelAuditor/audit_model.py, audit_model.py, "
+                    "or enhanced_audit_model.py."
+                )
+                console.print(f"[red]❌ {msg}[/red]")
+                logging.error(msg)
+                raise typer.Exit(2)
+
+            base_cmd = [
                 "python",
-                "src/Phase2_ModelAuditor/audit_model_fixed.py",
+                str(auditor_script),
                 "--model",
                 model,
                 "--corpus",
                 corpus,
                 "--output-dir",
                 output_dir,
-                "--max-workers",
-                str(max_workers),
             ]
 
-            # Add ETA parameter if user specified one
+            # Add concurrency option only if the target script supports it
+            base_cmd.extend(["--max-workers", str(max_workers)])
+
             if user_eta_preference is not None:
-                cmd.extend(["--eta-per-test", str(user_eta_preference)])
+                base_cmd.extend(["--eta-per-test", str(user_eta_preference)])
 
-            # Add resume parameter if specified
             if resume:
-                cmd.extend(["--resume", resume])
+                base_cmd.extend(["--resume", resume])
+            # Forward retry options
+            if retry_immediate:
+                base_cmd.append("--retry-immediate")
+            if retry_batch_size is not None:
+                base_cmd.extend(["--retry-batch-size", str(retry_batch_size)])
 
-            if silent:
-                # Redirect both stdout and stderr to suppress emoji encoding errors
-                subprocess.run(
-                    cmd,
-                    check=True,
-                    stderr=subprocess.DEVNULL,
-                    stdout=subprocess.DEVNULL,
-                    text=True,
-                    encoding="utf-8",
-                    errors="replace",
-                )
-                console.print(
-                    "[green]✓[/green] Audit process completed successfully (output suppressed)"
-                )
-            else:
-                # Normal execution with full output but with proper encoding handling
+            def run_audit(cmd, silent_mode=False):
+                cwd = Path.cwd()
                 try:
-                    subprocess.run(
-                        cmd,
-                        check=True,
-                        text=True,
-                        encoding="utf-8",
-                        errors="replace",
-                    )
-                except UnicodeDecodeError:
-                    # Fallback for Unicode issues - run in silent mode automatically
-                    console.print(
-                        "[yellow]⚠ Unicode display issues detected, switching to silent mode...[/yellow]"
-                    )
-                    fallback_cmd = [
-                        "python",
-                        "src/Phase2_ModelAuditor/audit_model.py",
-                        "--model",
-                        model,
-                        "--corpus",
-                        corpus,
-                        "--output-dir",
-                        output_dir,
-                    ]
-
-                    # Add ETA parameter if user specified one
-                    if user_eta_preference is not None:
-                        fallback_cmd.extend(
-                            ["--eta-per-test", str(user_eta_preference)]
+                    if silent_mode:
+                        subprocess.run(
+                            cmd,
+                            check=True,
+                            stderr=subprocess.DEVNULL,
+                            stdout=subprocess.DEVNULL,
+                            text=True,
+                            encoding="utf-8",
+                            errors="replace",
+                            cwd=str(cwd),
                         )
-
-                    subprocess.run(
-                        fallback_cmd,
-                        check=True,
-                        stderr=subprocess.DEVNULL,
-                        stdout=subprocess.DEVNULL,
-                        text=True,
-                    )
+                    else:
+                        subprocess.run(
+                            cmd,
+                            check=True,
+                            text=True,
+                            encoding="utf-8",
+                            errors="replace",
+                            cwd=str(cwd),
+                        )
+                    return True
+                except FileNotFoundError as fnf:
                     console.print(
-                        "[green]✓[/green] Audit completed (Unicode issues bypassed)"
+                        f"[red]❌ Unable to start auditor: {fnf}. Is Python on the PATH and file present?[/red]"
                     )
+                    logging.exception("FileNotFoundError while starting auditor")
+                    return False
+                except UnicodeDecodeError:
+                    # Try again in silent mode to avoid console encoding problems
+                    console.print(
+                        "[yellow]⚠ Unicode decode error detected; retrying in silent mode...[/yellow]"
+                    )
+                    logging.warning("UnicodeDecodeError, retrying in silent mode")
+                    try:
+                        subprocess.run(
+                            cmd,
+                            check=True,
+                            stderr=subprocess.DEVNULL,
+                            stdout=subprocess.DEVNULL,
+                            text=True,
+                            encoding="utf-8",
+                            errors="replace",
+                            cwd=str(cwd),
+                        )
+                        return True
+                    except Exception:
+                        logging.exception("Retry in silent mode failed")
+                        return False
+                except subprocess.CalledProcessError as cpe:
+                    console.print(
+                        f"[red]❌ Auditor exited with non-zero status {cpe.returncode}. Check logs for details.[/red]"
+                    )
+                    logging.error("Auditor failed: %s", cpe)
+                    logging.debug(traceback.format_exc())
+                    return False
+                except KeyboardInterrupt:
+                    console.print(
+                        "[yellow]⏹️ Audit cancelled by user (KeyboardInterrupt).[/yellow]"
+                    )
+                    logging.info("Audit cancelled by user")
+                    raise
+                except Exception as exc:
+                    console.print(
+                        "[red]❌ Unexpected error while running auditor. See logs/audit_errors.log for details.[/red]"
+                    )
+                    logging.exception("Unexpected error while running auditor: %s", exc)
+                    return False
+
+            # Attempt to run normally first, then with fallbacks if needed
+            try:
+                success = run_audit(base_cmd, silent_mode=silent)
+
+                if not success and not silent:
+                    # If initial run failed, try a silent run to bypass console issues
+                    console.print(
+                        "[yellow]⚠ Attempting fallback: running auditor in silent mode...[/yellow]"
+                    )
+                    logging.info("Attempting fallback silent run for auditor")
+                    success = run_audit(base_cmd, silent_mode=True)
+
+                if not success:
+                    # If still failing, and we used a non-primary script, try other candidates
+                    for alt in candidates:
+                        if str(alt) == str(auditor_script):
+                            continue
+                        if not alt.exists():
+                            continue
+                        alt_cmd = [
+                            "python",
+                            str(alt),
+                            "--model",
+                            model,
+                            "--corpus",
+                            corpus,
+                            "--output-dir",
+                            output_dir,
+                        ]
+                        if user_eta_preference is not None:
+                            alt_cmd.extend(["--eta-per-test", str(user_eta_preference)])
+                        if resume:
+                            alt_cmd.extend(["--resume", resume])
+                        # Forward retry options
+                        if retry_immediate:
+                            alt_cmd.append("--retry-immediate")
+                        if retry_batch_size is not None:
+                            alt_cmd.extend(
+                                ["--retry-batch-size", str(retry_batch_size)]
+                            )
+                        console.print(
+                            f"[yellow]⚠ Trying alternative auditor script: {alt}[/yellow]"
+                        )
+                        logging.info("Trying alternative auditor: %s", alt)
+                        if run_audit(alt_cmd, silent_mode=silent):
+                            success = True
+                            break
+
+                if success:
+                    console.print(
+                        "[green]✓[/green] Audit process completed successfully"
+                    )
+                else:
+                    console.print(
+                        "[red]❌ Audit failed after retries. Check logs/audit_errors.log for details.[/red]"
+                    )
+                    raise typer.Exit(1) from None
+            except KeyboardInterrupt:
+                raise typer.Exit(1) from None
 
         # Success Panel with enhanced information
         safe_model = model.replace(":", "_")
@@ -1316,18 +1607,56 @@ def audit(
 @app.command()
 def generate(
     config: Annotated[
-        str, typer.Argument(help="Configuration file path for corpus generation")
-    ],
+        str | None,
+        typer.Option(
+            "--config",
+            "-c",
+            help="Configuration file path for corpus generation (optional - uses interactive mode if not provided)",
+        ),
+    ] = None,
 ):
-    """📝 Generate test corpus using configuration file"""
-    manager = get_manager()
+    """📝 Generate test corpus with interactive mode or configuration file"""
 
-    success = manager.generate_corpus(config)
-    if success:
-        console.print("✅ [green]Corpus generated successfully![/green]")
+    if config is None:
+        # Interactive mode - run the generate_corpus.py script directly without arguments
+        console.print("🎯 [bold]Starting interactive corpus generation...[/bold]")
+        console.print(
+            "[dim]This will use the word_lists.json configuration and guide you through the process.[/dim]"
+        )
+
+        try:
+            # Run the corpus generator in interactive mode
+            subprocess.run(
+                ["python", "src/Phase1_CorpusGenerator/generate_corpus.py"],
+                check=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+            )
+            console.print("✅ [green]Corpus generated successfully![/green]")
+            console.print(
+                "📁 [cyan]Check the src/Phase1_CorpusGenerator/corpus/ directory for the generated files.[/cyan]"
+            )
+        except subprocess.CalledProcessError as e:
+            console.print(
+                f"[red]❌ Corpus generation failed with exit code: {e.returncode}[/red]"
+            )
+            raise typer.Exit(1) from e
+        except FileNotFoundError as e:
+            console.print("[red]❌ Could not find corpus generator script[/red]")
+            console.print(
+                "[yellow]💡 Make sure you're in the EquiLens project root directory[/yellow]"
+            )
+            raise typer.Exit(1) from e
     else:
-        console.print("[red]❌ Corpus generation failed[/red]")
-        raise typer.Exit(1)
+        # Config file mode - use the manager as before
+        manager = get_manager()
+        success = manager.generate_corpus(config)
+        if success:
+            console.print("✅ [green]Corpus generated successfully![/green]")
+        else:
+            console.print("[red]❌ Corpus generation failed[/red]")
+            raise typer.Exit(1)
 
 
 @app.command()
@@ -1448,7 +1777,6 @@ def analyze(
                 [
                     "python",
                     "src/Phase3_Analysis/analyze_results.py",
-                    "--results_file",
                     results,
                 ],
                 check=True,
@@ -1469,7 +1797,6 @@ def analyze(
                     [
                         "python",
                         "src/Phase3_Analysis/analyze_results.py",
-                        "--results_file",
                         results,
                     ],
                     check=True,
@@ -1486,7 +1813,6 @@ def analyze(
                     [
                         "python",
                         "src/Phase3_Analysis/analyze_results.py",
-                        "--results_file",
                         results,
                     ],
                     check=True,
@@ -1626,13 +1952,13 @@ def tui():
         raise typer.Exit(1) from e
 
 
-@app.command("resume-list")
+@audit_app.command("list")
 def resume_list(
     model: Annotated[
         str | None, typer.Option("--model", "-m", help="Filter by model name")
     ] = None,
 ):
-    """List all available resume sessions with detailed information"""
+    """📋 List all available resume sessions with detailed information"""
     try:
         interrupted_sessions = find_interrupted_sessions(model)
 
@@ -1640,7 +1966,9 @@ def resume_list(
             console.print("[yellow]📭 No interrupted audit sessions found.[/yellow]")
             return
 
-        console.print(f"\n[bold cyan]📋 Available Resume Sessions ({len(interrupted_sessions)} total):[/bold cyan]\n")
+        console.print(
+            f"\n[bold cyan]📋 Available Resume Sessions ({len(interrupted_sessions)} total):[/bold cyan]\n"
+        )
 
         for i, (progress_file, progress_data) in enumerate(interrupted_sessions, 1):
             session_model = progress_data.get("model_name", "Unknown")
@@ -1657,6 +1985,7 @@ def resume_list(
             # Parse start time for better display
             try:
                 from datetime import datetime
+
                 start_dt = datetime.fromisoformat(start_time)
                 time_str = start_dt.strftime("%Y-%m-%d %H:%M:%S")
             except Exception:
@@ -1706,7 +2035,9 @@ def resume_list(
                     eta_str = f"{eta_seconds:.0f} seconds"
 
             # Display session information
-            console.print(f"[bold green]{i:2d}.[/bold green] [cyan]{session_model}[/cyan] - {completed:,}/{total:,} tests ({completion_percent:.1f}% complete)")
+            console.print(
+                f"[bold green]{i:2d}.[/bold green] [cyan]{session_model}[/cyan] - {completed:,}/{total:,} tests ({completion_percent:.1f}% complete)"
+            )
             console.print(f"     [dim]Session ID: {session_id}[/dim]")
             console.print(f"     [dim]Started: {time_str}[/dim]")
             console.print(f"     [dim]Last Save: {checkpoint_str}[/dim]")
@@ -1714,14 +2045,22 @@ def resume_list(
 
             # Progress details
             if failed > 0:
-                success_rate = ((completed - failed) / completed * 100) if completed > 0 else 0
-                console.print(f"     [dim]Progress: {completed:,} completed, {failed:,} failed ({success_rate:.1f}% success)[/dim]")
+                success_rate = (
+                    ((completed - failed) / completed * 100) if completed > 0 else 0
+                )
+                console.print(
+                    f"     [dim]Progress: {completed:,} completed, {failed:,} failed ({success_rate:.1f}% success)[/dim]"
+                )
             else:
-                console.print(f"     [dim]Progress: {completed:,} completed, 0 failed (100% success)[/dim]")
+                console.print(
+                    f"     [dim]Progress: {completed:,} completed, 0 failed (100% success)[/dim]"
+                )
 
             # Performance metrics
             if avg_response_time > 0:
-                console.print(f"     [dim]Performance: {avg_response_time:.1f}s avg, {throughput:.2f} tests/sec[/dim]")
+                console.print(
+                    f"     [dim]Performance: {avg_response_time:.1f}s avg, {throughput:.2f} tests/sec[/dim]"
+                )
                 console.print(f"     [dim]Est. Time Remaining: {eta_str}[/dim]")
 
             # Show backup information if available
@@ -1731,9 +2070,15 @@ def resume_list(
                     backup_files = list(backup_dir.glob("progress_backup_*.json"))
                     if backup_files:
                         # Get latest backup info
-                        latest_backup = max(backup_files, key=lambda x: x.stat().st_mtime)
-                        backup_time = datetime.fromtimestamp(latest_backup.stat().st_mtime)
-                        console.print(f"     [dim]Backups: {len(backup_files)} available (latest: {backup_time.strftime('%H:%M:%S')})[/dim]")
+                        latest_backup = max(
+                            backup_files, key=lambda x: x.stat().st_mtime
+                        )
+                        backup_time = datetime.fromtimestamp(
+                            latest_backup.stat().st_mtime
+                        )
+                        console.print(
+                            f"     [dim]Backups: {len(backup_files)} available (latest: {backup_time.strftime('%H:%M:%S')})[/dim]"
+                        )
             except Exception:
                 pass
 
@@ -1745,21 +2090,24 @@ def resume_list(
         raise typer.Exit(1) from e
 
 
-@app.command("resume-remove")
+@audit_app.command("remove")
 def resume_remove(
     identifiers: Annotated[
-        list[str], typer.Argument(help="Session indices (1,2,3...), session IDs, or folder names to remove (space-separated)")
+        list[str],
+        typer.Argument(
+            help="Session indices (1,2,3...), session IDs, or folder names to remove (space-separated)"
+        ),
     ],
     force: Annotated[
         bool, typer.Option("--force", "-f", help="Skip confirmation prompts")
     ] = False,
 ):
-    """Remove specific resume sessions by index number, session ID, or folder name
+    """🗑️ Remove specific resume sessions by index number, session ID, or folder name
 
     Examples:
-        uv run equilens resume-remove 1 3 5          # Remove sessions 1, 3, and 5 from the list
-        uv run equilens resume-remove folder_name    # Remove by folder name
-        uv run equilens resume-remove session_id     # Remove by session ID (if unique)
+        uv run equilens audit remove 1 3 5          # Remove sessions 1, 3, and 5 from the list
+        uv run equilens audit remove folder_name    # Remove by folder name
+        uv run equilens audit remove session_id     # Remove by session ID (if unique)
     """
     try:
         interrupted_sessions = find_interrupted_sessions()
@@ -1769,10 +2117,10 @@ def resume_remove(
             return
 
         # Build mappings for different identifier types
-        index_map = {}           # index -> progress_file
-        session_map = {}         # session_id -> [progress_files] (can be multiple)
-        folder_map = {}          # folder_name -> progress_file
-        session_details = {}     # progress_file -> progress_data
+        index_map = {}  # index -> progress_file
+        session_map = {}  # session_id -> [progress_files] (can be multiple)
+        folder_map = {}  # folder_name -> progress_file
+        session_details = {}  # progress_file -> progress_data
 
         for i, (progress_file, progress_data) in enumerate(interrupted_sessions, 1):
             session_id = progress_data.get("session_id", "")
@@ -1791,7 +2139,6 @@ def resume_remove(
             except Exception:
                 continue
 
-        sessions_to_remove = []
         removed_count = 0
         total_size_freed = 0
 
@@ -1825,7 +2172,9 @@ def resume_remove(
                     console.print(f"[cyan]🆔 Found session by session ID: {identifier}[/cyan]")
 
             else:
-                console.print(f"[yellow]⚠️ Identifier '{identifier}' not found. Use 'resume-list' to see available sessions.[/yellow]")
+                console.print(
+                    f"[yellow]⚠️ Identifier '{identifier}' not found. Use 'audit list' to see available sessions.[/yellow]"
+                )
                 continue
 
             # Process found sessions
@@ -1876,7 +2225,7 @@ def resume_remove(
                         size_str = f"{folder_size / 1024:.1f} KB"
 
                     # Show detailed information about what will be removed
-                    console.print(f"\n[yellow]🗑️ Session to remove:[/yellow]")
+                    console.print("\n[yellow]🗑️ Session to remove:[/yellow]")
                     console.print(f"     [bold]{session_model}[/bold] - {completed:,}/{total:,} tests ({completion_percent:.1f}% complete)")
                     console.print(f"     [dim]Matched by: {identifier}[/dim]")
                     console.print(f"     [dim]Started: {start_str}[/dim]")
@@ -1919,12 +2268,12 @@ def resume_remove(
             console.print(f"\n[green]✅ Successfully removed {removed_count} session(s).[/green]")
             console.print(f"[green]💾 Total space freed: {total_freed_str}[/green]")
         else:
-            console.print(f"\n[yellow]📭 No sessions were removed.[/yellow]")
+            console.print("\n[yellow]📭 No sessions were removed.[/yellow]")
 
     except Exception as e:
         console.print(f"[red]❌ Error removing resume sessions: {e}[/red]")
         raise typer.Exit(1) from e
-@app.command("resume-remove-range")
+@audit_app.command("remove-range")
 def resume_remove_range(
     range_spec: Annotated[
         str, typer.Argument(help="Range specification like '1-5', '1,3,5-8', or 'all'")
@@ -1933,13 +2282,13 @@ def resume_remove_range(
         bool, typer.Option("--force", "-f", help="Skip confirmation prompts")
     ] = False,
 ):
-    """Remove multiple resume sessions by range specification
+    """🗑️ Remove multiple resume sessions by range specification
 
     Examples:
-        uv run equilens resume-remove-range "1-5"       # Remove sessions 1 through 5
-        uv run equilens resume-remove-range "1,3,5"     # Remove sessions 1, 3, and 5
-        uv run equilens resume-remove-range "1-3,7-9"   # Remove sessions 1-3 and 7-9
-        uv run equilens resume-remove-range "all"       # Remove all sessions
+        uv run equilens audit remove-range "1-5"       # Remove sessions 1 through 5
+        uv run equilens audit remove-range "1,3,5"     # Remove sessions 1, 3, and 5
+        uv run equilens audit remove-range "1-3,7-9"   # Remove sessions 1-3 and 7-9
+        uv run equilens audit remove-range "all"       # Remove all sessions
     """
     try:
         interrupted_sessions = find_interrupted_sessions()
@@ -2036,7 +2385,7 @@ def resume_remove_range(
         removed_count = 0
         freed_space = 0
 
-        for progress_file, progress_data in sessions_to_remove:
+        for progress_file, _progress_data in sessions_to_remove:
             try:
                 folder_path = Path(progress_file).parent
 
@@ -2068,7 +2417,7 @@ def resume_remove_range(
         raise typer.Exit(1) from e
 
 
-@app.command("resume-clean")
+@audit_app.command("clean")
 def resume_clean(
     keep: Annotated[
         int, typer.Option("--keep", "-k", help="Number of most recent sessions to keep")
@@ -2077,7 +2426,7 @@ def resume_clean(
         bool, typer.Option("--force", "-f", help="Skip confirmation prompt")
     ] = False,
 ):
-    """Clean up old resume sessions, keeping only the most recent ones"""
+    """🧹 Clean up old resume sessions, keeping only the most recent ones"""
     try:
         interrupted_sessions = find_interrupted_sessions()
 

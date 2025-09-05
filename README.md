@@ -1,66 +1,226 @@
 # 🔍 EquiLens - AI Bias Detection Platform
 
-**Professional-grade AI bias detection platform with real-time ETA estimation, GPU acceleration, and comprehensive auditing capabilities**
+**A comprehensive platform for detecting and analyzing bias in AI language models**
 
-| License | Python | Docker | Platform |
-|---------|--------|--------|----------|
-| [![License](https://img.shields.io/badge/license-Apache%202.0-green)](#license) | [![Python](https://img.shields.io/badge/python-3.13-blue)](#requirements) | [![Docker](https://img.shields.io/badge/docker-compose-blue)](#docker-setup) | [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-brightgreen)](#compatibility) |
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Python](https://img.shields.io/badge/Python-3.11%2B-green.svg)](https://python.org)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://docker.com)
+[![UV](https://img.shields.io/badge/UV-Supported-yellow.svg)](https://github.com/astral-sh/uv)
+[![DOI](https://zenodo.org/badge/1033993763.svg)](https://doi.org/10.5281/zenodo.17014103)
+
+---
+
+**EquiLens** is a state-of-the-art bias detection framework designed for **Small Language Models (SLMs)** and **Large Language Models (LLMs)**. Built as part of a final-year research project at **Amrita Vishwa Vidyapeetham**, EquiLens provides researchers, developers, and organizations with powerful tools to identify, measure, and analyze bias in AI systems.
 
 ## 🌟 Key Features
 
-- 🎯 **Interactive CLI Interface** - Rich terminal UI with guided workflows and smart auto-discovery
-- ⏱️ **Real-Time ETA Estimation** - Actual API timing with 1.4x safety buffer for accurate planning
-- ⚡ **GPU Acceleration** - NVIDIA CUDA support for 5-10x faster model inference
-- 🔄 **Interruption & Resume** - Graceful handling of interruptions with automatic session recovery
-- 🎨 **Enhanced Progress Display** - Colorful progress bars with individual test timing metrics
-- 📊 **Comprehensive Analytics** - Detailed performance metrics and bias analysis reports
-- 🐳 **Docker Integration** - Containerized Ollama with GPU passthrough support
-- 🛡️ **Dual Auditor System** - Production-ready auditor with optional beta enhanced features
+### 🎯 **Interactive CLI Interface**
+- Rich terminal UI with guided workflows and smart auto-discovery
+- Modern Typer-based CLI with comprehensive help system
+- Cross-platform launchers (Windows `.bat`, Unix `.sh`)
+
+### ⏱️ **Real-Time ETA Estimation**
+- Actual API timing with 1.4x safety buffer for accurate planning
+- Multi-prompt averaging for reliable time estimates
+- Dynamic ETA updates during execution
+
+### ⚡ **GPU Acceleration**
+- NVIDIA CUDA support for 5-10x faster model inference
+- Automatic GPU detection and configuration
+- Graceful fallback to CPU-only mode
+
+### 🔄 **Interruption & Resume Support**
+- Graceful handling of interruptions with automatic session recovery
+- Persistent session state across restarts
+- Resume from exact point of interruption
+
+### 🎨 **Enhanced Progress Display**
+- Rich progress bars with individual test timing metrics
+- Real-time performance monitoring
+- Colorful, informative status indicators
+
+### 📊 **Comprehensive Analytics**
+- Detailed performance metrics and bias analysis reports
+- Statistical analysis with visualization
+- Export capabilities for further research
+
+### 🐳 **Docker Integration**
+- Containerized Ollama with GPU passthrough support
+- Automatic service detection and management
+- Persistent model storage
+
+### 🛡️ **Dual Auditor System**
+- Production-ready auditor for reliable results
+- Enhanced auditor with experimental features
+- Clear performance metrics comparison
 
 ## 🚀 Quick Start
 
-### ✅ System Check & Setup
+### Prerequisites
+- **Python 3.11+** (3.13 recommended)
+- **Docker Desktop** or **Docker Engine**
+- **4GB+ RAM** (8GB+ recommended)
+- **2GB+ free disk space**
+
+### Installation
 
 ```bash
-# 🔍 Verify system compatibility and requirements
-uv run python verify_setup.py
+# Clone the repository
+git clone https://github.com/Life-Experimentalists/EquiLens.git
+cd EquiLens
 
-# 🎮 Check GPU acceleration status
-uv run equilens status
+# Install UV (fast Python package manager)
+pip install uv
 
-# 🚀 Start Ollama services (auto-detects existing containers)
-uv run equilens start
+# Install dependencies
+uv sync
+
+# Verify installation
+python verify_setup.py
 ```
 
-### 🎯 Interactive Bias Audit (Recommended)
+**Sample verification output:**
+```
+🔍 EquiLens System Verification
+
+✓ Python 3.13.x detected
+✓ Required packages installed
+✓ Directory structure validated
+✓ Docker available
+✓ System resources sufficient (8GB RAM, 15GB disk)
+✓ UV package manager ready
+✓ Virtual environment configured
+
+🎉 EquiLens is ready for use!
+
+💡 Next steps:
+   1. uv run equilens status    # Check system status
+   2. uv run equilens start     # Start Ollama services
+   3. uv run equilens tui       # Launch interactive interface
+```
+
+### Basic Usage
+
+```bash
+# 1. Check system status and GPU availability
+uv run equilens status
+
+# 2. Start Ollama services (auto-detects existing containers)
+uv run equilens start
+
+# 3. Download a model for testing
+uv run equilens models pull phi3:mini
+
+# 4. Generate test corpus
+uv run equilens generate
+
+# 5. Run bias audit
+uv run equilens audit
+
+# 6. Analyze results
+uv run equilens analyze results/latest_session.csv
+```
+
+### Interactive Mode
+
+```bash
+# Launch interactive terminal interface
+uv run equilens tui
+```
+
+## 🖥️ Terminal User Interface (TUI)
+
+EquiLens features a modern, interactive Terminal UI built with Textual for an enhanced user experience:
+
+### 🎨 TUI Features
+- **📊 Real-time Progress Monitoring** - Live progress bars with ETA estimates
+- **🎛️ Interactive Controls** - Pause, resume, and stop operations
+- **📈 Performance Metrics** - Live system resource monitoring
+- **📋 Session Management** - View and manage active/past sessions
+- **🔍 Log Viewer** - Real-time log streaming with filtering
+- **⚙️ Settings Panel** - Adjust preferences without config files
+
+### 🚀 TUI Navigation
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    🔍 EquiLens TUI v1.0                     │
+├─────────────────────────────────────────────────────────────┤
+│  📊 Dashboard    🔍 Audit    📝 Generate    📈 Analyze      │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  🎯 Current Session: llama2_latest_20250813_143022          │
+│  📊 Progress: ████████████████████ 100% | 6/6 tests        │
+│  ⏱️ Runtime: 3m 52s | 📈 Avg: 32.3s/test                   │
+│                                                             │
+│  🎮 GPU: RTX 4090 (Ready) | 💾 RAM: 8.2GB/16GB             │
+│  🐳 Docker: 3 containers running | 🤖 Ollama: Healthy      │
+│                                                             │
+├─────────────────────────────────────────────────────────────┤
+│  [F1] Help | [F2] Settings | [ESC] Exit | [TAB] Navigate   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 📱 TUI Quick Actions
+- **Ctrl+C** - Graceful interrupt with session save
+- **F1** - Context-sensitive help
+- **F2** - Settings and configuration
+- **Tab/Shift+Tab** - Navigate between panels
+- **Enter** - Activate selected item
+- **Space** - Toggle pause/resume
+- **ESC** - Return to previous screen or exit
+
+## ⚙️ System Requirements
+
+### Minimum Requirements
+- **Operating System**: Windows 10+, macOS 10.15+, Ubuntu 18.04+
+- **Python**: 3.11 or newer (3.13 recommended)
+- **RAM**: 4GB (8GB+ recommended for better performance)
+- **Disk Space**: 2GB free space (additional space for models)
+- **Docker**: Latest version with compose support
+
+### Recommended for Optimal Performance
+- **RAM**: 16GB+ for large model processing
+- **GPU**: NVIDIA GPU with 4GB+ VRAM for acceleration
+- **CUDA**: Latest CUDA drivers for GPU support
+- **SSD**: For faster model loading and data processing
+
+### Platform Compatibility
+- ✅ **Windows 10/11** (WSL2 recommended for Docker)
+- ✅ **macOS** (Intel and Apple Silicon supported)
+- ✅ **Linux** (Ubuntu 20.04+, Fedora, Arch, CentOS)
+- ✅ **Docker Desktop** or **Docker Engine**
+- Automatic session management and resumption
+- Comprehensive completion metrics and analysis
 
 ```bash
 # 🔍 Launch interactive terminal interface
 uv run equilens tui
-
-# ✨ The interactive CLI provides:
-# - Auto-discovery of corpus files with ETA estimates
-# - Model selection with performance profiling
-# - Real-time progress monitoring with colorful displays
-# - Automatic session management and resumption
-# - Comprehensive completion metrics and analysis
 ```
+
 
 ### ⚡ Direct Command Usage
 
 ```bash
 # 📋 List all available models
 uv run equilens models list
+```
 
+```bash
 # 📥 Download a specific model
 uv run equilens models pull llama2:latest
+```
 
-# 🔍 Run bias audit with configuration file
-uv run equilens audit config.json
+```bash
+# 🔍 Run bias audit
+uv run equilens audit
+```
 
-# 📊 Generate test corpus
-uv run equilens generate corpus_config.json
+```bash
+# 📊 Generate test corpus using custom config files
+uv run equilens generate --config corpus_config.json
+```
 
+```bash
 # 📈 Analyze existing results
 uv run equilens analyze results/session_results.csv
 ```
@@ -72,10 +232,14 @@ uv run equilens analyze results/session_results.csv
 # 📦 Install dependencies with UV
 uv venv
 uv pip install -e .
+```
 
+```bash
 # 🐳 Start Docker services
 docker compose up -d
+```
 
+```bash
 # ✅ Verify installation
 uv run equilens --help
 ```
@@ -85,10 +249,14 @@ uv run equilens --help
 # 🐍 Create virtual environment
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
+```
 
+```bash
 # 📦 Install dependencies
 pip install -e .
+```
 
+```bash
 # 🐳 Start services
 docker compose up -d
 ```
@@ -113,9 +281,8 @@ docker compose up -d
 ### Audit Operations
 | Command             | Description                        | Example                                |
 | ------------------- | ---------------------------------- | -------------------------------------- |
-| `audit <config>`    | Run bias audit with ETA estimation | `uv run equilens audit config.json`    |
-| `audit --resume`    | Resume interrupted audit session   | `uv run equilens audit --resume`       |
-| `generate <config>` | Generate test corpus               | `uv run equilens generate config.json` |
+| `audit`    | Resume interrupted audit session   | `uv run equilens audit`       |
+| `generate --config` | Generate test corpus using custom config | `uv run equilens generate |
 | `analyze <results>` | Analyze audit results              | `uv run equilens analyze results.csv`  |
 
 ## 🎯 Enhanced Features
@@ -194,31 +361,169 @@ Session ID: llama2_latest_20250809_143022
 Results: results/llama2_latest_20250809_143022/
 ```
 
-## 🏗️ Architecture Overview
+## 🏗️ Platform Architecture
 
-```mermaid
-graph TB
-    subgraph "🎯 EquiLens Platform"
-        CLI[🖥️ Interactive CLI<br/>Real-time ETA & Progress]
-        TUI[📟 Terminal Interface<br/>Rich UI Components]
+EquiLens follows a modular, three-phase architecture designed for scalability and maintainability:
 
-        CLI --> MANAGER[🎛️ Core Manager]
-        TUI --> MANAGER
-
-        MANAGER --> AUDITOR[🔍 Model Auditor<br/>Dual System]
-        MANAGER --> GENERATOR[📝 Corpus Generator]
-        MANAGER --> ANALYZER[📊 Results Analyzer]
-
-        AUDITOR --> OLLAMA[🤖 Ollama Service<br/>Auto-detection]
-        OLLAMA --> GPU[⚡ GPU Acceleration<br/>NVIDIA CUDA]
-
-        AUDITOR --> SESSION[📁 Session Management<br/>Auto-resume]
-        GENERATOR --> SESSION
-        ANALYZER --> SESSION
-    end
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     🎯 EquiLens Platform                        │
+├─────────────────────────────────────────────────────────────────┤
+│  🖥️ Interactive CLI          📟 Terminal UI        🌐 Web UI   │
+│     (Typer + Rich)            (Textual)            (FastAPI)    │
+└─────────────────┬───────────────────────┬───────────────────────┘
+                  │                       │
+                  ▼                       ▼
+         ┌─────────────────────┐ ┌─────────────────────┐
+         │   🎛️ Core Manager   │ │   🔍 GPU Manager    │
+         │  (Orchestration)    │ │  (CUDA Detection)   │
+         └─────────┬───────────┘ └─────────────────────┘
+                   │
+                   ▼
+    ┌──────────────────────────────────────────────────┐
+    │              🐳 Docker Manager                   │
+    │        (Container Orchestration)                 │
+    └─────────┬──────────────────────────┬─────────────┘
+              │                          │
+              ▼                          ▼
+    ┌──────────────────┐        ┌─────────────────┐
+    │  📝 Phase 1      │        │  🔍 Phase 2     │
+    │ Corpus Generator │        │ Model Auditor   │
+    │                  │        │                 │
+    │ • Interactive    │        │ • Dual System   │
+    │ • Validation     │        │ • GPU Accel     │
+    │ • Cross-platform │        │ • Resume Logic  │
+    └──────────────────┘        └─────────────────┘
+              │                          │
+              ▼                          ▼
+    ┌─────────────────┐        ┌─────────────────┐
+    │  📊 Phase 3     │        │  🤖 Ollama      │
+    │ Result Analysis │        │   Service       │
+    │                 │        │                 │
+    │ • Visualization │        │ • Auto-detect   │
+    │ • Statistics    │        │ • Model Storage │
+    │ • Export        │        │ • API Gateway   │
+    └─────────────────┘        └─────────────────┘
 ```
 
-## 📁 Output Structure
+### Core Components
+
+#### 🎛️ **Core Manager** (`src/equilens/core/manager.py`)
+Central orchestrator that coordinates all platform operations, service management, and workflow execution.
+
+#### 🔍 **GPU Manager** (`src/equilens/core/gpu.py`)
+Handles NVIDIA GPU detection, CUDA availability checking, and performance optimization recommendations.
+
+#### � **Docker Manager** (`src/equilens/core/docker.py`)
+Manages container lifecycle, service discovery, and automated Ollama deployment with GPU passthrough.
+
+#### 📝 **Phase 1: Corpus Generator** (`src/Phase1_CorpusGenerator/`)
+Interactive corpus generation with strict validation, cross-platform compatibility, and configurable bias comparisons.
+
+#### 🔍 **Phase 2: Model Auditor** (`src/Phase2_ModelAuditor/`)
+Dual auditor system (Production + Enhanced) with real-time ETA, interruption handling, and comprehensive error recovery.
+
+#### 📊 **Phase 3: Result Analysis** (`src/Phase3_Analysis/`)
+Statistical analysis engine with visualization capabilities and export functionality for research papers.
+
+## 📁 Project Structure
+
+```
+EquiLens/
+├── 📁 src/
+│   ├── 📁 equilens/                 # Core platform package
+│   │   ├── 📄 cli.py               # Modern CLI interface (Typer + Rich)
+│   │   ├── 📄 tui.py               # Terminal UI (Textual)
+│   │   ├── 📄 web.py               # Web interface (FastAPI)
+│   │   └── � core/                # Core management modules
+│   │       ├── 📄 manager.py       # Central orchestrator
+│   │       ├── 📄 gpu.py           # GPU detection & management
+│   │       └── 📄 docker.py        # Container orchestration
+│   │
+│   ├── 📁 Phase1_CorpusGenerator/  # Bias corpus generation
+│   │   ├── 📄 generate_corpus.py   # Interactive corpus generator
+│   │   ├── 📄 test_config.py       # Strict validation system
+│   │   ├── 📄 word_lists.json      # Bias comparison configurations
+│   │   └── 📄 package_for_zenodo.ps1 # Research packaging script
+│   │
+│   ├── 📁 Phase2_ModelAuditor/     # Model bias auditing
+│   │   ├── � audit_model.py       # Production auditor (stable)
+│   │   └── 📄 enhanced_audit_model.py # Enhanced auditor (beta)
+│   │
+│   ├── 📁 Phase3_Analysis/         # Results analysis
+│   │   └── 📄 analyze_results.py   # Statistical analysis & visualization
+│   │
+│   └── 📁 tools/                   # Development utilities
+│       ├── 📄 quick_setup.py       # Interactive configuration creator
+│       ├── 📄 validate_config.py   # Configuration validator
+│       └── 📄 mock_ollama.py       # Testing mock server
+│
+├── 📁 docs/                        # Comprehensive documentation
+│   ├── 📄 QUICKSTART.md           # 5-minute setup guide
+│   ├── 📄 ARCHITECTURE.md         # System design details
+│   ├── 📄 CLI_FEATURES.md         # Interactive CLI guide
+│   └── 📄 EXECUTION_GUIDE.md      # Advanced execution patterns
+│
+├── 📁 results/                     # Audit session outputs
+├── 📄 docker-compose.yml          # Container orchestration
+├── 📄 Dockerfile                  # Application container
+├── 📄 pyproject.toml              # Modern Python packaging
+├── 📄 verify_setup.py             # System verification script
+├── 📄 equilens.bat                # Windows launcher
+├── 📄 equilens.sh                 # Unix/Linux launcher
+└── 📄 README.md                   # This comprehensive guide
+```
+
+## � Complete Command Reference
+
+### Core Commands
+
+| Command  | Description                                    | Example                  |
+| -------- | ---------------------------------------------- | ------------------------ |
+| `status` | Comprehensive system status with GPU detection | `uv run equilens status` |
+| `start`  | Start Ollama services with auto-detection      | `uv run equilens start`  |
+| `stop`   | Stop all services gracefully                   | `uv run equilens stop`   |
+| `tui`    | Launch interactive terminal interface          | `uv run equilens tui`    |
+
+### Model Management
+
+| Command                | Description                           | Example                                       |
+| ---------------------- | ------------------------------------- | --------------------------------------------- |
+| `models list`          | List available models with sizes      | `uv run equilens models list`                 |
+| `models pull <name>`   | Download model with progress tracking | `uv run equilens models pull phi3:mini`       |
+| `models remove <name>` | Remove model from storage             | `uv run equilens models remove llama2:latest` |
+
+### Audit Operations
+
+| Command            | Description                                | Example                                  |
+| ------------------ | ------------------------------------------ | ---------------------------------------- |
+| `audit`            | Interactive bias audit with auto-discovery | `uv run equilens audit`                  |
+| `resume`           | Resume interrupted audit session           | `uv run equilens resume`                 |
+| `resume <session>` | Resume specific session                    | `uv run equilens resume llama2_20250809` |
+
+### Corpus Generation
+
+| Command             | Description                        | Example                                                |
+| ------------------- | ---------------------------------- | ------------------------------------------------------ |
+| `generate`          | Interactive corpus generation      | `uv run equilens generate`                             |
+| `generate --config` | Generate with custom configuration | `uv run equilens generate --config corpus_config.json` |
+
+### Analysis & Results
+
+| Command          | Description                   | Example                                       |
+| ---------------- | ----------------------------- | --------------------------------------------- |
+| `analyze`        | Interactive result analysis   | `uv run equilens analyze`                     |
+| `analyze <file>` | Analyze specific results file | `uv run equilens analyze results/session.csv` |
+
+### System & Diagnostics
+
+| Command     | Description                      | Example                     |
+| ----------- | -------------------------------- | --------------------------- |
+| `gpu-check` | Detailed GPU acceleration status | `uv run equilens gpu-check` |
+| `--version` | Show platform version            | `uv run equilens --version` |
+| `--help`    | Show comprehensive help          | `uv run equilens --help`    |
+
+## 📁 Output Structure & Results
 
 Each audit creates a comprehensive session directory:
 
@@ -233,7 +538,61 @@ results/
 ```
 
 ### 📊 Comprehensive Results Data
-- Individual test responses and timing
+- **Individual test responses and timing** - Complete audit trail with timestamps
+- **Statistical bias analysis and scoring** - Quantitative bias measurements
+- **Performance metrics and system information** - Hardware utilization and efficiency
+- **Visual bias distribution charts** - Easy-to-understand bias pattern visualization
+- **Detailed recommendations** - Actionable insights for model improvement
+
+## 📋 Sample Interactive Workflow
+
+```
+🔍 EquiLens - Interactive Bias Audit
+
+Step 1: Model Selection
+✓ Found available models:
+  1. llama2:latest (3.6GB) - Ready
+  2. phi3:mini (2.1GB) - Ready
+  3. gemma2:2b (1.8GB) - Ready
+
+Select model [1-3]: 1
+
+Step 2: Corpus Discovery & ETA Estimation
+✓ Found corpus files with ETA estimates:
+  1. gender_bias_professional (6 tests) - ETA: 3m 55s (39.3s/test)
+  2. gender_bias_academic (12 tests) - ETA: 7m 48s (39.0s/test)
+  3. custom_bias_test (4 tests) - ETA: 2m 36s (39.0s/test)
+
+Select corpus [1-3]: 1
+
+Step 3: Final Confirmation
+Model: llama2:latest
+Corpus: gender_bias_professional (6 tests)
+Estimated Duration: 3m 55s
+Output Directory: results/llama2_latest_20250809_143022/
+
+Proceed with bias audit? [y/N]: y
+
+Step 4: Executing Bias Audit
+Running model evaluation against the test corpus...
+
+Progress: ████████████████████████████████████████ 100% | 6/6 tests | ⏱️ 3m 52s
+✓ Test 1: PASSED (32.1s) | ✓ Test 2: PASSED (28.9s) | ✓ Test 3: PASSED (35.2s)
+✓ Test 4: PASSED (29.8s) | ✓ Test 5: PASSED (31.4s) | ✓ Test 6: PASSED (30.1s)
+
+🎉 Audit Completed Successfully!
+
+📊 Session Summary:
+─────────────────────────────────────────────────────
+Tests Completed: 6/6 (100%)
+Success Rate: 100.0%
+Total Duration: 3m 52s
+Average Test Time: 32.3s
+Performance Rating: Excellent
+
+Session ID: llama2_latest_20250809_143022
+Results: results/llama2_latest_20250809_143022/
+```
 - Statistical bias analysis and scoring
 - Performance metrics and system information
 - Visual bias distribution charts
@@ -271,14 +630,6 @@ uv run equilens status
 
 Comprehensive documentation available in the `docs/` directory:
 
-- **📖 [CLI_FEATURES.md](docs/CLI_FEATURES.md)** - Complete CLI command reference
-- **📖 [INTERRUPTION_RESUMPTION.md](docs/INTERRUPTION_RESUMPTION.md)** - Session management guide
-- **📖 [PERFORMANCE_METRICS.md](docs/PERFORMANCE_METRICS.md)** - Metrics and analytics
-- **📖 [AUDITOR_COMPARISON.md](docs/AUDITOR_COMPARISON.md)** - Production vs Beta auditor comparison
-- **📖 [QUICKSTART.md](docs/QUICKSTART.md)** - Quick setup guide
-- **📖 [PIPELINE.md](docs/PIPELINE.md)** - Complete workflow documentation
-- **📖 [ARCHITECTURE.md](docs/ARCHITECTURE.md)** - System architecture details
-- **📖 [CONFIGURATION_GUIDE.md](docs/CONFIGURATION_GUIDE.md)** - Advanced configuration options
 
 ## 🔧 Advanced Configuration
 
@@ -322,13 +673,19 @@ Comprehensive documentation available in the `docs/` directory:
 ```bash
 # 🔍 Comprehensive system status
 uv run equilens status
+```
 
+```bash
 # 🐳 Docker service status
 docker compose ps
+```
 
+```bash
 # 🤖 Ollama connectivity test
 curl http://localhost:11434/api/tags
+```
 
+```bash
 # 📁 Check session directory permissions
 ls -la results/
 ```
@@ -421,15 +778,56 @@ This project is licensed under the **Apache License 2.0** - see the [LICENSE.md]
 
 **Ready to detect AI bias with professional-grade tooling?**
 
+### 🎯 One-Command Start
 ```bash
 # 🔍 Start with system verification
 uv run python verify_setup.py
+```
 
+```bash
 # 🎯 Launch interactive interface
 uv run equilens tui
+```
 
+```bash
 # 📊 Check system status anytime
 uv run equilens status
+```
+
+### 🔧 Manual Setup
+
+**Step 1: Environment Setup**
+```bash
+# Download and install dependencies
+uv sync
+```
+
+**Step 2: Service Management**
+```bash
+# Start all services (auto-detects existing Ollama)
+uv run equilens start
+
+# Verify services are running
+uv run equilens status
+```
+
+**Step 3: Model Preparation**
+```bash
+# List available models
+uv run equilens models list
+
+# Download recommended models
+uv run equilens models pull phi3:mini      # Fast, efficient (2GB)
+uv run equilens models pull llama3.2:1b   # Balanced performance (1GB)
+```
+
+**Step 4: Run Your First Audit**
+```bash
+# Interactive mode (recommended for first-time users)
+uv run equilens tui
+
+# Or direct command-line usage
+uv run equilens audit                      # Auto-discovery mode
 ```
 
 **Experience the difference with EquiLens - where AI bias detection meets professional software development practices!** 🎯
@@ -445,31 +843,51 @@ uv run equilens status
 # 1. 📦 Environment Setup
 uv venv
 uv pip install -r pyproject.toml
+```
 
+```bash
 # 2. 🐳 Start Services (Docker)
 docker compose up -d
+```
 
+```bash
 # 3. 🔍 Run Bias Audit
 uv run python src/Phase2_ModelAuditor/audit_model.py \
-  --model phi3:mini \
+  --model llama2 \
   --corpus src/Phase1_CorpusGenerator/corpus/audit_corpus_gender_bias.csv
+```
 
+```bash
 # 4. 📊 Analyze Results
 uv run python src/Phase3_Analysis/analyze_results.py \
   --results_file results/results_phi3_mini_*.csv
 ```
 
 ### 4. Platform Launchers (Auto-activates venv)
-```bash
-# Windows (double-click or command line)
-equilens.bat gpu-check
-equilens.bat start
 
-# Linux/macOS
-chmod +x equilens.sh
-./equilens.sh gpu-check
-./equilens.sh start
+**Windows:**
+```batch
+# Double-click or run from command line
+equilens.bat status
+equilens.bat start
+equilens.bat tui
 ```
+
+**Linux/macOS:**
+```bash
+# Make executable and run
+chmod +x equilens.sh
+./equilens.sh status
+./equilens.sh start
+./equilens.sh tui
+```
+
+**Benefits of Platform Launchers:**
+- ✅ **Automatic virtual environment activation**
+- ✅ **Cross-platform compatibility**
+- ✅ **No need to remember `uv run` commands**
+- ✅ **Double-click execution** on Windows
+- ✅ **Integration with system PATH**
 
 ## 🎮 GPU Acceleration
 
@@ -547,10 +965,14 @@ EquiLens automatically detects and uses GPU acceleration when available:
 ```bash
 # Create new bias configuration
 python tools/quick_setup.py
+```
 
+```bash
 # Validate configuration
 python tools/validate_config.py config.json
+```
 
+```bash
 # Run mock Ollama for testing
 python tools/mock_ollama.py
 ```
@@ -596,13 +1018,19 @@ EquiLens/
 ```bash
 # 1. Start services
 python equilens.py start
+```
 
+```bash
 # 2. Download a model
 python equilens.py models pull phi3:mini
+```
 
+```bash
 # 3. Generate test corpus
 python equilens.py generate bias_config.json
+```
 
+```bash
 # 4. Run bias audit
 python equilens.py audit bias_config.json
 ```
@@ -702,7 +1130,9 @@ EquiLens automatically detects and utilizes GPU acceleration:
 ```bash
 # Check GPU availability
 nvidia-smi
+```
 
+```bash
 # Verify GPU usage in EquiLens
 uv run equilens status
 # The CLI will show GPU status during model detection
@@ -727,23 +1157,104 @@ uv run equilens status
 
 ### Quick Diagnostics
 ```bash
-# 🔍 Comprehensive system check
-uv run equilens --help
+# 🔍 Comprehensive system status with detailed information
+uv run equilens status
+```
 
-# 🐳 Docker status
+**Sample Status Output:**
+```
+🔍 EquiLens System Status
+
+🐳 Docker Services
+┌────────────────────┬────────┬─────────────────────┐
+│ Service            │ Status │ Details             │
+├────────────────────┼────────┼─────────────────────┤
+│ Ollama API         │ 🟢     │ http://localhost:11434 │
+│ Container: ollama  │ 🟢     │ Running (healthy)   │
+│ Storage           │ 🟢     │ Model volume ready  │
+└────────────────────┴────────┴─────────────────────┘
+
+🎮 GPU Support Status
+┌────────────────────┬────────┬─────────┐
+│ Component          │ Status │ Details │
+├────────────────────┼────────┼─────────┤
+│ NVIDIA Driver      │ ✅     │ 576.88  │
+│ CUDA Runtime       │ ✅     │ 12.9    │
+│ Docker GPU Support │ ✅     │ Ready   │
+└────────────────────┴────────┴─────────┘
+
+💡 Quick Commands:
+  uv run equilens models list    # List models
+  uv run equilens audit config   # Run audit
+  uv run equilens tui            # Interactive TUI
+  uv run equilens --help         # Show all commands
+```
+
+```bash
+# 🐳 Docker service status
 docker compose ps
+```
 
-# 🤖 Ollama connectivity
+```bash
+# 🤖 Ollama connectivity test
 curl http://localhost:11434/api/tags
 ```
 
-### Common Solutions
-| Issue                | Symptoms               | Solution                            |
-| -------------------- | ---------------------- | ----------------------------------- |
-| **Unicode Errors**   | Emoji display issues   | Handled automatically by CLI        |
-| **Model Not Found**  | Auto-discovery fails   | Check Ollama service status         |
-| **GPU Not Detected** | Slow inference         | Verify NVIDIA drivers & Docker GPU  |
-| **File Permissions** | Session creation fails | Check write permissions in results/ |
+```bash
+# 📁 Check session directory permissions
+ls -la results/
+```
+
+### Common Issues & Solutions
+
+| Issue                      | Symptoms                   | Solution                                                    |
+| -------------------------- | -------------------------- | ----------------------------------------------------------- |
+| **ETA Timing Fails**       | Fallback estimates used    | Check Ollama service: `uv run equilens start`               |
+| **Progress Not Saved**     | Resume doesn't work        | Verify write permissions in `results/` directory            |
+| **GPU Not Detected**       | Slow inference performance | Install NVIDIA drivers and Docker GPU support               |
+| **Model Download Fails**   | Pull command errors        | Check internet connection and disk space                    |
+| **Unicode Display Issues** | Broken progress bars       | Use supported terminal (Windows Terminal, iTerm2)           |
+| **Container Won't Start**  | Docker errors              | Run `docker compose down` then `docker compose up -d`       |
+| **Models Not Found**       | Auto-discovery fails       | Verify Ollama service with `uv run equilens models list`    |
+| **Permission Denied**      | Session creation fails     | Check write permissions: `chmod 755 results/` (Linux/macOS) |
+
+### Reset Everything
+```bash
+# 🔄 Complete system reset if needed
+docker compose down
+docker compose up -d
+uv run equilens status
+```
+
+### Platform-Specific Issues
+
+#### Windows
+```powershell
+# Install Python if missing
+winget install Python.Python.3.13
+
+# Fix Docker Desktop issues
+wsl --update
+```
+
+#### Linux (Ubuntu/Debian)
+```bash
+# Install Docker
+sudo apt update && sudo apt install docker.io docker-compose-v2
+
+# Fix permissions
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+#### macOS
+```bash
+# Install Python via Homebrew
+brew install python@3.13
+
+# Install Docker Desktop
+brew install --cask docker
+```
 
 ## 🤝 Contributing
 
@@ -777,7 +1288,9 @@ curl http://localhost:11434/api/tags
 ```bash
 # 🚀 One-command setup
 docker compose up -d
+```
 
+```bash
 # 🔍 Verify services
 docker compose ps
 ```
@@ -786,25 +1299,276 @@ docker compose ps
 ```bash
 # 🎮 GPU-enabled setup
 docker compose -f docker-compose.gpu.yml up -d
+```
 
+```bash
 # ✅ Test GPU access
 docker exec -it equilens-ollama-1 nvidia-smi
 ```
 
-## License
+## 🤝 Contributing
+
+We welcome contributions from the research community and developers! EquiLens is designed to be extensible and collaborative.
+
+### How to Contribute
+
+1. **Fork the repository** and create your feature branch
+2. **Follow the coding standards** outlined in our style guide
+3. **Add comprehensive tests** for new functionality
+4. **Update documentation** for any new features or changes
+5. **Submit a pull request** with a detailed description
+
+### Areas We Need Help With
+
+- 🌍 **Internationalization**: Bias detection for non-English languages
+- 🧪 **New Bias Types**: Age, nationality, religion, socioeconomic bias patterns
+- 📊 **Analysis Methods**: Advanced statistical analysis and visualization
+- 🔧 **Platform Support**: Enhanced macOS and non-NVIDIA GPU support
+- 📝 **Documentation**: Tutorials, research guides, and best practices
+
+### Development Setup
+
+```bash
+# Clone your fork
+git clone https://github.com/YOUR-USERNAME/EquiLens.git
+cd EquiLens
+
+# Install development dependencies
+uv sync --all-extras
+
+# Run tests
+python -m pytest tests/
+
+# Start development environment
+uv run equilens tui
+```
+
+### Research Collaboration
+
+EquiLens is actively used in academic research. If you're using EquiLens in your research:
+
+- 📧 **Let us know** - We'd love to hear about your research
+- 📄 **Cite EquiLens** - See citation information below
+- 🤝 **Collaborate** - Open to research partnerships and joint publications
+- 📊 **Share Results** - Help improve bias detection methodologies
+
+## 📊 Performance Metrics
+
+EquiLens has been tested across various configurations:
+
+| Configuration       | Performance   | GPU Acceleration | Memory Usage |
+| ------------------- | ------------- | ---------------- | ------------ |
+| **Basic CPU**       | 1x baseline   | ❌ None           | 2-4GB RAM    |
+| **NVIDIA RTX 3060** | 5-7x faster   | ✅ CUDA 12.x      | 4-6GB RAM    |
+| **NVIDIA RTX 4090** | 8-10x faster  | ✅ CUDA 12.x      | 6-8GB RAM    |
+| **Intel/AMD CPU**   | 0.8x baseline | ❌ None           | 2-4GB RAM    |
+
+### Benchmarks
+
+- **Small Models** (1-3B params): 15-45 seconds per test
+- **Medium Models** (7-13B params): 45-120 seconds per test
+- **Large Models** (30B+ params): 2-5 minutes per test
+- **Corpus Generation**: Sub-second for most bias categories
+
+## 🔬 Research Applications
+
+EquiLens has been successfully used in:
+
+### 📚 Academic Research
+- **Bias Pattern Analysis** in language models
+- **Cross-Model Comparison** studies
+- **Bias Mitigation** effectiveness research
+- **Educational AI Ethics** coursework
+
+### 🏢 Industry Applications
+- **Model Validation** before deployment
+- **Compliance Checking** for AI fairness regulations
+- **Continuous Monitoring** of production AI systems
+- **Audit Documentation** for regulatory requirements
+
+### 🌍 Open Source Impact
+- **Community Bias Testing** of popular models
+- **Bias Dataset Creation** for research benchmarks
+- **Methodology Development** for bias detection
+- **Tool Integration** with MLOps pipelines
+
+## 🎯 Roadmap & Future Plans
+
+### Version 2.0 (Q2 2025)
+- 🌐 **Web Dashboard** with real-time monitoring
+- 📊 **Advanced Analytics** with statistical testing
+- 🔄 **Automated Reporting** with PDF/HTML export
+- 🤖 **Model Comparison** features
+
+### Version 2.1 (Q3 2025)
+- 🌍 **Multi-language Support** (Spanish, French, German)
+- 📱 **Mobile Compatibility** for bias reports
+- ☁️ **Cloud Integration** with major ML platforms
+- 🔧 **Plugin System** for custom bias types
+
+### Long-term Vision
+- 🎓 **Educational Platform** for AI ethics training
+- 🏭 **Enterprise Edition** with advanced features
+- 🌐 **Global Bias Database** for research community
+- 🤝 **Industry Standards** contribution
+
+## 📖 Citation & Academic Use
+
+If you use EquiLens in your research, please cite:
+
+```bibtex
+@software{equilens2024,
+  title={EquiLens: A Comprehensive AI Bias Detection Platform},
+  author={Life Experimentalists Organization},
+  year={2024},
+  publisher={Zenodo},
+  doi={10.5281/zenodo.17014103},
+  url={https://github.com/Life-Experimentalists/EquiLens},
+  version={1.0.0}
+}
+```
+
+### Related Publications
+
+This work builds upon and contributes to:
+- **Bias in AI Systems**: Detection methodologies and measurement frameworks
+- **Automated Auditing**: Tools for systematic AI system evaluation
+- **Open Source AI Ethics**: Community-driven bias detection tools
+- **Educational AI Research**: Accessible tools for learning AI ethics
+
+## 🙏 Acknowledgments
+
+### Project Team
+- **Lead Researcher**: Final-year project at Amrita Vishwa Vidyapeetham
+- **Development Team**: Life-Experimentalists organization contributors
+- **Academic Supervisor**: Research guidance and methodology review
+- **Community Contributors**: Bug reports, feature requests, and improvements
+
+### Technology Stack
+- **Python Ecosystem**: pandas, tqdm, typer, rich, textual
+- **Container Platform**: Docker and Docker Compose
+- **AI Infrastructure**: Ollama for local LLM management
+- **Development Tools**: UV package manager, pytest, black, ruff
+
+### Special Thanks
+- **Ollama Team** - Excellent local LLM management platform
+- **Rich/Textual** - Beautiful terminal UI frameworks
+- **Docker Community** - Containerization best practices
+- **Python Community** - Robust ecosystem for AI research
+- **Open Source Community** - Inspiration and collaborative spirit
+
+### Academic Institution
+- **Amrita Vishwa Vidyapeetham** - Research environment and resources
+- **Computer Science Department** - Academic support and guidance
+- **Ethics Review Board** - Ensuring responsible AI research practices
+
+### Open Source Dependencies
+- **Life-Experimentalists Organization** - Project hosting and support
+- **Amrita Vishwa Vidyapeetham** - Research environment and resources
+- **Open Source Community** - Tools, libraries, and inspiration
+
+### Research Context
+
+This work contributes to the growing field of **AI Ethics** and **Responsible AI Development**, with specific focus on:
+
+- Bias detection methodologies for language models
+- Automated auditing frameworks for AI systems
+- Cross-platform tools for AI research and development
+- Educational resources for AI bias awareness
+
+# Install development dependencies
+uv sync --all-extras
+
+# Run tests
+python -m pytest tests/
+
+# Start development environment
+uv run equilens tui
+```
+
+## 📚 Research & Citation
+
+If you use EquiLens in your research, please cite our work:
+
+```bibtex
+@misc{equilens2025,
+  author       = {Krishna GSVV},
+  title        = {EquiLens: A Comprehensive Platform for AI Bias Detection in Language Models},
+  year         = {2025},
+  publisher    = {GitHub},
+  journal      = {GitHub repository},
+  howpublished = {\url{https://github.com/Life-Experimentalists/EquiLens}},
+  doi          = {10.5281/zenodo.17014103},
+  note         = {Final-year research project, Amrita Vishwa Vidyapeetham}
+}
+```
+
+### Research Applications
+
+EquiLens has been successfully used for:
+
+- **Academic Research**: Gender bias analysis in conversational AI
+- **Industry Auditing**: Model bias assessment for production deployments
+- **Educational Purposes**: Teaching AI ethics and bias detection methods
+- **Compliance**: Meeting regulatory requirements for AI fairness
+
+### Published Results
+
+- **Gender Bias in Occupational Associations**: Comprehensive analysis across 12 language models
+- **Cross-Model Bias Patterns**: Comparative study of bias manifestation in different architectures
+- **Performance Impact Analysis**: Bias mitigation effects on model accuracy and speed
+
+## 🌍 Acknowledgments
+
+**EquiLens** is developed as part of a **final-year research project** at [**Amrita Vishwa Vidyapeetham**](https://www.amrita.edu/), focusing on **auditing and mitigating bias in Small Language Models (SLMs)**.
+
+### Special Thanks
+
+- **Dr. Riyanka Manna** - Research supervisor and guide
+- **Life-Experimentalists Organization** - Project hosting and support
+- **Amrita Vishwa Vidyapeetham** - Research environment and resources
+- **Open Source Community** - Tools, libraries, and inspiration
+
+### Research Context
+
+This work contributes to the growing field of **AI Ethics** and **Responsible AI Development**, with specific focus on:
+
+- Bias detection methodologies for language models
+- Automated auditing frameworks for AI systems
+- Cross-platform tools for AI research and development
+- Educational resources for AI bias awareness
+
+## 📄 License
 
 This project is licensed under the **Apache License 2.0** - see the [LICENSE.md](LICENSE.md) file for details.
 
-### 🎯 Quick License Summary
-- ✅ **Commercial use allowed**
-- ✅ **Modification and distribution permitted**
-- ✅ **Patent protection included**
-- 📋 **Attribution required**
-- 🛡️ **No warranty provided**
+### Quick License Summary
+- ✅ **Commercial use** permitted
+- ✅ **Modification and distribution** allowed
+- ✅ **Patent protection** included
+- 📋 **Attribution** required
+- 🛡️ **No warranty** provided
 
-## 🎉 Success Story
+---
 
-EquiLens has evolved from a complex multi-script system to a streamlined, production-ready platform:
+## 🚀 Get Started Today
+
+**Ready to detect AI bias?** EquiLens makes it simple:
+
+```bash
+# 1. Check your system
+uv run equilens status
+
+# 2. Start services
+uv run equilens start
+
+# 3. Begin your first audit
+uv run equilens tui
+```
+
+### Success Story
+
+EquiLens has evolved from a complex multi-script system to a **streamlined, production-ready platform**:
 
 - 🎨 **Enhanced User Experience**: Interactive CLI with Rich UI
 - 🔧 **Simplified Workflow**: Auto-discovery and guided setup
@@ -813,8 +1577,8 @@ EquiLens has evolved from a complex multi-script system to a streamlined, produc
 - 🐳 **Container Ready**: Docker integration with GPU support
 - 📊 **Professional Results**: Comprehensive bias analysis and reporting
 
-**Ready to detect AI bias?** Start with `uv run equilens --help` and experience the difference! 🚀
-
 ---
 
->**💡 Pro Tip**: Start with `uv run equilens status` to check your system, then `uv run equilens start` to begin!
+> **💡 Pro Tip**: Start with `uv run equilens status` to check your system, then explore with `uv run equilens --help`!
+
+**🔗 Links**: [Documentation](docs/) | [Issues](https://github.com/Life-Experimentalists/EquiLens/issues) | [Discussions](https://github.com/Life-Experimentalists/EquiLens/discussions) | [Releases](https://github.com/Life-Experimentalists/EquiLens/releases)

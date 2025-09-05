@@ -39,6 +39,48 @@ equilens.bat start
 docker compose exec equilens-app python Phase2_ModelAuditor/audit_model.py config.json
 ```
 
+## Execution Guide — EquiLens
+
+This guide explains how to run EquiLens locally, in containers, and how to manage runs and sessions. Use `uv run equilens` as the canonical entrypoint.
+
+### Local interactive
+```powershell
+uv run equilens
+```
+
+### Local non-interactive (examples)
+```powershell
+uv run equilens generate --config configs/corpus_config.json
+uv run equilens audit --config configs/audit_config.json
+uv run equilens analyze --results-file results/*/results_*.csv
+```
+
+### Common flags
+- `--config <file>` — run using configuration file
+- `--model <name>` — specify model to audit
+- `--corpus <file>` — path to corpus CSV
+- `--samples <n>` — samples per prompt (1–5)
+- `--system-instruction` / `--system-preset` — system instruction controls
+- `--custom-ollama-options` — JSON string for additional model options
+- `--resume <file>` — resume from progress checkpoint
+
+### Resuming
+```powershell
+uv run equilens audit --resume results/{model}_{timestamp}/progress_{timestamp}.json
+```
+
+### Containerized
+```powershell
+docker compose up -d
+uv run equilens status
+```
+
+### Debugging & logs
+- Session logs in `results/{session}/session.log`
+- Use `--verbosity debug` for detailed logs
+
+This file is the authoritative execution reference for users and maintainers.
+
 ## 🔧 How It Works
 
 ### 1. **Host CLI Management**

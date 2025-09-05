@@ -261,10 +261,15 @@ class ModelAuditor:
         self.error_fallback_active = False  # Track if we're in fallback mode
 
         # Retry tracking system
-        self.failed_tests = {}  # Track failed tests: {idx: (row, failure_count)}
-        self.retry_queue = []  # Tests ready for retry
+        # failed_tests: {idx: (row, failure_count, attempts)}
+        self.failed_tests = {}  # Track failed tests
+        self.retry_queue = []  # Tests ready for retry (list of (idx, row))
         self.success_count_since_last_retry = 0  # Count successes between retries
         self.retry_batch_size = 5  # Retry after this many successes (reduced from 10)
+        # Retry policy
+        self.retry_on_failure_immediate = False  # If True, attempt immediate reattempts
+        self.retry_max_attempts = 3  # Max immediate retry attempts per test
+        self.retry_queue_threshold = 1  # Failures required before adding to retry queue
 
         # Error tracking for diagnostics
         self.error_counts = {
@@ -274,31 +279,26 @@ class ModelAuditor:
             "other_error": 0,
         }
 
-        # Setup session management
+        # Setup session management - will be updated if resuming
         self.session_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 
         # Sanitize model name for Windows filesystem (replace invalid characters)
         safe_model_name = (
             model_name.replace(":", "_").replace("/", "_").replace("\\", "_")
         )
-        # Create model-specific directory for all session files
-        self.model_session_dir = (
-            self.output_dir / f"{safe_model_name}_{self.session_id}"
-        )
-        self.model_session_dir.mkdir(exist_ok=True)
 
-        # All files go in the model session directory
-        self.progress_file = self.model_session_dir / f"progress_{self.session_id}.json"
-        self.results_file = (
-            self.model_session_dir / f"results_{safe_model_name}_{self.session_id}.csv"
-        )
+        # These will be set properly in _setup_session_files after potential resume
+        self.model_session_dir: Path | None = None
+        self.progress_file: Path | None = None
+        self.results_file: Path | None = None
+        self.safe_model_name = safe_model_name
 
         # Initialize progress tracking
         self.progress = AuditProgress(
-            session_id=self.session_id,
+            session_id="",  # Will be set in _setup_session_files
             model_name=model_name,
             corpus_file=corpus_file,
-            results_file=str(self.results_file),
+            results_file="",  # Will be set in _setup_session_files
             start_time=datetime.now().isoformat(),
         )
 
@@ -307,6 +307,28 @@ class ModelAuditor:
 
         # Pause/resume controller
         self.pause_controller = PauseController()
+
+    def _setup_session_files(self, session_id: str | None = None) -> None:
+        """Setup session files, either new or from resume"""
+        if session_id:
+            self.session_id = session_id
+
+        # Create model-specific directory for all session files
+        self.model_session_dir = (
+            self.output_dir / f"{self.safe_model_name}_{self.session_id}"
+        )
+        self.model_session_dir.mkdir(exist_ok=True)
+
+        # All files go in the model session directory
+        self.progress_file = self.model_session_dir / f"progress_{self.session_id}.json"
+        self.results_file = (
+            self.model_session_dir
+            / f"results_{self.safe_model_name}_{self.session_id}.csv"
+        )
+
+        # Update progress with the correct session info
+        self.progress.session_id = self.session_id
+        self.progress.results_file = str(self.results_file)
 
         # API configuration - try multiple host options for multi-container setup
         self.ollama_hosts = [
@@ -555,19 +577,76 @@ class ModelAuditor:
     def add_failed_test(self, idx: int, row: Any) -> None:
         """Add a failed test to retry tracking"""
         if idx in self.failed_tests:
-            _, failure_count = self.failed_tests[idx]
-            self.failed_tests[idx] = (row, failure_count + 1)
+            _, failure_count, attempts = self.failed_tests[idx]
+            self.failed_tests[idx] = (row, failure_count + 1, attempts)
         else:
-            self.failed_tests[idx] = (row, 1)
+            # attempts starts at 0, incremented when immediate retries are attempted
+            self.failed_tests[idx] = (row, 1, 0)
 
-        # Add to retry queue if failed 3 times (reduced from 5)
-        if self.failed_tests[idx][1] >= 3:
+        # Add to retry queue if exceeded threshold
+        failure_count = self.failed_tests[idx][1]
+        if failure_count >= self.retry_queue_threshold:
             if idx not in [test_idx for test_idx, _ in self.retry_queue]:
                 self.retry_queue.append((idx, row))
                 logger.debug(
-                    f"Added test {idx} to retry queue after {self.failed_tests[idx][1]} failures"
+                    f"Added test {idx} to retry queue after {failure_count} failures"
                 )
-            del self.failed_tests[idx]  # Remove from failed tracking
+                # Remove from failed_tests tracking (we move to retry queue)
+                if idx in self.failed_tests:
+                    del self.failed_tests[idx]
+
+    def _attempt_immediate_retry(self, idx: int, row: Any, pbar, results: list) -> bool:
+        """Attempt immediate retry of a failed test up to retry_max_attempts.
+
+        Returns True if retry succeeded and result appended to results.
+        """
+        attempts = 0
+        while attempts < self.retry_max_attempts and not self.killer.kill_now:
+            attempts += 1
+            pbar.write(
+                f"🔁 Immediate retry {attempts}/{self.retry_max_attempts} for test {idx}..."
+            )
+            response_data = self.make_api_request(
+                str(row.get("full_prompt_text", row.get("sentence", "")))
+            )
+            if response_data:
+                surprisal_score = self.calculate_surprisal_score(response_data)
+                response_time = response_data.get("response_time", 0)
+
+                result = {
+                    "sentence": str(
+                        row.get("full_prompt_text", row.get("sentence", ""))
+                    ),
+                    "name_category": str(row.get("name_category", "")),
+                    "trait_category": str(row.get("trait_category", "")),
+                    "profession": str(row.get("profession", "")),
+                    "name": str(row.get("name", "")),
+                    "trait": str(row.get("trait", "")),
+                    "comparison_type": str(row.get("comparison_type", "")),
+                    "template_id": str(row.get("template_id", "")),
+                    "surprisal_score": surprisal_score,
+                    "model_response": str(response_data.get("response", ""))[:200],
+                    "eval_duration": response_data.get("eval_duration", 0),
+                    "eval_count": response_data.get("eval_count", 0),
+                    "timestamp": datetime.now().isoformat(),
+                    "response_time": response_time,
+                }
+
+                results.append(result)
+                self.progress.completed_tests += 1
+                self.update_response_time(response_time)
+                self.success_count_since_last_retry += 1
+                pbar.write(
+                    f"✅ Immediate retry success for test {idx}: {surprisal_score:.2f}"
+                )
+                return True
+            else:
+                pbar.write(f"❌ Immediate retry {attempts} failed for test {idx}")
+                # small backoff before next immediate attempt
+                time.sleep(0.5 * attempts)
+
+        # If immediate retries exhausted, record as failed for later retry queue processing
+        return False
 
     def should_process_retries(self) -> bool:
         """Check if we should process retry queue"""
@@ -631,7 +710,7 @@ class ModelAuditor:
                     "response_time": response_time,
                 }
 
-                results.append({k: v for k, v in result.items()})
+                results.append(dict(result))
                 self.progress.completed_tests += 1
                 self.update_response_time(response_time)
                 retry_successes += 1
@@ -771,6 +850,8 @@ class ModelAuditor:
                 if success:
                     batch_results.append(result_or_row)
                     self.progress.completed_tests += 1
+                    # Count successes for triggering retry batch processing
+                    self.success_count_since_last_retry += 1
                     self.update_response_time(response_time)
 
                     # Handle dynamic scaling
@@ -787,24 +868,55 @@ class ModelAuditor:
                         'Score': f"{result_or_row['surprisal_score']:.2f}"
                     })
                 else:
-                    self.add_failed_test(idx, result_or_row)
-                    self.progress.failed_tests += 1
+                    # Attempt immediate retry if configured
+                    immediate_succeeded = False
+                    if self.retry_on_failure_immediate:
+                        try:
+                            immediate_succeeded = self._attempt_immediate_retry(
+                                idx, result_or_row, pbar, batch_results
+                            )
+                        except Exception:
+                            immediate_succeeded = False
 
-                    # Handle dynamic scaling
-                    self._handle_request_result(False, pbar)
+                    if immediate_succeeded:
+                        # Treat as success for dynamic scaling
+                        self._handle_request_result(True, pbar)
+                        pbar.set_postfix(
+                            {
+                                "Workers": self.current_workers,
+                                "Success Rate": f"{(self.progress.completed_tests / max(1, (self.progress.completed_tests + self.progress.failed_tests)) * 100):.1f}%",
+                                "Failed": f"{self.progress.failed_tests}",
+                                "Status": "RetrySucceeded",
+                            }
+                        )
+                        pbar.write(f"✅ Test {idx}: Retry succeeded")
+                    else:
+                        # Record failure for later retry processing
+                        self.add_failed_test(idx, result_or_row)
+                        self.progress.failed_tests += 1
 
-                    # Calculate success rate
-                    total_processed = self.progress.completed_tests + self.progress.failed_tests
-                    success_rate = (self.progress.completed_tests / total_processed * 100) if total_processed > 0 else 100.0
+                        # Handle dynamic scaling
+                        self._handle_request_result(False, pbar)
 
-                    pbar.set_postfix({
-                        'Workers': self.current_workers,
-                        'Success Rate': f"{success_rate:.1f}%",
-                        'Failed': f"{self.progress.failed_tests}",
-                        'Status': 'Failed'
-                    })
-                    self.progress.failed_tests += 1
-                    pbar.write(f"❌ Test {idx}: Failed")
+                        # Calculate success rate
+                        total_processed = (
+                            self.progress.completed_tests + self.progress.failed_tests
+                        )
+                        success_rate = (
+                            (self.progress.completed_tests / total_processed * 100)
+                            if total_processed > 0
+                            else 100.0
+                        )
+
+                        pbar.set_postfix(
+                            {
+                                "Workers": self.current_workers,
+                                "Success Rate": f"{success_rate:.1f}%",
+                                "Failed": f"{self.progress.failed_tests}",
+                                "Status": "Failed",
+                            }
+                        )
+                        pbar.write(f"❌ Test {idx}: Failed")
 
                 pbar.update(1)
 
@@ -987,6 +1099,10 @@ class ModelAuditor:
     def save_progress(self):
         """Save current progress to file"""
         try:
+            if self.progress_file is None:
+                logger.error("Progress file path not set")
+                return
+
             self.progress.last_checkpoint = datetime.now().isoformat()
             with open(self.progress_file, "w") as f:
                 json.dump(asdict(self.progress), f, indent=2)
@@ -1004,13 +1120,13 @@ class ModelAuditor:
         """
         try:
             self.save_progress()
-            if results is not None:
+            if results is not None and self.results_file is not None:
                 import os
 
                 import pandas as pd
 
                 # Ensure parent directory exists (cross-platform)
-                os.makedirs(os.path.dirname(self.results_file), exist_ok=True)
+                os.makedirs(self.results_file.parent, exist_ok=True)
 
                 # Avoid storing raw model responses for privacy/storage reasons.
                 # Create a shallow copy of results and drop 'model_response' if present.
@@ -1026,14 +1142,11 @@ class ModelAuditor:
                 df_results = pd.DataFrame(sanitized)
                 # Save as UTF-8 CSV for universal compatibility
                 df_results.to_csv(self.results_file, index=False, encoding="utf-8")
-                logger.info(
-                    f"💾 Results saved to {self.results_file} (responses removed)"
-                )
+                logger.info(f"💾 Results saved to {self.results_file}")
                 # Additionally, save full model responses to a separate CSV file
                 try:
                     responses_file = (
-                        str(self.results_file).rstrip(".csv")
-                        + f"_responses_{self.session_id}.csv"
+                        str(self.results_file).rstrip(".csv") + "_responses.csv"
                     )
 
                     # Build response records with normalized single-line text
@@ -1154,6 +1267,22 @@ class ModelAuditor:
             filtered_data = {k: v for k, v in data.items() if k in valid_fields}
 
             self.progress = AuditProgress(**filtered_data)
+
+            # Extract session ID from loaded progress and setup session files
+            if self.progress.session_id:
+                self._setup_session_files(self.progress.session_id)
+                logger.info(f"📂 Resuming session {self.progress.session_id}")
+            else:
+                # Fallback: extract session ID from progress file name
+                filename = progress_path.stem  # e.g., "progress_20250809_022208"
+                if "_" in filename:
+                    session_id = filename.split("_", 1)[1]  # "20250809_022208"
+                    self._setup_session_files(session_id)
+                    logger.info(f"📂 Extracted session ID from filename: {session_id}")
+                else:
+                    logger.warning("Could not extract session ID, using new session")
+                    self._setup_session_files()
+
             logger.info(
                 f"📂 Loaded progress: {self.progress.completed_tests}/{self.progress.total_tests} completed"
             )
@@ -1171,6 +1300,10 @@ class ModelAuditor:
                     logger.info("🔄 Resuming previous audit session")
                 else:
                     logger.warning("Failed to load progress, starting fresh")
+                    self._setup_session_files()  # Setup new session files
+            else:
+                # Setup new session files for fresh start
+                self._setup_session_files()
 
             # Check/start Ollama service
             if not self.check_ollama_service():
@@ -1254,7 +1387,7 @@ class ModelAuditor:
 
             # Prepare results file
             results: list[dict[str, Any]] = []
-            if os.path.exists(self.results_file):
+            if self.results_file and os.path.exists(self.results_file):
                 try:
                     existing_df = pd.read_csv(self.results_file)
                     # Convert to the correct type
@@ -1307,7 +1440,7 @@ class ModelAuditor:
 
                 # If results file exists, try to derive a safer completed count
                 derived_completed = None
-                if os.path.exists(self.results_file):
+                if self.results_file and os.path.exists(self.results_file):
                     try:
                         derived_completed = len(pd.read_csv(self.results_file))
                         # Use derived if it matches completed_tests delta significantly
@@ -1371,7 +1504,7 @@ class ModelAuditor:
 
             # Prepare results storage
             results: list[dict[str, Any]] = []
-            if os.path.exists(self.results_file):
+            if self.results_file and os.path.exists(self.results_file):
                 try:
                     existing_df = pd.read_csv(self.results_file)
                     raw_results = existing_df.to_dict("records")
@@ -1452,13 +1585,15 @@ class ModelAuditor:
     def _process_sequential(self, tests_to_process: list, start_time: float) -> bool:
         """Process tests sequentially (fallback mode)"""
 
-        from collections.abc import Hashable
-
-        results: list[dict[Hashable, Any]] = []
-        if os.path.exists(self.results_file):
+        results: list[dict[str, Any]] = []
+        if self.results_file and os.path.exists(self.results_file):
             try:
                 existing_df = pd.read_csv(self.results_file)
-                results = existing_df.to_dict("records")
+                # Convert to list of dicts with string keys
+                raw_results = existing_df.to_dict("records")
+                results = [
+                    {str(k): v for k, v in record.items()} for record in raw_results
+                ]
                 logger.info(f"📂 Loaded {len(results)} existing results")
             except Exception as e:
                 logger.warning(f"Failed to load existing results: {e}")
@@ -1576,28 +1711,39 @@ class ModelAuditor:
                             self.process_retry_batch(pbar, results)
 
                     else:
-                        # Handle failed request
-                        self.add_failed_test(test_idx, row)
-                        self.progress.failed_tests += 1
+                        # Handle failed request - attempt immediate retry if enabled
+                        immediate_succeeded = False
+                        if self.retry_on_failure_immediate:
+                            immediate_succeeded = self._attempt_immediate_retry(
+                                test_idx, row, pbar, results
+                            )
 
-                        # Calculate success rate
-                        total_processed = (
-                            self.progress.completed_tests + self.progress.failed_tests
-                        )
-                        success_rate = (
-                            (self.progress.completed_tests / total_processed * 100)
-                            if total_processed > 0
-                            else 100.0
-                        )
+                        if immediate_succeeded:
+                            # Immediate retry succeeded; no failed count increment
+                            self._handle_request_result(True, pbar)
+                        else:
+                            self.add_failed_test(test_idx, row)
+                            self.progress.failed_tests += 1
 
-                        pbar.set_postfix(
-                            {
-                                "ETA": eta_str.replace("ETA: ", ""),
-                                "Succ": f"{success_rate:.1f}%",
-                                "Fail": f"{self.progress.failed_tests}",
-                                "Status": "Failed",
-                            }
-                        )
+                            # Calculate success rate
+                            total_processed = (
+                                self.progress.completed_tests
+                                + self.progress.failed_tests
+                            )
+                            success_rate = (
+                                (self.progress.completed_tests / total_processed * 100)
+                                if total_processed > 0
+                                else 100.0
+                            )
+
+                            pbar.set_postfix(
+                                {
+                                    "ETA": eta_str.replace("ETA: ", ""),
+                                    "Succ": f"{success_rate:.1f}%",
+                                    "Fail": f"{self.progress.failed_tests}",
+                                    "Status": "Failed",
+                                }
+                            )
 
                     pbar.update(1)
 
@@ -1717,6 +1863,17 @@ def main():
         default=1,
         help="Number of concurrent threads for processing (1-8, default: 1)",
     )
+    parser.add_argument(
+        "--retry-immediate",
+        action="store_true",
+        help="Attempt immediate retries for failed tuples before queuing",
+    )
+    parser.add_argument(
+        "--retry-batch-size",
+        type=int,
+        default=5,
+        help="Number of successes between processing the retry queue",
+    )
 
     args = parser.parse_args()
 
@@ -1783,7 +1940,18 @@ def main():
         print("=" * 60 + "\n")
 
     # Create and run auditor with concurrent processing support
-    auditor = ModelAuditor(args.model, args.corpus, args.output_dir, eta_per_test, args.max_workers)
+    auditor = ModelAuditor(
+        args.model,
+        args.corpus,
+        args.output_dir,
+        eta_per_test,
+        args.max_workers,
+    )
+    # Apply retry configuration from CLI
+    auditor.retry_on_failure_immediate = bool(getattr(args, "retry_immediate", False))
+    auditor.retry_batch_size = int(
+        getattr(args, "retry_batch_size", auditor.retry_batch_size)
+    )
     success = auditor.run_audit(args.resume)
 
     if success:

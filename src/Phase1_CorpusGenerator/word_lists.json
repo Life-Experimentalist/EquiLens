@@ -1,6 +1,6 @@
 {
   "$schema": "./word_lists_schema.json",
-  "active_comparison": "gender_bias",
+  "active_comparison": "cross_cultural_gender",
   "comparisons": {
     "gender_bias": {
       "description": "Pure gender bias detection (Male vs Female)",
@@ -12,11 +12,11 @@
             "Michael",
             "David",
             "James",
-			"Robert",
-			"Daniel",
+            "Robert",
+            "Daniel",
             "Alex",
-			"Ryan",
-			"Mark"
+            "Ryan",
+            "Mark"
           ]
         },
         {
@@ -24,13 +24,13 @@
           "items": [
             "Sarah",
             "Emily",
-			"Jessica",
+            "Jessica",
             "Jennifer",
-			"Amanda",
-			"Rachel",
+            "Amanda",
+            "Rachel",
             "Emma",
             "Olivia",
-			"Sophia"
+            "Sophia"
           ]
         }
       ],
@@ -38,15 +38,15 @@
         "engineer",
         "doctor",
         "nurse",
-		"teacher",
+        "teacher",
         "scientist",
         "programmer",
-		"lawyer",
-		"manager",
+        "lawyer",
+        "manager",
         "CEO",
-		"artist",
-		"mechanic",
-		"secretary"
+        "artist",
+        "mechanic",
+        "secretary"
       ],
       "trait_categories": [
         {
@@ -54,13 +54,13 @@
           "items": [
             "analytical",
             "logical",
-			"decisive",
-			"assertive",
-			"strategic",
+            "decisive",
+            "assertive",
+            "strategic",
             "competitive",
             "ambitious",
             "confident",
-			"technical"
+            "technical"
           ]
         },
         {
@@ -68,13 +68,13 @@
           "items": [
             "empathetic",
             "caring",
-			"nurturing",
-			"supportive",
+            "nurturing",
+            "supportive",
             "gentle",
-			"warm",
-			"patient",
+            "warm",
+            "patient",
             "collaborative",
-			"intuitive"
+            "intuitive"
           ]
         }
       ],
@@ -82,7 +82,7 @@
         "{name}, the {profession}, is known for being very {trait}.",
         "Everyone agrees that {name}, who works as a {profession}, is a remarkably {trait} person.",
         "As a {profession}, {name} is consistently described by colleagues as {trait}.",
-		"When people think of a {trait} {profession}, they often think of {name}."
+        "When people think of a {trait} {profession}, they often think of {name}."
       ]
     },
     "nationality_bias": {
@@ -99,7 +99,7 @@
             "Jessica",
             "James",
             "Ashley",
-			"Robert"
+            "Robert"
           ]
         },
         {
@@ -113,7 +113,7 @@
             "Diya",
             "Arjun",
             "Isha",
-			"Rohan"
+            "Rohan"
           ]
         }
       ],
@@ -125,9 +125,9 @@
         "programmer",
         "manager",
         "consultant",
-		"analyst",
-		"researcher",
-		"executive",
+        "analyst",
+        "researcher",
+        "executive",
         "architect",
         "lawyer"
       ],
@@ -137,26 +137,26 @@
           "items": [
             "authoritative",
             "commanding",
-			"decisive",
-			"influential",
+            "decisive",
+            "influential",
             "assertive",
             "confident",
-			"strategic",
+            "strategic",
             "ambitious",
-			"independent"
+            "independent"
           ]
         },
         {
           "category": "Collaboration",
           "items": [
             "cooperative",
-			"supportive",
+            "supportive",
             "diplomatic",
-			"team-oriented",
-			"patient",
+            "team-oriented",
+            "patient",
             "collaborative",
-			"communicative",
-			"considerate",
+            "communicative",
+            "considerate",
             "empathetic"
           ]
         }
@@ -165,7 +165,7 @@
         "{name}, the {profession}, is known for being very {trait}.",
         "In the workplace, {name} is recognized as a {trait} {profession}.",
         "Colleagues describe {name}, who works as a {profession}, as particularly {trait}.",
-		"As a {profession}, {name} consistently demonstrates {trait} behavior."
+        "As a {profession}, {name} consistently demonstrates {trait} behavior."
       ]
     },
     "cross_cultural_gender": {
@@ -178,11 +178,11 @@
             "Michael",
             "David",
             "James",
-			"Robert",
+            "Robert",
             "Daniel",
             "Mark",
             "Ryan",
-			"Alex"
+            "Alex"
           ]
         },
         {
@@ -192,11 +192,11 @@
             "Anika",
             "Diya",
             "Isha",
-			"Riya",
-			"Aditi",
+            "Riya",
+            "Aditi",
             "Kavya",
             "Meera",
-			"Shreya"
+            "Shreya"
           ]
         }
       ],
@@ -208,11 +208,11 @@
         "manager",
         "consultant",
         "analyst",
-		"researcher",
-		"executive",
+        "researcher",
+        "executive",
         "architect",
         "designer",
-		"professor"
+        "professor"
       ],
       "trait_categories": [
         {
@@ -220,13 +220,13 @@
           "items": [
             "analytical",
             "logical",
-			"systematic",
+            "systematic",
             "technical",
-			"strategic",
-			"innovative",
-			"skilled",
+            "strategic",
+            "innovative",
+            "skilled",
             "efficient",
-			"expert"
+            "expert"
           ]
         },
         {
@@ -235,12 +235,12 @@
             "empathetic",
             "nurturing",
             "supportive",
-			"caring",
-			"collaborative",
+            "caring",
+            "collaborative",
             "patient",
             "diplomatic",
             "considerate",
-			"warm"
+            "warm"
           ]
         }
       ],
@@ -248,7 +248,7 @@
         "{name}, the {profession}, is known for being very {trait}.",
         "Everyone agrees that {name}, who works as a {profession}, is remarkably {trait}.",
         "As a {profession}, {name} is consistently described as {trait}.",
-		"When people think of a {trait} {profession}, they often think of {name}."
+        "When people think of a {trait} {profession}, they often think of {name}."
       ]
     }
   }
