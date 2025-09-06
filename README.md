@@ -66,7 +66,7 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/Life-Experimentalists/EquiLens.git
+git clone https://github.com/Life-Experimentalist/EquiLens.git
 cd EquiLens
 
 # Install UV (fast Python package manager)
@@ -1419,11 +1419,11 @@ If you use EquiLens in your research, please cite:
 ```bibtex
 @software{equilens2024,
   title={EquiLens: A Comprehensive AI Bias Detection Platform},
-  author={Life Experimentalists Organization},
+  author={Life Experimentalist Organization},
   year={2024},
   publisher={Zenodo},
   doi={10.5281/zenodo.17014103},
-  url={https://github.com/Life-Experimentalists/EquiLens},
+  url={https://github.com/Life-Experimentalist/EquiLens},
   version={1.0.0}
 }
 ```
@@ -1440,7 +1440,7 @@ This work builds upon and contributes to:
 
 ### Project Team
 - **Lead Researcher**: Final-year project at Amrita Vishwa Vidyapeetham
-- **Development Team**: Life-Experimentalists organization contributors
+- **Development Team**: Life-Experimentalist organization contributors
 - **Academic Supervisor**: Research guidance and methodology review
 - **Community Contributors**: Bug reports, feature requests, and improvements
 
@@ -1463,7 +1463,7 @@ This work builds upon and contributes to:
 - **Ethics Review Board** - Ensuring responsible AI research practices
 
 ### Open Source Dependencies
-- **Life-Experimentalists Organization** - Project hosting and support
+- **Life-Experimentalist Organization** - Project hosting and support
 - **Amrita Vishwa Vidyapeetham** - Research environment and resources
 - **Open Source Community** - Tools, libraries, and inspiration
 
@@ -1497,7 +1497,7 @@ If you use EquiLens in your research, please cite our work:
   year         = {2025},
   publisher    = {GitHub},
   journal      = {GitHub repository},
-  howpublished = {\url{https://github.com/Life-Experimentalists/EquiLens}},
+  howpublished = {\url{https://github.com/Life-Experimentalist/EquiLens}},
   doi          = {10.5281/zenodo.17014103},
   note         = {Final-year research project, Amrita Vishwa Vidyapeetham}
 }
@@ -1525,7 +1525,7 @@ EquiLens has been successfully used for:
 ### Special Thanks
 
 - **Dr. Riyanka Manna** - Research supervisor and guide
-- **Life-Experimentalists Organization** - Project hosting and support
+- **Life-Experimentalist Organization** - Project hosting and support
 - **Amrita Vishwa Vidyapeetham** - Research environment and resources
 - **Open Source Community** - Tools, libraries, and inspiration
 
@@ -1581,4 +1581,4 @@ EquiLens has evolved from a complex multi-script system to a **streamlined, prod
 
 > **💡 Pro Tip**: Start with `uv run equilens status` to check your system, then explore with `uv run equilens --help`!
 
-**🔗 Links**: [Documentation](docs/) | [Issues](https://github.com/Life-Experimentalists/EquiLens/issues) | [Discussions](https://github.com/Life-Experimentalists/EquiLens/discussions) | [Releases](https://github.com/Life-Experimentalists/EquiLens/releases)
+**🔗 Links**: [Documentation](docs/) | [Issues](https://github.com/Life-Experimentalist/EquiLens/issues) | [Discussions](https://github.com/Life-Experimentalist/EquiLens/discussions) | [Releases](https://github.com/Life-Experimentalist/EquiLens/releases)

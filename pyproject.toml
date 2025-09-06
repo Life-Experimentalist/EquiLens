@@ -81,9 +81,9 @@ viz = [
 
 [project.urls]
 Homepage = "https://vkrishna04.github.io"
-Repository = "https://github.com/Life-Experimentalists/EquiLens.git"
-Documentation = "https://github.com/Life-Experimentalists/EquiLens/docs"
-Issues = "https://github.com/Life-Experimentalists/EquiLens/issues"
+Repository = "https://github.com/Life-Experimentalist/EquiLens.git"
+Documentation = "https://github.com/Life-Experimentalist/EquiLens/docs"
+Issues = "https://github.com/Life-Experimentalist/EquiLens/issues"
 
 [project.scripts]
 equilens = "equilens.cli:app"

@@ -2,7 +2,7 @@
 
 The **EquiLens Corpus Generator** (CorpusGen) is a dataset-generation tool for **auditing bias in Small Language Models (SLMs)**. It creates reproducible, balanced CSV corpora for bias detection using a JSON-driven specification and template-based prompt assembly.
 
-This module is part of the [EquiLens framework](https://github.com/Life-Experimentalists/EquiLens).
+This module is part of the [EquiLens framework](https://github.com/Life-Experimentalist/EquiLens).
 [![DOI](https://zenodo.org/badge/1033993763.svg)](https://doi.org/10.5281/zenodo.17014103)
 
 ---
@@ -43,12 +43,12 @@ This design ensures **only the name varies**, while profession, trait, and templ
 1. Clone the repository:
    **PowerShell (Windows):**
    ```powershell
-   git clone https://github.com/Life-Experimentalists/EquiLens.git
+   git clone https://github.com/Life-Experimentalist/EquiLens.git
    Set-Location "EquiLens/src/Phase1_CorpusGenerator"
    ```
    **Bash (Linux/macOS):**
    ```bash
-   git clone https://github.com/Life-Experimentalists/EquiLens.git
+   git clone https://github.com/Life-Experimentalist/EquiLens.git
    cd EquiLens/src/Phase1_CorpusGenerator
    ```
 2. (Recommended) Create a virtual environment:
@@ -166,7 +166,7 @@ Include the following files in the release:
 ---
 
 ## Contributing
-Contributions are welcome! Please open issues or pull requests on the [Equilens GitHub repository](https://github.com/Life-Experimentalists/EquiLens).
+Contributions are welcome! Please open issues or pull requests on the [Equilens GitHub repository](https://github.com/Life-Experimentalist/EquiLens).
 
 ---
 
@@ -180,7 +180,7 @@ If you use **EquiLens Corpus Generator**, please cite:
   year         = {2025},
   publisher    = {GitHub},
   journal      = {GitHub repository},
-  howpublished = {\url{https://github.com/Life-Experimentalists/EquiLens}},
+  howpublished = {\url{https://github.com/Life-Experimentalist/EquiLens}},
   license      = {Apache-2.0}
 }
 ```
@@ -201,6 +201,6 @@ We thank our guide, **Dr. Riyanka Manna**, for supervision and support.
 ---
 
 ## Contact / Maintainers
-Life-Experimentalists / EquiLens
-Repository: https://github.com/Life-Experimentalists/EquiLens
+Life-Experimentalist / EquiLens
+Repository: https://github.com/Life-Experimentalist/EquiLens
 DOI: 10.5281/zenodo.1234567

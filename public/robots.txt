@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://life-experimentalists.github.io/EquiLens/sitemap.xml
+Sitemap: https://life-Experimentalist.github.io/EquiLens/sitemap.xml
 
 # Crawl-delay
 Crawl-delay: 1

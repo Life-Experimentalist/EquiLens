@@ -79,10 +79,10 @@ EquiLens provides a comprehensive bias detection platform with:
 
 ## 📖 External Resources
 
-- **[GitHub Repository](https://github.com/Life-Experimentalists/EquiLens)** - Source code and issues
+- **[GitHub Repository](https://github.com/Life-Experimentalist/EquiLens)** - Source code and issues
 - **[Zenodo DOI](https://doi.org/10.5281/zenodo.17014103)** - Archived releases
-- **[Project Website](https://life-experimentalists.github.io/EquiLens/)** - Interactive documentation
-- **[Phase 1 CorpusGen](https://github.com/Life-Experimentalists/EquiLens/tree/main/src/Phase1_CorpusGenerator)** - Released corpus generator
+- **[Project Website](https://life-Experimentalist.github.io/EquiLens/)** - Interactive documentation
+- **[Phase 1 CorpusGen](https://github.com/Life-Experimentalist/EquiLens/tree/main/src/Phase1_CorpusGenerator)** - Released corpus generator
 
 ## 🆘 Need Help?
 
@@ -91,11 +91,11 @@ EquiLens provides a comprehensive bias detection platform with:
 - **Research Questions**: Review [BIAS_ANALYSIS.md](BIAS_ANALYSIS.md)
 - **Performance Issues**: Check [PERFORMANCE.md](PERFORMANCE.md)
 - **Session Problems**: See [RESUME.md](RESUME.md)
-- **Report Bugs**: [GitHub Issues](https://github.com/Life-Experimentalists/EquiLens/issues)
+- **Report Bugs**: [GitHub Issues](https://github.com/Life-Experimentalist/EquiLens/issues)
 
 ---
 
-**Note**: This documentation structure reflects the current state of EquiLens as described in the main README.md and matches the website at https://life-experimentalists.github.io/EquiLens/
+**Note**: This documentation structure reflects the current state of EquiLens as described in the main README.md and matches the website at https://life-Experimentalist.github.io/EquiLens/
 
 ## 📁 Consolidated Documentation Structure
 
@@ -128,6 +128,6 @@ The docs directory has been streamlined to eliminate redundancy and improve navi
 
 ---
 
-**Note**: This documentation structure reflects the current state of EquiLens as described in the main README.md and matches the website at https://life-experimentalists.github.io/EquiLens/
+**Note**: This documentation structure reflects the current state of EquiLens as described in the main README.md and matches the website at https://life-Experimentalist.github.io/EquiLens/
 
 *Last Updated: September 2025*
