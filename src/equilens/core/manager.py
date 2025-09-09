@@ -152,7 +152,7 @@ class EquiLensManager:
             console.print("  [cyan]uv run equilens models list[/cyan]    # List models")
             console.print("  [cyan]uv run equilens audit[/cyan]   # Run audit")
             console.print(
-                "  [cyan]uv run equilens tui[/cyan]            # Interactive TUI"
+                "  [cyan]uv run equilens gui[/cyan]            # Interactive Web GUI"
             )
         console.print(
             "  [cyan]uv run equilens --help[/cyan]         # Show all commands"

@@ -1,13 +1,17 @@
 {
     "cSpell.words": [
-        "barplot",
-        "datavalues",
-        "Equi",
-        "equilens",
-        "fontsize",
-        "viridis",
-        "xticks"
-    ],
+		"barplot",
+		"datavalues",
+		"Equi",
+		"equilens",
+		"fontsize",
+		"inbrowser",
+		"minmax",
+		"PYTHONPATH",
+		"redoc",
+		"viridis",
+		"xticks"
+	],
     "files.exclude": {
         "**/.git": true,
         "**/.svn": true,
@@ -15,5 +19,5 @@
         "**/.DS_Store": true,
         "**/Thumbs.db": true
     },
-    "powershell.integratedConsole.suppressStartupBanner": false
+	"powershell.integratedConsole.suppressStartupBanner": false,
 }

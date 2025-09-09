@@ -36,8 +36,8 @@ uv run equilens generate
 # Analyze results
 uv run equilens analyze results.csv
 
-# Interactive terminal UI
-uv run equilens tui
+# Interactive web UI
+uv run equilens gui
 
 # GPU acceleration check
 uv run equilens gpu-check

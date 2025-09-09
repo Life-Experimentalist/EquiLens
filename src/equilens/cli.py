@@ -1926,8 +1926,8 @@ def web():
     console.print(
         Panel.fit(
             "🚧 [yellow]Web interface coming soon![/yellow]\n\n"
-            "For now, use CLI commands or the interactive TUI:\n"
-            "• [cyan]uv run equilens tui[/cyan] - Terminal UI\n"
+            "For now, use CLI commands or the interactive GUI:\n"
+            "• [cyan]uv run equilens gui[/cyan] - Web GUI\n"
             "• [cyan]uv run equilens --help[/cyan] - All commands",
             title="Web Interface",
             border_style="yellow",
@@ -1936,19 +1936,20 @@ def web():
 
 
 @app.command()
-def tui():
-    """🖥️ Launch interactive terminal UI"""
+def gui():
+    """🖥️ Launch web-based Gradio GUI"""
     try:
-        from equilens.tui import EquiLensTUI
+        from equilens.web_ui import main as web_ui_main
 
-        app_instance = EquiLensTUI()
-        app_instance.run()
+        console.print("🚀 [green]Starting EquiLens Web Interface...[/green]")
+        console.print("🌐 Opening web interface in your browser...")
+        web_ui_main()
     except ImportError:
-        console.print("[red]❌ TUI dependencies not available[/red]")
-        console.print("Install with: [cyan]uv add textual[/cyan]")
+        console.print("[red]❌ Gradio dependencies not available[/red]")
+        console.print("Install with: [cyan]uv add gradio[/cyan]")
         raise typer.Exit(1) from None
     except Exception as e:
-        console.print(f"[red]❌ Failed to start TUI: {e}[/red]")
+        console.print(f"[red]❌ Failed to start Web GUI: {e}[/red]")
         raise typer.Exit(1) from e
 
 

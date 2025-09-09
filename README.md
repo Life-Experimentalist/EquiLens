@@ -14,10 +14,13 @@
 
 ## 🌟 Key Features
 
-### 🎯 **Interactive CLI Interface**
-- Rich terminal UI with guided workflows and smart auto-discovery
-- Modern Typer-based CLI with comprehensive help system
-- Cross-platform launchers (Windows `.bat`, Unix `.sh`)
+### 🖥️ **Web User Interface (GUI)**
+- Modern Gradio-based web interface with professional styling
+- Real-time system monitoring and status indicators
+- Interactive model management and downloads
+- Guided corpus generation with built-in templates
+- Comprehensive audit execution with progress tracking
+- Advanced result analysis and visualization tools
 
 ### ⏱️ **Real-Time ETA Estimation**
 - Actual API timing with 1.4x safety buffer for accurate planning
@@ -96,7 +99,7 @@ python verify_setup.py
 💡 Next steps:
    1. uv run equilens status    # Check system status
    2. uv run equilens start     # Start Ollama services
-   3. uv run equilens tui       # Launch interactive interface
+   3. uv run equilens gui       # Launch web interface
 ```
 
 ### Basic Usage
@@ -124,50 +127,50 @@ uv run equilens analyze results/latest_session.csv
 ### Interactive Mode
 
 ```bash
-# Launch interactive terminal interface
-uv run equilens tui
+# Launch web-based interface (recommended)
+uv run equilens gui
 ```
 
-## 🖥️ Terminal User Interface (TUI)
+## 🖥️ Web User Interface (GUI)
 
-EquiLens features a modern, interactive Terminal UI built with Textual for an enhanced user experience:
+EquiLens features a modern, interactive web interface built with Gradio for an enhanced user experience:
 
-### 🎨 TUI Features
-- **📊 Real-time Progress Monitoring** - Live progress bars with ETA estimates
-- **🎛️ Interactive Controls** - Pause, resume, and stop operations
-- **📈 Performance Metrics** - Live system resource monitoring
-- **📋 Session Management** - View and manage active/past sessions
-- **🔍 Log Viewer** - Real-time log streaming with filtering
-- **⚙️ Settings Panel** - Adjust preferences without config files
+### 🎨 GUI Features
+- **📊 Real-time Progress Monitoring** - Live progress updates with ETA estimates
+- **🎛️ Interactive Controls** - Start, stop, and monitor operations through web interface
+- **📈 Performance Metrics** - Live system resource monitoring with visual indicators
+- **📋 Session Management** - View and manage active/past sessions through web dashboard
+- **🔍 Log Viewer** - Real-time operation feedback with detailed output
+- **⚙️ Settings Panel** - Adjust preferences through intuitive web forms
 
-### 🚀 TUI Navigation
+### 🚀 GUI Navigation
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    🔍 EquiLens TUI v1.0                     │
-├─────────────────────────────────────────────────────────────┤
-│  📊 Dashboard    🔍 Audit    📝 Generate    📈 Analyze      │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  🎯 Current Session: llama2_latest_20250813_143022          │
-│  📊 Progress: ████████████████████ 100% | 6/6 tests        │
-│  ⏱️ Runtime: 3m 52s | 📈 Avg: 32.3s/test                   │
-│                                                             │
-│  🎮 GPU: RTX 4090 (Ready) | 💾 RAM: 8.2GB/16GB             │
-│  🐳 Docker: 3 containers running | 🤖 Ollama: Healthy      │
-│                                                             │
-├─────────────────────────────────────────────────────────────┤
-│  [F1] Help | [F2] Settings | [ESC] Exit | [TAB] Navigate   │
-└─────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────┐
+│                🔍 EquiLens Web Interface                       │
+├────────────────────────────────────────────────────────────────┤
+│  🏠 Dashboard | 🎯 Models | 📝 Corpus | 🔍 Audit | � Analysis │
+├────────────────────────────────────────────────────────────────┤
+│                                                                │
+│  🎯 Current Session: llama2_latest_20250813_143022             │
+│  📊 Progress: ████████████████████ 100% | 6/6 tests            │
+│  ⏱️ Runtime: 3m 52s | 📈 Avg: 32.3s/test                       │
+│                                                                │
+│  🎮 GPU: RTX 4090 (Ready) | 💾 RAM: 8.2GB/16GB                 │
+│  🐳 Docker: 3 containers running | 🤖 Ollama: Healthy          │
+│                                                                │
+├────────────────────────────────────────────────────────────────┤
+│  🌐 Open in Browser | 🔄 Auto-refresh | 📱 Mobile Ready       │
+└────────────────────────────────────────────────────────────────┘
 ```
 
-### 📱 TUI Quick Actions
-- **Ctrl+C** - Graceful interrupt with session save
-- **F1** - Context-sensitive help
-- **F2** - Settings and configuration
-- **Tab/Shift+Tab** - Navigate between panels
-- **Enter** - Activate selected item
-- **Space** - Toggle pause/resume
-- **ESC** - Return to previous screen or exit
+### 📱 GUI Quick Actions
+- **Dashboard Tab** - System status, service management, and quick commands
+- **Models Tab** - List, download, and manage Ollama models
+- **Corpus Tab** - Generate and manage test corpus files
+- **Audit Tab** - Run bias audits with real-time progress tracking
+- **Analysis Tab** - Analyze results and generate reports
+- **Auto-refresh** - Live updates without manual page reloads
+- **Mobile Ready** - Responsive design works on phones and tablets
 
 ## ⚙️ System Requirements
 
@@ -193,8 +196,8 @@ EquiLens features a modern, interactive Terminal UI built with Textual for an en
 - Comprehensive completion metrics and analysis
 
 ```bash
-# 🔍 Launch interactive terminal interface
-uv run equilens tui
+# 🔍 Launch interactive web interface
+uv run equilens gui
 ```
 
 
@@ -269,7 +272,7 @@ docker compose up -d
 | `status` | Comprehensive service status with GPU detection | `uv run equilens status` |
 | `start`  | Start Ollama services (auto-detection)          | `uv run equilens start`  |
 | `stop`   | Stop all services gracefully                    | `uv run equilens stop`   |
-| `tui`    | Launch interactive terminal interface           | `uv run equilens tui`    |
+| `gui`    | Launch interactive web interface                | `uv run equilens gui`    |
 
 ### Model Management
 | Command                | Description                      | Example                                       |
@@ -370,7 +373,7 @@ EquiLens follows a modular, three-phase architecture designed for scalability an
 │                     🎯 EquiLens Platform                        │
 ├─────────────────────────────────────────────────────────────────┤
 │  🖥️ Interactive CLI          📟 Terminal UI        🌐 Web UI   │
-│     (Typer + Rich)            (Textual)            (FastAPI)    │
+│     (Typer + Rich)            (Gradio)             (FastAPI)    │
 └─────────────────┬───────────────────────┬───────────────────────┘
                   │                       │
                   ▼                       ▼
@@ -433,7 +436,7 @@ EquiLens/
 ├── 📁 src/
 │   ├── 📁 equilens/                 # Core platform package
 │   │   ├── 📄 cli.py               # Modern CLI interface (Typer + Rich)
-│   │   ├── 📄 tui.py               # Terminal UI (Textual)
+│   │   ├── 📄 web_ui.py           # Web Interface (Gradio)
 │   │   ├── 📄 web.py               # Web interface (FastAPI)
 │   │   └── � core/                # Core management modules
 │   │       ├── 📄 manager.py       # Central orchestrator
@@ -483,7 +486,7 @@ EquiLens/
 | `status` | Comprehensive system status with GPU detection | `uv run equilens status` |
 | `start`  | Start Ollama services with auto-detection      | `uv run equilens start`  |
 | `stop`   | Stop all services gracefully                   | `uv run equilens stop`   |
-| `tui`    | Launch interactive terminal interface          | `uv run equilens tui`    |
+| `gui`    | Launch interactive web interface               | `uv run equilens gui`    |
 
 ### Model Management
 
@@ -705,7 +708,7 @@ ls -la results/
 1. 🍴 **Fork** the repository
 2. 🌿 **Create** a feature branch: `git checkout -b feature/amazing-feature`
 3. 💻 **Develop** your changes with comprehensive testing
-4. ✅ **Test** using the interactive CLI: `uv run equilens tui`
+4. ✅ **Test** using the interactive CLI: `uv run equilens gui`
 5. 📝 **Commit** your changes: `git commit -m 'Add amazing feature'`
 6. 🚀 **Push** to branch: `git push origin feature/amazing-feature`
 7. 🔄 **Open** a Pull Request with detailed description
@@ -786,7 +789,7 @@ uv run python verify_setup.py
 
 ```bash
 # 🎯 Launch interactive interface
-uv run equilens tui
+uv run equilens gui
 ```
 
 ```bash
@@ -824,7 +827,7 @@ uv run equilens models pull llama3.2:1b   # Balanced performance (1GB)
 **Step 4: Run Your First Audit**
 ```bash
 # Interactive mode (recommended for first-time users)
-uv run equilens tui
+uv run equilens gui
 
 # Or direct command-line usage
 uv run equilens audit                      # Auto-discovery mode
@@ -834,7 +837,7 @@ uv run equilens audit                      # Auto-discovery mode
 
 ---
 
-> **💡 Pro Tip**: Start with `uv run equilens status` to verify your setup, then `uv run equilens tui` for the full interactive experience!
+> **💡 Pro Tip**: Start with `uv run equilens status` to verify your setup, then `uv run equilens gui` for the full interactive experience!
 
 
 ### 🔧 Manual Setup
@@ -870,7 +873,7 @@ uv run python src/Phase3_Analysis/analyze_results.py \
 # Double-click or run from command line
 equilens.bat status
 equilens.bat start
-equilens.bat tui
+equilens.bat gui
 ```
 
 **Linux/macOS:**
@@ -879,7 +882,7 @@ equilens.bat tui
 chmod +x equilens.sh
 ./equilens.sh status
 ./equilens.sh start
-./equilens.sh tui
+./equilens.sh gui
 ```
 
 **Benefits of Platform Launchers:**
@@ -1043,11 +1046,11 @@ python equilens.py audit bias_config.json
 graph TB
     subgraph "🎯 EquiLens Platform"
         CLI[🖥️ Interactive CLI<br/>Rich UI & Auto-discovery]
-        TUI[📟 Terminal UI<br/>Progress Monitoring]
-        WEB[🌐 Web Interface<br/>Future Dashboard]
+        GUI[🌐 Web Interface<br/>Interactive Dashboard]
+        WEB[🌐 Future Extensions<br/>API Gateway]
 
         CLI --> MANAGER[🎛️ Core Manager]
-        TUI --> MANAGER
+        GUI --> MANAGER
         WEB --> MANAGER
 
         MANAGER --> PHASE2[🔍 Model Auditor]
@@ -1149,7 +1152,7 @@ uv run equilens status
 - **📖 [QUICKSTART.md](docs/QUICKSTART.md)** - Quick setup guide
 - **📖 [PIPELINE.md](docs/PIPELINE.md)** - Complete workflow guide
 - **📖 [ARCHITECTURE.md](docs/ARCHITECTURE.md)** - System architecture details
-- **📖 [CONFIGURATION_GUIDE.md](docs/CONFIGURATION_GUIDE.md)** - Advanced configuration
+<!-- - **📖 [CONFIGURATION_GUIDE.md](docs/CONFIGURATION_GUIDE.md)** - Advanced configuration -->
 - **📖 [EXECUTION_GUIDE.md](docs/EXECUTION_GUIDE.md)** - Detailed execution instructions
 - **📖 [OLLAMA_SETUP.md](docs/OLLAMA_SETUP.md)** - Ollama configuration guide
 
@@ -1186,7 +1189,7 @@ uv run equilens status
 💡 Quick Commands:
   uv run equilens models list    # List models
   uv run equilens audit config   # Run audit
-  uv run equilens tui            # Interactive TUI
+  uv run equilens gui            # Interactive GUI
   uv run equilens --help         # Show all commands
 ```
 
@@ -1340,7 +1343,7 @@ uv sync --all-extras
 python -m pytest tests/
 
 # Start development environment
-uv run equilens tui
+uv run equilens gui
 ```
 
 ### Research Collaboration
@@ -1445,14 +1448,14 @@ This work builds upon and contributes to:
 - **Community Contributors**: Bug reports, feature requests, and improvements
 
 ### Technology Stack
-- **Python Ecosystem**: pandas, tqdm, typer, rich, textual
+- **Python Ecosystem**: pandas, tqdm, typer, rich, gradio
 - **Container Platform**: Docker and Docker Compose
 - **AI Infrastructure**: Ollama for local LLM management
 - **Development Tools**: UV package manager, pytest, black, ruff
 
 ### Special Thanks
 - **Ollama Team** - Excellent local LLM management platform
-- **Rich/Textual** - Beautiful terminal UI frameworks
+- **Rich/Gradio** - Beautiful terminal and web UI frameworks
 - **Docker Community** - Containerization best practices
 - **Python Community** - Robust ecosystem for AI research
 - **Open Source Community** - Inspiration and collaborative spirit
@@ -1483,7 +1486,7 @@ uv sync --all-extras
 python -m pytest tests/
 
 # Start development environment
-uv run equilens tui
+uv run equilens gui
 ```
 
 ## 📚 Research & Citation
@@ -1563,7 +1566,58 @@ uv run equilens status
 uv run equilens start
 
 # 3. Begin your first audit
-uv run equilens tui
+uv run equilens gui
+```
+
+### Success Story
+
+EquiLens has evolved from a complex multi-script system to a **streamlined, production-ready platform**:
+
+- 🎨 **Enhanced User Experience**: Interactive CLI with Rich UI
+- 🔧 **Simplified Workflow**: Auto-discovery and guided setup
+- ⚡ **Performance Optimized**: GPU acceleration and efficient processing
+- 📁 **Organized Output**: Session-based file management
+- 🐳 **Container Ready**: Docker integration with GPU support
+- 📊 **Professional Results**: Comprehensive bias analysis and reporting
+
+---
+
+> **💡 Pro Tip**: Start with `uv run equilens status` to check your system, then explore with `uv run equilens --help`!
+
+**🔗 Links**: [Documentation](docs/) | [Issues](https://github.com/Life-Experimentalist/EquiLens/issues) | [Discussions](https://github.com/Life-Experimentalist/EquiLens/discussions) | [Releases](https://github.com/Life-Experimentalist/EquiLens/releases)
+This work contributes to the growing field of **AI Ethics** and **Responsible AI Development**, with specific focus on:
+
+- Bias detection methodologies for language models
+- Automated auditing frameworks for AI systems
+- Cross-platform tools for AI research and development
+- Educational resources for AI bias awareness
+
+## 📄 License
+
+This project is licensed under the **Apache License 2.0** - see the [LICENSE.md](LICENSE.md) file for details.
+
+### Quick License Summary
+- ✅ **Commercial use** permitted
+- ✅ **Modification and distribution** allowed
+- ✅ **Patent protection** included
+- 📋 **Attribution** required
+- 🛡️ **No warranty** provided
+
+---
+
+## 🚀 Get Started Today
+
+**Ready to detect AI bias?** EquiLens makes it simple:
+
+```bash
+# 1. Check your system
+uv run equilens status
+
+# 2. Start services
+uv run equilens start
+
+# 3. Begin your first audit
+uv run equilens gui
 ```
 
 ### Success Story

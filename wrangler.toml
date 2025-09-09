@@ -1,7 +1,0 @@
-name = "equilens"
-compatibility_date = "2025-01-01"
-
-# Pages configuration
-[[pages_build_config.pages]]
-# Pages-specific configuration
-url = "https://equilens.pages.dev"

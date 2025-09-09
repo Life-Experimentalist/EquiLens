@@ -9,7 +9,18 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 
-from equilens.core.manager import EquiLensManager
+try:
+    from .core.manager import EquiLensManager
+except ImportError:
+    # Fallback for relative imports when run as script
+    import sys
+    from pathlib import Path
+
+    print(
+        f"Unable ot find it relatively using path to find the script -> {Path(__file__).parent.parent}"
+    )
+    sys.path.append(str(Path(__file__).parent.parent))
+    from equilens.core.manager import EquiLensManager
 
 app = FastAPI(
     title="EquiLens Web Interface",
@@ -78,7 +89,7 @@ async def root():
             </div>
             <div class="status-card">
                 <h3>📱 Current Options</h3>
-                <p>Use CLI or TUI for now</p>
+                <p>Use CLI or Web GUI for now</p>
             </div>
         </div>
 
@@ -90,7 +101,7 @@ async def root():
             </p>
             <p>
                 <strong>Interactive Terminal UI:</strong><br>
-                <code>uv run equilens tui</code>
+                <code>uv run equilens gui</code>
             </p>
         </div>
 

@@ -7,14 +7,7 @@ This script demonstrates the new structured output and repeated sampling
 features of the enhanced auditor.
 """
 
-import sys
-from pathlib import Path
-
-# Add src to Python path
-src_path = Path(__file__).parent / "src"
-sys.path.insert(0, str(src_path))
-
-from Phase2_ModelAuditor.enhanced_audit_model import EnhancedBiasAuditor
+from src.Phase2_ModelAuditor.enhanced_audit_model import EnhancedBiasAuditor
 
 
 def test_enhanced_features():
