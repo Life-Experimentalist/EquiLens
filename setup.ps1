@@ -9,7 +9,7 @@ param(
 )
 
 # Configuration
-$REPO_URL = "https://github.com/Life-Experimentalists/EquiLens.git"
+$REPO_URL = "https://github.com/Life-Experimentalist/EquiLens.git"
 $SCRIPT_VERSION = "1.0.0"
 $REQUIRED_PYTHON = "3.11"
 $REQUIRED_MEMORY_GB = 4

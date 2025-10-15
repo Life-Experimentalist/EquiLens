@@ -140,7 +140,7 @@ All files were already present from GitHub clone:
 
 ## Contact & Support
 
-- **GitHub**: https://github.com/Life-Experimentalists/EquiLens
+- **GitHub**: https://github.com/Life-Experimentalist/EquiLens
 - **Developer**: VKrishna04
 - **Documentation**: `docs/` directory
 

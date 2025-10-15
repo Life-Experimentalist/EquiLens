@@ -13,7 +13,7 @@ powershell -Command "Write-Host '✅ PowerShell detected'" >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
     echo 🚀 Starting setup with PowerShell...
     echo.
-    powershell -ExecutionPolicy Bypass -Command "& { try { $ErrorActionPreference = 'Stop'; Invoke-RestMethod -Uri 'https://raw.githubusercontent.com/Life-Experimentalists/EquiLens/main/setup.ps1' | Invoke-Expression } catch { Write-Host '❌ Setup failed:' $_.Exception.Message -ForegroundColor Red; exit 1 } }"
+    powershell -ExecutionPolicy Bypass -Command "& { try { $ErrorActionPreference = 'Stop'; Invoke-RestMethod -Uri 'https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/setup.ps1' | Invoke-Expression } catch { Write-Host '❌ Setup failed:' $_.Exception.Message -ForegroundColor Red; exit 1 } }"
     goto :end
 )
 
@@ -22,13 +22,13 @@ curl --version >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
     echo 🚀 Downloading and running setup script...
     echo.
-    curl -fsSL https://raw.githubusercontent.com/Life-Experimentalists/EquiLens/main/setup.ps1 | powershell -ExecutionPolicy Bypass -
+    curl -fsSL https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/setup.ps1 | powershell -ExecutionPolicy Bypass -
     goto :end
 )
 
 REM Last resort: try bitsadmin to download and run
 echo 🚀 Downloading setup script...
-bitsadmin /transfer "EquiLensSetup" https://raw.githubusercontent.com/Life-Experimentalists/EquiLens/main/setup.ps1 "%TEMP%\equilens_setup.ps1" >nul
+bitsadmin /transfer "EquiLensSetup" https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/setup.ps1 "%TEMP%\equilens_setup.ps1" >nul
 if %ERRORLEVEL% EQU 0 (
     echo 🚀 Running setup script...
     powershell -ExecutionPolicy Bypass -File "%TEMP%\equilens_setup.ps1"
@@ -43,7 +43,7 @@ echo - PowerShell installed (comes with Windows)
 echo - Or curl (from Git for Windows, WSL, etc.)
 echo.
 echo Manual installation:
-echo 1. Download: https://raw.githubusercontent.com/Life-Experimentalists/EquiLens/main/setup.ps1
+echo 1. Download: https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/setup.ps1
 echo 2. Run with PowerShell: powershell -ExecutionPolicy Bypass -File setup.ps1
 echo.
 pause

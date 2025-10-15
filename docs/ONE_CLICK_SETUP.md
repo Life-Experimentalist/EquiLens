@@ -6,22 +6,22 @@
 
 ### PowerShell (Recommended)
 ```powershell
-irm https://raw.githubusercontent.com/Life-Experimentalists/EquiLens/main/setup.ps1 | iex
+irm https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/setup.ps1 | iex
 ```
 
 ### Command Prompt (cmd.exe)
 ```cmd
-curl -fsSL https://raw.githubusercontent.com/Life-Experimentalists/EquiLens/main/setup.bat | cmd
+curl -fsSL https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/setup.bat | cmd
 ```
 
 ### Git Bash / WSL
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Life-Experimentalists/EquiLens/main/setup.ps1 | powershell -ExecutionPolicy Bypass -
+curl -fsSL https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/setup.ps1 | powershell -ExecutionPolicy Bypass -
 ```
 
 ### Universal (works in most Windows shells)
 ```powershell
-powershell -ExecutionPolicy Bypass -Command "irm 'https://raw.githubusercontent.com/Life-Experimentalists/EquiLens/main/setup.ps1' | iex"
+powershell -ExecutionPolicy Bypass -Command "irm 'https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/setup.ps1' | iex"
 ```
 
 ## 📋 What the Setup Does
@@ -52,22 +52,22 @@ powershell -ExecutionPolicy Bypass -Command "irm 'https://raw.githubusercontent.
 
 ### Custom Install Path
 ```powershell
-irm https://raw.githubusercontent.com/Life-Experimentalists/EquiLens/main/setup.ps1 | iex -InstallPath "D:\Projects\EquiLens"
+irm https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/setup.ps1 | iex -InstallPath "D:\Projects\EquiLens"
 ```
 
 ### Skip Docker Setup
 ```powershell
-irm https://raw.githubusercontent.com/Life-Experimentalists/EquiLens/main/setup.ps1 | iex -SkipDocker
+irm https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/setup.ps1 | iex -SkipDocker
 ```
 
 ### Skip Model Downloads
 ```powershell
-irm https://raw.githubusercontent.com/Life-Experimentalists/EquiLens/main/setup.ps1 | iex -SkipModels
+irm https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/setup.ps1 | iex -SkipModels
 ```
 
 ### Specify Python Version
 ```powershell
-irm https://raw.githubusercontent.com/Life-Experimentalists/EquiLens/main/setup.ps1 | iex -PythonVersion "3.12"
+irm https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/setup.ps1 | iex -PythonVersion "3.12"
 ```
 
 ## 🔧 Manual Installation
@@ -76,7 +76,7 @@ If the one-liner doesn't work:
 
 1. **Download the setup script:**
    ```powershell
-   Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Life-Experimentalists/EquiLens/main/setup.ps1" -OutFile "setup.ps1"
+   Invoke-WebRequest -Uri "https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/setup.ps1" -OutFile "setup.ps1"
    ```
 
 2. **Run the setup:**
@@ -140,8 +140,8 @@ uv run equilens --help
 
 ## 🆘 Support
 
-- **GitHub Issues**: https://github.com/Life-Experimentalists/EquiLens/issues
-- **Documentation**: https://github.com/Life-Experimentalists/EquiLens/docs
+- **GitHub Issues**: https://github.com/Life-Experimentalist/EquiLens/issues
+- **Documentation**: https://github.com/Life-Experimentalist/EquiLens/docs
 
 ---
 

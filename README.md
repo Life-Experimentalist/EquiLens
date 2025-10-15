@@ -91,22 +91,22 @@ or
 ### One Click Installation
 #### PowerShell (Recommended)
 ```powershell
-irm https://raw.githubusercontent.com/Life-Experimentalists/EquiLens/main/setup.ps1 | iex
+irm https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/setup.ps1 | iex
 ```
 
 #### Command Prompt
 ```bash
-powershell -ExecutionPolicy Bypass -Command "irm 'https://raw.githubusercontent.com/Life-Experimentalists/EquiLens/main/setup.ps1' | iex"
+powershell -ExecutionPolicy Bypass -Command "irm 'https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/setup.ps1' | iex"
 ```
 
 #### Git Bash / WSL
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Life-Experimentalists/EquiLens/main/setup.ps1 | powershell -ExecutionPolicy Bypass -
+curl -fsSL https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/setup.ps1 | powershell -ExecutionPolicy Bypass -
 ```
 
 #### Universal (works everywhere)
 ```powershell
-powershell -c "IEX (IRM 'https://raw.githubusercontent.com/Life-Experimentalists/EquiLens/main/setup.ps1')"
+powershell -c "IEX (IRM 'https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/setup.ps1')"
 ```
 Full documentation: [ONE_CLICK_SETUP.md](docs/ONE_CLICK_SETUP.md)
 

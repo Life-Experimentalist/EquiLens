@@ -29,7 +29,7 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/Life-Experimentalists/EquiLens.git
+git clone https://github.com/Life-Experimentalist/EquiLens.git
 cd EquiLens
 
 # Install UV (fast Python package manager)
@@ -66,7 +66,7 @@ python verify_setup.py
 
 ```bash
 # Clone the repository
-git clone https://github.com/Life-Experimentalists/EquiLens.git
+git clone https://github.com/Life-Experimentalist/EquiLens.git
 cd EquiLens
 
 # Create virtual environment
