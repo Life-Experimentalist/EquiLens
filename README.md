@@ -65,8 +65,9 @@
 - **4GB+ RAM** (8GB+ recommended)
 - **2GB+ free disk space**
 
-### Installation
+## Installation
 
+### Manual Installation
 ```bash
 # Clone the repository
 git clone https://github.com/Life-Experimentalist/EquiLens.git
@@ -79,30 +80,37 @@ pip install uv
 uv sync
 
 # Verify installation
-python verify_setup.py
+uv run scripts/setup/verify_setup.py
+
+# Start the Equilens System
+uv run equilens
 ```
 
-**Sample verification output:**
-```
-🔍 EquiLens System Verification
+or
 
-✓ Python 3.13.x detected
-✓ Required packages installed
-✓ Directory structure validated
-✓ Docker available
-✓ System resources sufficient (8GB RAM, 15GB disk)
-✓ UV package manager ready
-✓ Virtual environment configured
-
-🎉 EquiLens is ready for use!
-
-💡 Next steps:
-   1. uv run equilens status    # Check system status
-   2. uv run equilens start     # Start Ollama services
-   3. uv run equilens gui       # Launch web interface
+### One Click Installation
+#### PowerShell (Recommended)
+```powershell
+irm https://raw.githubusercontent.com/Life-Experimentalists/EquiLens/main/setup.ps1 | iex
 ```
 
-### Basic Usage
+#### Command Prompt
+```bash
+powershell -ExecutionPolicy Bypass -Command "irm 'https://raw.githubusercontent.com/Life-Experimentalists/EquiLens/main/setup.ps1' | iex"
+```
+
+#### Git Bash / WSL
+```bash
+curl -fsSL https://raw.githubusercontent.com/Life-Experimentalists/EquiLens/main/setup.ps1 | powershell -ExecutionPolicy Bypass -
+```
+
+#### Universal (works everywhere)
+```powershell
+powershell -c "IEX (IRM 'https://raw.githubusercontent.com/Life-Experimentalists/EquiLens/main/setup.ps1')"
+```
+Full documentation: [ONE_CLICK_SETUP.md](docs/ONE_CLICK_SETUP.md)
+
+## Basic Usage
 
 ```bash
 # 1. Check system status and GPU availability
@@ -127,7 +135,7 @@ uv run equilens analyze results/latest_session.csv
 ### Interactive Mode
 
 ```bash
-# Launch web-based interface (recommended)
+# Launch web-based interface
 uv run equilens gui
 ```
 
@@ -1152,7 +1160,7 @@ uv run equilens status
 - **📖 [QUICKSTART.md](docs/QUICKSTART.md)** - Quick setup guide
 - **📖 [PIPELINE.md](docs/PIPELINE.md)** - Complete workflow guide
 - **📖 [ARCHITECTURE.md](docs/ARCHITECTURE.md)** - System architecture details
-<!-- - **📖 [CONFIGURATION_GUIDE.md](docs/CONFIGURATION_GUIDE.md)** - Advanced configuration -->
+- **📖 [CONFIGURATION_GUIDE.md](docs/CONFIGURATION_GUIDE.md)** - Advanced configuration
 - **📖 [EXECUTION_GUIDE.md](docs/EXECUTION_GUIDE.md)** - Detailed execution instructions
 - **📖 [OLLAMA_SETUP.md](docs/OLLAMA_SETUP.md)** - Ollama configuration guide
 
@@ -1169,13 +1177,13 @@ uv run equilens status
 🔍 EquiLens System Status
 
 🐳 Docker Services
-┌────────────────────┬────────┬─────────────────────┐
-│ Service            │ Status │ Details             │
-├────────────────────┼────────┼─────────────────────┤
+┌────────────────────┬────────┬────────────────────────┐
+│ Service            │ Status │ Details                │
+├────────────────────┼────────┼────────────────────────┤
 │ Ollama API         │ 🟢     │ http://localhost:11434 │
-│ Container: ollama  │ 🟢     │ Running (healthy)   │
-│ Storage           │ 🟢     │ Model volume ready  │
-└────────────────────┴────────┴─────────────────────┘
+│ Container: ollama  │ 🟢     │ Running (healthy)      │
+│ Storage            │ 🟢     │ Model volume ready     │
+└────────────────────┴────────┴────────────────────────┘
 
 🎮 GPU Support Status
 ┌────────────────────┬────────┬─────────┐

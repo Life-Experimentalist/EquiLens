@@ -36,11 +36,9 @@ dependencies = [
     "colorama>=0.4.6",
     # Async HTTP for enhanced performance
     "aiohttp>=3.12.15",
-
     # Data visualization
     "matplotlib>=3.6.0",
     "plotly>=5.15.0",
-
     # Text processing
     "spacy>=3.6.0",
     # Web framework (for future web UI)
@@ -51,6 +49,7 @@ dependencies = [
     # Data processing
     "psutil>=7.0.0",
     "pytest>=8.4.1",
+    "textual>=6.2.1",
 ]
 
 [project.optional-dependencies]

@@ -95,7 +95,7 @@ def check_directory_structure() -> bool:
         "logs",
     ]
 
-    project_root = Path(__file__).parent
+    project_root = Path(__file__).parent.parent.parent  # Go up to project root
     missing_dirs = []
 
     for dir_path in required_dirs:
@@ -124,7 +124,7 @@ def check_configuration_files() -> bool:
         "src/Phase1_CorpusGenerator/word_lists_schema.json",
     ]
 
-    project_root = Path(__file__).parent
+    project_root = Path(__file__).parent.parent.parent  # Go up to project root
     missing_files = []
 
     for file_path in config_files:

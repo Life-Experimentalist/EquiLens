@@ -125,7 +125,7 @@ function Install-UV {
     }
 }
 
-function Clone-Repository {
+function Copy-Repository {
     param([string]$Path)
 
     Write-Step "Cloning EquiLens Repository" "Downloading source code from GitHub"
@@ -196,7 +196,7 @@ function Start-DockerServices {
         Push-Location $ProjectPath
 
         # Check if Docker is running
-        $dockerVersion = & docker --version 2>$null
+        $null = & docker --version 2>$null
         if ($LASTEXITCODE -ne 0) {
             Write-ColorOutput "⚠️ Docker not detected. Please start Docker Desktop manually." $Colors.Yellow
             Write-ColorOutput "   Then run: docker-compose up -d ollama" $Colors.Cyan
@@ -225,7 +225,7 @@ function Start-DockerServices {
     }
 }
 
-function Download-Models {
+function Get-AIModels {
     if ($SkipModels) {
         Write-ColorOutput "⏭️ Skipping model downloads (as requested)" $Colors.Yellow
         return $true
@@ -254,7 +254,7 @@ function Download-Models {
     }
 }
 
-function Run-Verification {
+function Invoke-Verification {
     param([string]$ProjectPath)
 
     Write-Step "Running Final Verification" "Ensuring everything works"
@@ -369,7 +369,7 @@ function Install-EquiLens {
     }
 
     # Clone repository
-    if (-not (Clone-Repository $InstallPath)) {
+    if (-not (Copy-Repository $InstallPath)) {
         exit 1
     }
 
@@ -382,10 +382,10 @@ function Install-EquiLens {
     Start-DockerServices $InstallPath
 
     # Download models
-    Download-Models
+    Get-AIModels
 
     # Run verification
-    Run-Verification $InstallPath
+    Invoke-Verification $InstallPath
 
     # Show next steps
     Show-NextSteps $InstallPath
