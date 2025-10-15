@@ -1959,7 +1959,7 @@ def main():
         logger.info("📁 Next steps:")
         logger.info(f"   1. Review results: {auditor.results_file}")
         logger.info(
-            f"   2. Run analysis: python Phase3_Analysis/analyze_results.py --results_file {auditor.results_file}"
+            f"   2. Run analysis: uv run equilens analyze --results {auditor.results_file}"
         )
     else:
         logger.error("❌ Audit failed or was interrupted")

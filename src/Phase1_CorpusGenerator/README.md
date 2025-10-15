@@ -203,4 +203,4 @@ We thank our guide, **Dr. Riyanka Manna**, for supervision and support.
 ## Contact / Maintainers
 Life-Experimentalist / EquiLens
 Repository: https://github.com/Life-Experimentalist/EquiLens
-DOI: 10.5281/zenodo.1234567
+DOI: [10.5281/zenodo.1234567](https://doi.org/10.5281/zenodo.1234567)

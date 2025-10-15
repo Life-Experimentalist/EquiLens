@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Verification script for EquiLens Web UI
 Tests that all imports work correctly and the interface can be created
@@ -110,7 +109,7 @@ def verify_web_ui():
     if passed == total:
         print(f"✅ All {total} tests passed!")
         print("\n🚀 Web UI is ready to launch!")
-        print("💡 Run: python -m equilens gui")
+        print("💡 Run: uv run equilens gui")
         return True
     else:
         print(f"❌ {total - passed} of {total} tests failed")

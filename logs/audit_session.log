@@ -5129,3 +5129,70 @@
 2025-09-05 17:57:24,377 - INFO - 📁 Next steps:
 2025-09-05 17:57:24,378 - INFO -    1. Review results: results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
 2025-09-05 17:57:24,378 - INFO -    2. Run analysis: python Phase3_Analysis/analyze_results.py --results_file results\llama2_latest_20250902_010400\results_llama2_latest_20250902_010400.csv
+2025-10-16 00:36:04,476 - INFO - Initialized audit session 20251016_003604
+2025-10-16 00:36:07,261 - INFO - ✅ Ollama service found at http://localhost:11434
+2025-10-16 00:36:07,273 - INFO - Available models: ['llama2:latest']
+2025-10-16 00:36:07,275 - INFO - ✅ Model llama2:latest is already available
+2025-10-16 00:36:07,276 - INFO - 📂 Loading corpus from src\Phase1_CorpusGenerator\corpus\test_corpus_sample.csv
+2025-10-16 00:36:07,289 - INFO - 🎯 Starting audit: 20 total tests
+2025-10-16 00:36:07,290 - INFO - 📊 Model: llama2:latest
+2025-10-16 00:36:07,291 - INFO - 💾 Results will be saved to: results\llama2_latest_20251016_003604\results_llama2_latest_20251016_003604.csv
+2025-10-16 00:36:07,292 - INFO - ┌───────────────────────────────────────────────────────────────────────────────────────────┐
+2025-10-16 00:36:07,293 - INFO - │ Session: 20251016_003604                                                                  │
+2025-10-16 00:36:07,294 - INFO - │ Model:   llama2:latest                                                                    │
+2025-10-16 00:36:07,295 - INFO - │ Corpus:  src\Phase1_CorpusGenerator\corpus\test_corpus_sample.csv                         │
+2025-10-16 00:36:07,297 - INFO - │ Progress:0/20 (0.0%)                                                                      │
+2025-10-16 00:36:07,298 - INFO - │ Output:  results\llama2_latest_20251016_003604\results_llama2_latest_20251016_003604.csv  │
+2025-10-16 00:36:07,299 - INFO - │ ETA Mode:Dynamic                                                                          │
+2025-10-16 00:36:07,299 - INFO - └───────────────────────────────────────────────────────────────────────────────────────────┘
+2025-10-16 00:36:07,300 - INFO - 📈 ETA will be calculated dynamically based on actual performance
+2025-10-16 00:36:07,304 - INFO - 🚀 Starting fresh audit with 20 tests
+2025-10-16 00:36:07,837 - INFO - 🔧 System under load - starting with reduced concurrency (2 workers)
+2025-10-16 00:36:07,848 - INFO - � Starting concurrent processing with 2 workers...
+2025-10-16 00:36:07,852 - INFO - 📊 Processing 20 tests
+2025-10-16 00:36:07,858 - INFO - 
+🔍 AI Bias Detection Audit Progress
+2025-10-16 00:36:07,863 - INFO - Testing AI model responses against bias detection corpus
+2025-10-16 00:36:07,870 - INFO - Progress shows: Completed/Total | Elapsed Time | Remaining Time | Success Rate
+2025-10-16 00:36:07,879 - INFO - 💡 Press 'p' at any time to pause/resume the audit
+
+2025-10-16 00:37:03,665 - INFO - 💾 Results saved to results\llama2_latest_20251016_003604\results_llama2_latest_20251016_003604.csv
+2025-10-16 00:37:03,672 - INFO - 💾 Full responses saved to results\llama2_latest_20251016_003604\results_llama2_latest_20251016_003604_responses.csv
+2025-10-16 00:44:07,527 - INFO - 💾 Results saved to results\llama2_latest_20251016_003604\results_llama2_latest_20251016_003604.csv
+2025-10-16 00:44:07,534 - INFO - 💾 Full responses saved to results\llama2_latest_20251016_003604\results_llama2_latest_20251016_003604_responses.csv
+2025-10-16 00:51:53,126 - INFO - 💾 Results saved to results\llama2_latest_20251016_003604\results_llama2_latest_20251016_003604.csv
+2025-10-16 00:51:53,132 - INFO - 💾 Full responses saved to results\llama2_latest_20251016_003604\results_llama2_latest_20251016_003604_responses.csv
+2025-10-16 00:51:53,157 - INFO - ✅ Concurrent processing completed!
+2025-10-16 00:51:53,158 - INFO - 🤖 Final worker count: 2
+2025-10-16 00:51:53,162 - INFO - 🎉 Audit completed successfully!
+2025-10-16 00:51:53,163 - INFO - 📁 Next steps:
+2025-10-16 00:51:53,164 - INFO -    1. Review results: results\llama2_latest_20251016_003604\results_llama2_latest_20251016_003604.csv
+2025-10-16 00:51:53,165 - INFO -    2. Run analysis: python Phase3_Analysis/analyze_results.py --results_file results\llama2_latest_20251016_003604\results_llama2_latest_20251016_003604.csv
+2025-10-16 01:10:24,673 - INFO - Initialized audit session 20251016_011024
+2025-10-16 01:10:27,417 - INFO - ✅ Ollama service found at http://localhost:11434
+2025-10-16 01:10:27,423 - INFO - Available models: ['llama2:latest']
+2025-10-16 01:10:27,423 - INFO - ✅ Model llama2:latest is already available
+2025-10-16 01:10:27,424 - INFO - 📂 Loading corpus from src\Phase1_CorpusGenerator\corpus\test_corpus_sample.csv
+2025-10-16 01:10:27,431 - INFO - 🎯 Starting audit: 40 total tests
+2025-10-16 01:10:27,432 - INFO - 📊 Model: llama2:latest
+2025-10-16 01:10:27,432 - INFO - 💾 Results will be saved to: results\llama2_latest_20251016_011024\results_llama2_latest_20251016_011024.csv
+2025-10-16 01:10:27,432 - INFO - ┌───────────────────────────────────────────────────────────────────────────────────────────┐
+2025-10-16 01:10:27,433 - INFO - │ Session: 20251016_011024                                                                  │
+2025-10-16 01:10:27,433 - INFO - │ Model:   llama2:latest                                                                    │
+2025-10-16 01:10:27,433 - INFO - │ Corpus:  src\Phase1_CorpusGenerator\corpus\test_corpus_sample.csv                         │
+2025-10-16 01:10:27,433 - INFO - │ Progress:0/40 (0.0%)                                                                      │
+2025-10-16 01:10:27,433 - INFO - │ Output:  results\llama2_latest_20251016_011024\results_llama2_latest_20251016_011024.csv  │
+2025-10-16 01:10:27,434 - INFO - │ ETA Mode:Dynamic                                                                          │
+2025-10-16 01:10:27,434 - INFO - └───────────────────────────────────────────────────────────────────────────────────────────┘
+2025-10-16 01:10:27,434 - INFO - 📈 ETA will be calculated dynamically based on actual performance
+2025-10-16 01:10:27,437 - INFO - 🚀 Starting fresh audit with 40 tests
+2025-10-16 01:10:27,552 - INFO - � Starting concurrent processing with 2 workers...
+2025-10-16 01:10:27,553 - INFO - 📊 Processing 40 tests
+2025-10-16 01:10:27,553 - INFO - 
+🔍 AI Bias Detection Audit Progress
+2025-10-16 01:10:27,553 - INFO - Testing AI model responses against bias detection corpus
+2025-10-16 01:10:27,554 - INFO - Progress shows: Completed/Total | Elapsed Time | Remaining Time | Success Rate
+2025-10-16 01:10:27,554 - INFO - 💡 Press 'p' at any time to pause/resume the audit
+
+2025-10-16 01:11:46,290 - INFO - 💾 Results saved to results\llama2_latest_20251016_011024\results_llama2_latest_20251016_011024.csv
+2025-10-16 01:11:46,296 - INFO - 💾 Full responses saved to results\llama2_latest_20251016_011024\results_llama2_latest_20251016_011024_responses.csv

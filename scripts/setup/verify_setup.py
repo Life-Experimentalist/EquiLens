@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 EquiLens Setup Verification Script
 ==================================
@@ -7,16 +6,18 @@ Verifies that the EquiLens platform is properly configured and ready for use.
 This script checks dependencies, configurations, and system requirements.
 
 Usage:
-    python verify_setup.py
+        python verify_setup.py
 
-    Or from Docker:
-    docker-compose exec equilens-app python verify_setup.py
+        Or from Docker:
+        docker-compose exec equilens-app python verify_setup.py
 """
 
 import platform
 import subprocess
 import sys
 from pathlib import Path
+
+from verify_web_ui import verify_web_ui
 
 
 # ANSI color codes for terminal output
@@ -289,4 +290,11 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    # Separated main function call for clarity
+    separated_success = main()
+
+    # Verify web UI
+    web_ui_success = verify_web_ui()
+
+    # Exit with combined success status
+    sys.exit(0 if (separated_success or web_ui_success) else 1)

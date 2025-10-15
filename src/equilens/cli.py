@@ -7,11 +7,9 @@ Features interactive commands, beautiful output formatting, and comprehensive he
 
 import json
 import subprocess
-import time
 from pathlib import Path
 from typing import Annotated
 
-import pandas as pd
 import requests
 import typer
 from rich.console import Console
@@ -29,274 +27,128 @@ except ImportError:
 console = Console()
 
 
-def measure_single_request_time(model_name: str, prompt: str) -> dict:
-    """Measure actual time for a single model request with specific prompt"""
-    try:
-        start_time = time.time()
-        response = requests.post(
-            "http://localhost:11434/api/generate",
-            json={"model": model_name, "prompt": prompt, "stream": False},
-            timeout=180,  # No timeout limit for ETA measurements
-        )
-        end_time = time.time()
-        actual_time = end_time - start_time
-
-        if response.status_code == 200:
-            return {"success": True, "time": actual_time, "error": None}
-        else:
-            return {
-                "success": False,
-                "time": actual_time,
-                "error": f"API error {response.status_code}",
-            }
-
-    except requests.exceptions.Timeout:
-        end_time = time.time()
-        actual_time = end_time - start_time
-        return {"success": False, "time": actual_time, "error": "Request timed out"}
-    except requests.exceptions.ConnectionError:
-        # For connection errors, we don't have a meaningful time measurement
-        return {
-            "success": False,
-            "time": 0.0,
-            "error": "Connection error - is Ollama running?",
-        }
-    except Exception as e:
-        end_time = time.time()
-        actual_time = end_time - start_time if "start_time" in locals() else 0.0
-        return {"success": False, "time": actual_time, "error": str(e)}
+# Corpus discovery paths - includes Phase1_CorpusGenerator/corpus
+DEFAULT_CORPUS_SEARCH_PATHS = [
+    Path.cwd(),
+    Path.cwd() / "corpus",
+    Path.cwd() / "src" / "Phase1_CorpusGenerator" / "corpus",
+    Path(__file__).parent.parent / "Phase1_CorpusGenerator" / "corpus",
+    Path(__file__).parent.parent.parent / "src" / "Phase1_CorpusGenerator" / "corpus",
+]
 
 
-def preload_model(model_name: str) -> dict:
-    """Send a dummy request to preload the model into Ollama's memory"""
-    console.print(f"[dim]🔄 Preloading model {model_name} into memory...[/dim]")
+def find_corpus_files(
+    user_path: str | None = None, pattern: str = "*.csv"
+) -> list[Path]:
+    """
+    Robust corpus discovery:
+      1) use explicit user_path (if provided)
+      2) fallback to search paths in DEFAULT_CORPUS_SEARCH_PATHS
+      3) return absolute Path list (may be empty)
+    """
+    # 1) explicit path
+    if user_path:
+        p = Path(user_path).expanduser().resolve()
+        if p.is_file():
+            return [p]
+        if p.is_dir():
+            return sorted([f.resolve() for f in p.glob(pattern)])
+    # 2) try defaults
+    found = []
+    for sp in DEFAULT_CORPUS_SEARCH_PATHS:
+        try:
+            sp = Path(sp).expanduser().resolve()
+            if sp.exists():
+                if sp.is_dir():
+                    found.extend([f.resolve() for f in sp.glob(pattern)])
+                elif sp.is_file() and sp.match(pattern):
+                    found.append(sp)
+        except (PermissionError, OSError):
+            continue  # Skip paths we can't access
+    # de-duplicate and sort
+    unique = sorted(dict.fromkeys(found))
+    return unique
 
-    try:
-        start_time = time.time()
-        response = requests.post(
-            "http://localhost:11434/api/generate",
-            json={"model": model_name, "prompt": "Hi", "stream": False},
-            timeout=300,  # 5 minutes timeout for initial model loading
-        )
-        end_time = time.time()
-        preload_time = end_time - start_time
 
-        if response.status_code == 200:
-            console.print(f"[dim]✓ Model preloaded in {preload_time:.1f}s[/dim]")
-            return {"success": True, "time": preload_time, "error": None}
-        else:
-            console.print(
-                f"[dim]⚠️ Preload failed: API error {response.status_code}[/dim]"
-            )
-            return {
-                "success": False,
-                "time": preload_time,
-                "error": f"API error {response.status_code}",
-            }
+def interactive_corpus_selection(user_path: str | None = None) -> Path | None:
+    """
+    Interactive corpus file selection with auto-discovery.
+    Returns selected Path or None if cancelled/no files found.
+    """
+    corpus_files = find_corpus_files(user_path)
 
-    except Exception as e:
-        end_time = time.time()
-        preload_time = end_time - start_time if "start_time" in locals() else 0.0
-        console.print(f"[dim]⚠️ Preload failed: {str(e)}[/dim]")
-        return {"success": False, "time": preload_time, "error": str(e)}
-
-
-def measure_average_request_time(model_name: str, num_tests: int = 5) -> dict:
-    """Measure average time across multiple test prompts, accounting for all time spent"""
-    test_prompts = [
-        "Hello",
-        "What is AI?",
-        "Explain machine learning briefly.",
-        "Define bias in simple terms.",
-        "How does neural network work?",
-    ]
-
-    # Use the specified number of prompts (3 or 5)
-    prompts_to_test = test_prompts[:num_tests]
-
-    # First, preload the model to ensure it's in memory
-    preload_result = preload_model(model_name)
-    if not preload_result["success"]:
+    if not corpus_files:
+        console.print("\n[yellow]⚠ No corpus files found in common locations:[/yellow]")
+        for sp in DEFAULT_CORPUS_SEARCH_PATHS:
+            console.print(f"  [dim]• {sp}[/dim]")
         console.print(
-            "[dim]⚠️ Model preload failed, but continuing with timing tests...[/dim]"
+            "\n[bold]Enter corpus file path (or press Enter to cancel):[/bold]"
         )
-
-    console.print(
-        f"[dim]📊 Testing {num_tests} prompts to measure average response time for {model_name}...[/dim]"
-    )
-
-    results = []
-    successful_times = []
-    total_time_spent = 0.0
-
-    for i, prompt in enumerate(prompts_to_test, 1):
-        prompt_display = prompt[:20] + ("..." if len(prompt) > 20 else "")
-        console.print(f'[dim]  Test {i}/{num_tests}: "{prompt_display}"[/dim]')
-
-        result = measure_single_request_time(model_name, prompt)
-        results.append(result)
-        total_time_spent += result["time"]
-
-        if result["success"]:
-            successful_times.append(result["time"])
-            console.print(f"[dim]    ✓ {result['time']:.1f}s (success)[/dim]")
-        else:
+        manual_path = typer.prompt("", default="").strip()
+        if not manual_path:
+            return None
+        manual_corpus = find_corpus_files(manual_path)
+        if not manual_corpus:
             console.print(
-                f"[dim]    ✗ {result['time']:.1f}s (failed: {result['error']})[/dim]"
+                f"[red]❌ No valid corpus files found at: {manual_path}[/red]"
             )
+            return None
+        corpus_files = manual_corpus
 
-    # Calculate statistics
-    successful_count = len(successful_times)
-    failed_count = num_tests - successful_count
+    # Single file found - auto-select with confirmation
+    if len(corpus_files) == 1:
+        selected = corpus_files[0]
+        console.print(f"\n[green]✓ Found corpus:[/green] [cyan]{selected.name}[/cyan]")
+        console.print(f"  [dim]Location: {selected.parent}[/dim]")
+        console.print("\n[bold]Use this corpus?[/bold]")
+        if typer.confirm("", default=True):
+            return selected
+        return None
 
-    if successful_count > 0:
-        average_successful_time = sum(successful_times) / len(successful_times)
-        console.print(
-            f"[dim]📈 Average successful response time: {average_successful_time:.1f}s (from {successful_count}/{num_tests} successful tests)[/dim]"
-        )
-        if failed_count > 0:
+    # Multiple files - show interactive menu
+    console.print(f"\n[cyan]📊 Found {len(corpus_files)} corpus files:[/cyan]\n")
+    for idx, corpus in enumerate(corpus_files, 1):
+        try:
+            file_size = corpus.stat().st_size / 1024  # KB
             console.print(
-                f"[dim]⚠️ {failed_count} tests failed but their time ({total_time_spent - sum(successful_times):.1f}s) is included in ETA[/dim]"
+                f"  [bold cyan][{idx}][/bold cyan] [white]{corpus.name}[/white]"
             )
+            console.print(f"      [dim]📁 {corpus.parent}[/dim]")
+            console.print(f"      [dim]💾 {file_size:.1f} KB[/dim]")
+            console.print()
+        except (PermissionError, OSError):
+            console.print(
+                f"  [bold cyan][{idx}][/bold cyan] [white]{corpus.name}[/white] [yellow](⚠ Cannot read file info)[/yellow]"
+            )
+            console.print()
 
-        return {
-            "average_time": average_successful_time,
-            "total_time_spent": total_time_spent,
-            "successful_count": successful_count,
-            "failed_count": failed_count,
-            "success": True,
-        }
-    else:
-        console.print(
-            f"[dim]⚠️ All {num_tests} tests failed. Total time spent: {total_time_spent:.1f}s[/dim]"
-        )
-        return {
-            "average_time": None,
-            "total_time_spent": total_time_spent,
-            "successful_count": 0,
-            "failed_count": num_tests,
-            "success": False,
-        }
+    while True:
+        try:
+            console.print(
+                f"[bold]Select corpus [1-{len(corpus_files)}] (or 'q' to quit):[/bold]"
+            )
+            choice = typer.prompt("").strip()
+            if choice.lower() in ("q", "quit", "exit", ""):
+                return None
 
-
-def estimate_corpus_eta(
-    corpus_path: str,
-    model_name: str | None = None,
-    timing_data: dict | None = None,
-    user_eta_preference: float | None = None,
-) -> dict:
-    """Estimate ETA based on timing data from multiple test prompts or user preference"""
-    try:
-        # Count rows in corpus
-        df = pd.read_csv(corpus_path)
-        test_count = len(df)
-
-        # Prioritize user preference over timing data
-        if user_eta_preference is not None:
-            # Use user-provided ETA estimate
-            buffered_time_per_test = user_eta_preference
-            total_time_seconds = test_count * buffered_time_per_test
-
-            return {
-                "test_count": test_count,
-                "single_request_time": round(user_eta_preference, 2),
-                "buffered_time_per_test": round(buffered_time_per_test, 2),
-                "total_seconds": round(total_time_seconds),
-                "formatted": format_duration(total_time_seconds),
-                "timing_stats": {
-                    "source": "user_preference",
-                    "user_eta": user_eta_preference,
-                },
-            }
-        # Use timing data if provided and no user preference
-        elif timing_data and timing_data.get("success"):
-            average_time = timing_data["average_time"]
-            # Apply 1.4x buffer as requested
-            buffered_time_per_test = average_time * 1.4
-            total_time_seconds = test_count * buffered_time_per_test
-
-            return {
-                "test_count": test_count,
-                "single_request_time": round(average_time, 2),
-                "buffered_time_per_test": round(buffered_time_per_test, 2),
-                "total_seconds": round(total_time_seconds),
-                "formatted": format_duration(total_time_seconds),
-                "timing_stats": {
-                    "successful_tests": timing_data["successful_count"],
-                    "failed_tests": timing_data["failed_count"],
-                    "total_measurement_time": round(timing_data["total_time_spent"], 2),
-                },
-            }
-        elif timing_data and not timing_data.get("success"):
-            # All tests failed, but we still have timing data
-            return {
-                "test_count": test_count,
-                "single_request_time": None,
-                "buffered_time_per_test": None,
-                "total_seconds": None,
-                "formatted": "Unable to estimate (all tests failed)",
-                "timing_stats": {
-                    "successful_tests": 0,
-                    "failed_tests": timing_data["failed_count"],
-                    "total_measurement_time": round(timing_data["total_time_spent"], 2),
-                },
-                "error": "All timing tests failed",
-            }
-        else:
-            # No timing data provided
-            return {
-                "test_count": test_count,
-                "single_request_time": None,
-                "buffered_time_per_test": None,
-                "total_seconds": None,
-                "formatted": "No timing data available",
-                "error": "No timing measurement performed",
-            }
-
-    except Exception as e:
-        # Fallback estimates if file analysis fails
-        return {
-            "test_count": "unknown",
-            "single_request_time": None,
-            "buffered_time_per_test": None,
-            "total_seconds": None,
-            "formatted": "Error loading corpus",
-            "error": str(e),
-        }
-
-
-def format_duration(seconds: float) -> str:
-    """Format duration in human-readable format with days and years support"""
-    if seconds < 60:
-        return f"{int(seconds)}s"
-    elif seconds < 3600:  # Less than 1 hour
-        minutes = int(seconds // 60)
-        remaining_seconds = int(seconds % 60)
-        if remaining_seconds > 0:
-            return f"{minutes}m {remaining_seconds}s"
-        else:
-            return f"{minutes}m"
-    elif seconds < 86400:  # Less than 1 day
-        hours = int(seconds // 3600)
-        minutes = int((seconds % 3600) // 60)
-        if minutes > 0:
-            return f"{hours}h {minutes}m"
-        else:
-            return f"{hours}h"
-    elif seconds < 31536000:  # Less than 1 year (365 days)
-        days = int(seconds // 86400)
-        hours = int((seconds % 86400) // 3600)
-        if hours > 0:
-            return f"{days}d {hours}h"
-        else:
-            return f"{days}d"
-    else:  # 1 year or more
-        years = int(seconds // 31536000)
-        days = int((seconds % 31536000) // 86400)
-        if days > 0:
-            return f"{years}y {days}d"
-        else:
-            return f"{years}y"
+            idx = int(choice) - 1
+            if 0 <= idx < len(corpus_files):
+                selected = corpus_files[idx]
+                console.print(
+                    f"\n[green]✓ Selected:[/green] [cyan]{selected.name}[/cyan]"
+                )
+                return selected
+            else:
+                console.print(
+                    f"[yellow]⚠ Please enter a number between 1 and {len(corpus_files)}[/yellow]"
+                )
+        except ValueError:
+            console.print(
+                "[yellow]⚠ Please enter a valid number or 'q' to quit[/yellow]"
+            )
+        except KeyboardInterrupt:
+            console.print("\n\n[yellow]⚠ Selection cancelled[/yellow]")
+            return None
 
 
 def format_file_size(size_bytes: int) -> str:
@@ -824,11 +676,6 @@ def audit(
                     f"📋 Progress: {progress_data.get('completed_tests', 0)}/{progress_data.get('total_tests', 0)} tests completed"
                 )
 
-                # Initialize ETA variables for resume flow
-                timing_data = None
-                show_eta = False
-                user_eta_preference = None
-
                 # Always ask for concurrency configuration during resume
                 console.print("\n[bold]🔧 Performance Configuration[/bold]")
                 console.print(
@@ -913,10 +760,6 @@ def audit(
             console.print("[bold]Enter model name:[/bold]")
             model = typer.prompt("")
 
-    # Initialize variables that might be needed later
-    timing_data = None
-    show_eta = False
-    user_eta_preference = None
     max_workers = 1  # Default concurrent workers
 
     # Step 2: Corpus Selection
@@ -928,55 +771,6 @@ def audit(
                 border_style="blue",
             )
         )
-
-        # Configure ETA preference BEFORE any timing tests
-        if model:
-            console.print("\n[bold]� ETA Configuration[/bold]")
-            console.print(
-                "[dim]Would you like to see time estimates for available corpuses?[/dim]"
-            )
-            console.print(
-                "  • [cyan]Number (e.g., 5.2)[/cyan]: Use custom seconds per test"
-            )
-            console.print("  • [cyan]y[/cyan]: Auto-detect with 5 test prompts")
-            console.print("  • [cyan]n[/cyan]: Skip ETA estimates")
-
-            eta_input = (
-                typer.prompt("Enter your choice", default="y", show_default=True)
-                .strip()
-                .lower()
-            )
-
-            # Parse user input
-            if eta_input == "n":
-                show_eta = False
-                user_eta_preference = None
-                console.print("[yellow]⏭️ Skipping ETA estimates[/yellow]")
-            elif eta_input == "y":
-                show_eta = True
-                user_eta_preference = None  # Will auto-detect with timing test
-            else:
-                # Try to parse as number
-                try:
-                    custom_eta = float(eta_input)
-                    if custom_eta <= 0:
-                        console.print(
-                            "[red]❌ Invalid number, using auto-detection instead[/red]"
-                        )
-                        show_eta = True
-                        user_eta_preference = None
-                    else:
-                        show_eta = True
-                        user_eta_preference = custom_eta
-                        console.print(
-                            f"[green]✓ Using custom ETA: {custom_eta:.1f}s per test[/green]"
-                        )
-                except ValueError:
-                    console.print(
-                        "[red]❌ Invalid input, using auto-detection instead[/red]"
-                    )
-                    show_eta = True
-                    user_eta_preference = None
 
         # Ask about concurrent processing for faster performance
         console.print("\n[bold]🚀 Performance Configuration[/bold]")
@@ -1020,104 +814,34 @@ def audit(
                 console.print("[red]❌ Invalid input, using single threaded[/red]")
                 max_workers = 1
 
-            # Only run timing tests if user chose auto-detection (y) and no custom ETA provided
-            if show_eta and user_eta_preference is None and model:
-                console.print(
-                    f"\n[yellow]🔬 Measuring average response time for {model}...[/yellow]"
-                )
-                timing_data = measure_average_request_time(model, num_tests=5)
-                if timing_data["success"]:
-                    console.print(
-                        f"[green]✓ Average timing measurement complete: {timing_data['average_time']:.1f}s[/green]"
-                    )
-                    console.print(
-                        f"[green]  ({timing_data['successful_count']}/{timing_data['successful_count'] + timing_data['failed_count']} tests successful)[/green]\n"
-                    )
-                else:
-                    console.print(
-                        f"[red]⚠️ Timing measurement failed. Total time spent: {timing_data['total_time_spent']:.1f}s[/red]"
-                    )
-                    console.print(
-                        "[yellow]⚠️ Will try to estimate ETA based on corpus size only[/yellow]"
-                    )
-
-        # Look for common corpus files
-        common_paths = [
-            "src/Phase1_CorpusGenerator/corpus/quick_test_corpus.csv",
-            "src/Phase1_CorpusGenerator/corpus/test_corpus.csv",
-            "src/Phase1_CorpusGenerator/corpus/audit_corpus_gender_bias.csv",
-            "quick_test_corpus.csv",
-            "test_corpus.csv",
-        ]
-
+        # Auto-discover all corpus files in the corpus directory
+        corpus_dir = Path("src/Phase1_CorpusGenerator/corpus")
         found_files = []
-        for file_path in common_paths:
-            if Path(file_path).exists():
-                file_size = Path(file_path).stat().st_size
-                found_files.append((file_path, file_size))
+
+        if corpus_dir.exists() and corpus_dir.is_dir():
+            # Find all CSV files in the corpus directory
+            for csv_file in sorted(corpus_dir.glob("*.csv")):
+                if csv_file.is_file():
+                    file_size = csv_file.stat().st_size
+                    found_files.append((str(csv_file), file_size))
+
+        # Also check current directory for corpus files as fallback
+        for csv_file in sorted(Path.cwd().glob("*.csv")):
+            if csv_file.is_file() and "corpus" in csv_file.name.lower():
+                file_path = str(csv_file)
+                # Avoid duplicates
+                if not any(file_path == existing[0] for existing in found_files):
+                    file_size = csv_file.stat().st_size
+                    found_files.append((file_path, file_size))
 
         if found_files:
             console.print("[green]✓ Found corpus files:[/green]")
 
-            if show_eta:
-                console.print(
-                    "\n[bold cyan]📊 ETA Estimates for All Available Corpuses:[/bold cyan]"
-                )
-
             for i, (path, size) in enumerate(found_files, 1):
                 file_size_formatted = format_file_size(size)
-
-                # Get ETA estimates for this corpus using user preference or timing data
-                eta_display = ""
-                if show_eta:
-                    eta_info = estimate_corpus_eta(
-                        path, model, timing_data, user_eta_preference
-                    )
-                    if (
-                        "error" not in eta_info
-                        and eta_info.get("single_request_time") is not None
-                    ):
-                        test_count = eta_info["test_count"]
-                        eta_time = eta_info["formatted"]
-                        per_test_time = eta_info["buffered_time_per_test"]
-
-                        # Check if this is user preference or timing data
-                        timing_stats = eta_info.get("timing_stats", {})
-                        if timing_stats.get("source") == "user_preference":
-                            eta_display = f" | [dim]Tests: {test_count} | ETA: {eta_time} ({per_test_time}s/test) [cyan]((user estimate(UE)))[/cyan][/dim]"
-                        else:
-                            eta_display = f" | [dim]Tests: {test_count} | ETA: {eta_time} ({per_test_time}s/test)[/dim]"
-                            if timing_data and timing_data.get("failed_count", 0) > 0:
-                                eta_display += f" | [yellow]⚠️ {timing_data['failed_count']} timing tests failed[/yellow]"
-                    else:
-                        eta_display = " | [red]ETA: Calculation failed[/red]"
-                        if "timing_stats" in eta_info:
-                            stats = eta_info["timing_stats"]
-                            eta_display += f" | [dim]Failed tests: {stats.get('failed_tests', 0)}[/dim]"
-
                 console.print(
-                    f"  {i}. [cyan]{path}[/cyan] ([dim]{file_size_formatted}[/dim]){eta_display}"
+                    f"  {i}. [cyan]{path}[/cyan] ([dim]{file_size_formatted}[/dim])"
                 )
-
-            # Show timing statistics if we have timing data
-            if show_eta and timing_data:
-                timing_stats = timing_data
-                console.print(
-                    f"\n[dim]📈 Timing Statistics: {timing_stats['successful_count']} successful, {timing_stats['failed_count']} failed tests (Total: {timing_stats['total_time_spent']:.1f}s)[/dim]"
-                )
-            elif show_eta and user_eta_preference is not None:
-                console.print(
-                    f"\n[dim]📈 Using custom ETA estimate: {user_eta_preference:.1f}s per test[/dim]"
-                )
-
-                console.print(
-                    "\n[bold]Do you want to proceed with corpus selection?[/bold]"
-                )
-                if not typer.confirm("Continue?", default=True):
-                    console.print(
-                        "[yellow]Corpus selection cancelled by user.[/yellow]"
-                    )
-                    raise typer.Exit(0)
 
             while True:
                 console.print(
@@ -1133,57 +857,12 @@ def audit(
                 else:
                     console.print(f"[red]❌ File not found: {choice}[/red]")
         else:
-            console.print(
-                "\n[yellow]⚠ No corpus files found in common locations[/yellow]"
-            )
-            console.print("[bold]Enter corpus file path:[/bold]")
-            corpus_path = typer.prompt("")
-            while not Path(corpus_path).exists():
-                console.print(f"[red]❌ File not found: {corpus_path}[/red]")
-                console.print("[bold]Enter corpus file path:[/bold]")
-                corpus_path = typer.prompt("")
-            corpus = corpus_path
-
-            # Show ETA for custom path if ETA is enabled
-            if show_eta:
-                console.print(
-                    "\n[bold cyan]📊 ETA Estimate for Custom Corpus:[/bold cyan]"
-                )
-                eta_info = estimate_corpus_eta(
-                    corpus_path, model, timing_data, user_eta_preference
-                )
-                if (
-                    "error" not in eta_info
-                    and eta_info.get("single_request_time") is not None
-                ):
-                    test_count = eta_info["test_count"]
-                    eta_time = eta_info["formatted"]
-                    per_test_time = eta_info["buffered_time_per_test"]
-
-                    # Check if this is user preference or timing data
-                    timing_stats = eta_info.get("timing_stats", {})
-                    if timing_stats.get("source") == "user_preference":
-                        console.print(
-                            f"  📊 Tests: [cyan]{test_count}[/cyan] | ETA: [yellow]{eta_time}[/yellow] ({per_test_time}s/test) [cyan](user estimate)[/cyan]"
-                        )
-                    else:
-                        console.print(
-                            f"  📊 Tests: [cyan]{test_count}[/cyan] | ETA: [yellow]{eta_time}[/yellow] ({per_test_time}s/test)"
-                        )
-                        if timing_data and timing_data.get("failed_count", 0) > 0:
-                            console.print(
-                                f"  ⚠️ [yellow]{timing_data['failed_count']} timing tests failed during measurement[/yellow]"
-                            )
-                else:
-                    console.print("  [red]❌ ETA calculation failed[/red]")
-                    if "timing_stats" in eta_info:
-                        stats = eta_info["timing_stats"]
-                        console.print(f"  Failed tests: {stats.get('failed_tests', 0)}")
-
-                console.print("\n[bold]Do you want to proceed with this corpus?[/bold]")
-                if not typer.confirm("Continue?", default=True):
-                    console.print("[yellow]Audit cancelled by user.[/yellow]")
-                    raise typer.Exit(0)
+            # Use interactive corpus selection
+            selected_corpus = interactive_corpus_selection()
+            if selected_corpus is None:
+                console.print("[yellow]Corpus selection cancelled by user.[/yellow]")
+                raise typer.Exit(0)
+            corpus = str(selected_corpus)
 
     # Validate inputs
     assert model is not None, "Model should not be None at this point"
@@ -1208,40 +887,13 @@ def audit(
     if is_custom_path:
         corpus_display += " [yellow](Custom Path)[/yellow]"
 
-    # Get detailed ETA estimates for final review using pre-measured timing data
-    eta_info = estimate_corpus_eta(corpus, model, timing_data, user_eta_preference)
-    eta_text = ""
-    if "error" not in eta_info and eta_info.get("single_request_time") is not None:
-        test_count = eta_info["test_count"]
-        eta_time = eta_info["formatted"]
-        single_time = eta_info["single_request_time"]
-        buffered_time = eta_info["buffered_time_per_test"]
-        timing_stats = eta_info.get("timing_stats", {})
-        successful_tests = timing_stats.get("successful_tests", 0)
-        failed_tests = timing_stats.get("failed_tests", 0)
-        total_measurement_time = timing_stats.get("total_measurement_time", 0)
-
-        eta_text = f"""[bold]Test Count:[/bold] [cyan]{test_count}[/cyan]
-[bold]Average Request Time:[/bold] [dim]{single_time}s (from {successful_tests} successful tests)[/dim]
-[bold]Failed Tests:[/bold] [dim]{failed_tests} (total measurement time: {total_measurement_time}s)[/dim]
-[bold]Buffered Time per Test:[/bold] [dim]{buffered_time}s (1.4x safety margin)[/dim]
-[bold]Estimated Total Time:[/bold] [yellow]{eta_time}[/yellow]"""
-    else:
-        eta_text = f"[bold]Estimated Time:[/bold] [dim]{eta_info.get('formatted', 'Unable to calculate')}"
-        if "timing_stats" in eta_info:
-            stats = eta_info["timing_stats"]
-            eta_text += f" | Failed tests: {stats.get('failed_tests', 0)} (time: {stats.get('total_measurement_time', 0)}s)[/dim]"
-        else:
-            eta_text += "[/dim]"
-
     console.print(
         Panel.fit(
             f"[bold green]Step 3: Configuration Review[/bold green]\n\n"
             f"[bold]Model:[/bold] [cyan]{model}[/cyan]\n"
             f"[bold]Corpus:[/bold] {corpus_display} ([dim]{corpus_size}[/dim])\n"
             f"[bold]Output Directory:[/bold] [cyan]{output_dir}[/cyan]\n"
-            f"[bold]Silent Mode:[/bold] [cyan]{'Enabled' if silent else 'Disabled'}[/cyan]\n\n"
-            f"{eta_text}",
+            f"[bold]Silent Mode:[/bold] [cyan]{'Enabled' if silent else 'Disabled'}[/cyan]",
             border_style="green",
         )
     )
@@ -1286,12 +938,11 @@ def audit(
             try:
                 from Phase2_ModelAuditor.enhanced_audit_model import EnhancedBiasAuditor
 
-                # Create and run enhanced auditor
+                # Create and run enhanced auditor (auditor will handle ETA configuration)
                 auditor = EnhancedBiasAuditor(
                     model_name=model,
                     corpus_file=corpus,
                     output_dir=output_dir,
-                    eta_per_test=user_eta_preference,
                 )
 
                 # Set batch size if specified
@@ -1339,9 +990,28 @@ def audit(
                 format="%(asctime)s %(levelname)s: %(message)s",
             )
 
-            # Candidate auditor scripts in preferred order
+            # Find repository root by looking for pyproject.toml or .git
+            def find_repo_root(start_path: Path = Path.cwd()) -> Path | None:
+                """Find repository root by looking for pyproject.toml or .git"""
+                current = start_path.resolve()
+                for parent in [current] + list(current.parents):
+                    if (parent / "pyproject.toml").exists() or (
+                        parent / ".git"
+                    ).exists():
+                        return parent
+                return None
+
+            repo_root = find_repo_root()
+            if repo_root is None:
+                repo_root = Path.cwd()  # Fallback to current directory
+
+            # Candidate auditor scripts in preferred order (absolute paths from repo root)
             candidates = [
-                Path("src/Phase2_ModelAuditor/audit_model.py"),
+                repo_root / "src" / "Phase2_ModelAuditor" / "audit_model.py",
+                repo_root / "src" / "Phase2_ModelAuditor" / "enhanced_audit_model.py",
+                Path(
+                    "src/Phase2_ModelAuditor/audit_model.py"
+                ),  # Fallback relative path
                 Path("src/Phase2_ModelAuditor/enhanced_audit_model.py"),
             ]
 
@@ -1349,6 +1019,7 @@ def audit(
             for p in candidates:
                 if p.exists():
                     auditor_script = p
+                    console.print(f"[dim]✓ Found auditor: {p}[/dim]")
                     break
 
             if auditor_script is None:
@@ -1358,6 +1029,8 @@ def audit(
                     "or enhanced_audit_model.py."
                 )
                 console.print(f"[red]❌ {msg}[/red]")
+                console.print(f"[dim]Searched in repository root: {repo_root}[/dim]")
+                console.print(f"[dim]Current working directory: {Path.cwd()}[/dim]")
                 logging.error(msg)
                 raise typer.Exit(2)
 
@@ -1374,9 +1047,6 @@ def audit(
 
             # Add concurrency option only if the target script supports it
             base_cmd.extend(["--max-workers", str(max_workers)])
-
-            if user_eta_preference is not None:
-                base_cmd.extend(["--eta-per-test", str(user_eta_preference)])
 
             if resume:
                 base_cmd.extend(["--resume", resume])
@@ -1486,8 +1156,6 @@ def audit(
                             "--output-dir",
                             output_dir,
                         ]
-                        if user_eta_preference is not None:
-                            alt_cmd.extend(["--eta-per-test", str(user_eta_preference)])
                         if resume:
                             alt_cmd.extend(["--resume", resume])
                         # Forward retry options
@@ -1918,21 +1586,6 @@ def analyze(
             )
         )
         raise typer.Exit(1) from e
-
-
-@app.command()
-def web():
-    """🌐 Start web interface (coming soon)"""
-    console.print(
-        Panel.fit(
-            "🚧 [yellow]Web interface coming soon![/yellow]\n\n"
-            "For now, use CLI commands or the interactive GUI:\n"
-            "• [cyan]uv run equilens gui[/cyan] - Web GUI\n"
-            "• [cyan]uv run equilens --help[/cyan] - All commands",
-            title="Web Interface",
-            border_style="yellow",
-        )
-    )
 
 
 @app.command()

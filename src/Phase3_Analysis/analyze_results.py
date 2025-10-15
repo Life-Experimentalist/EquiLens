@@ -99,12 +99,14 @@ def analyze_results_enhanced(results_file):
         return success
 
     except ImportError:
-        print("⚠️ Enhanced analyzer not available. Using legacy analysis...")
-        return analyze_results_legacy(results_file)
+        print(
+            "⚠️ Enhanced analyzer not available. Using simple visualization analysis..."
+        )
+        return analyze_results_simple(results_file)
     except Exception as e:
         print(f"❌ Error during enhanced analysis: {e}")
-        print("🔄 Falling back to legacy analysis...")
-        return analyze_results_legacy(results_file)
+        print("🔄 Falling back to simple visualization analysis...")
+        return analyze_results_simple(results_file)
 
 
 def analyze_results_legacy(results_file):
@@ -113,6 +115,28 @@ def analyze_results_legacy(results_file):
     """
     try:
         df = pd.read_csv(results_file)
+
+        # Check if this is a responses-only file (no surprisal scores)
+        if "surprisal_score" not in df.columns:
+            # Try to find the corresponding results file with surprisal scores
+            if results_file.endswith("_responses.csv"):
+                base_file = results_file.replace("_responses.csv", ".csv")
+                if os.path.exists(base_file):
+                    print(
+                        f"ℹ️ Switching to results file with surprisal scores: {os.path.basename(base_file)}"
+                    )
+                    df = pd.read_csv(base_file)
+                else:
+                    print("❌ Results file lacks 'surprisal_score' column.")
+                    print("   Expected file: {base_file}")
+                    print(
+                        "   Please use the results file (not the _responses file) for analysis."
+                    )
+                    return False
+            else:
+                print("❌ Results file lacks 'surprisal_score' column.")
+                print("   This file doesn't contain the necessary bias metrics.")
+                return False
 
         print("\n--- Basic Statistics ---")
         print(f"Mean surprisal score: {df['surprisal_score'].mean():.3f}")
@@ -146,6 +170,29 @@ def analyze_results_simple(results_file: str):
 
     try:
         df = pd.read_csv(results_file)
+
+        # Check if this is a responses-only file (no surprisal scores)
+        if "surprisal_score" not in df.columns:
+            # Try to find the corresponding results file with surprisal scores
+            if results_file.endswith("_responses.csv"):
+                base_file = results_file.replace("_responses.csv", ".csv")
+                if os.path.exists(base_file):
+                    print(
+                        f"ℹ️ Switching to results file with surprisal scores: {os.path.basename(base_file)}"
+                    )
+                    df = pd.read_csv(base_file)
+                    results_file = base_file  # Update for output directory
+                else:
+                    print("❌ Results file lacks 'surprisal_score' column.")
+                    print(f"   Expected file: {base_file}")
+                    print(
+                        "   Please use the results file (not the _responses file) for analysis."
+                    )
+                    return False
+            else:
+                print("❌ Results file lacks 'surprisal_score' column.")
+                print("   This file doesn't contain the necessary bias metrics.")
+                return False
 
         print("\n--- Basic Statistics ---")
         print(f"Mean surprisal score: {df['surprisal_score'].mean():.3f}")
