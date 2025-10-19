@@ -133,12 +133,14 @@ if ($imageExists) {
     Write-Host "  [INFO] Image 'equilens:latest' already exists" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "  Do you want to rebuild? (builds take ~5 minutes)" -ForegroundColor Yellow
-    Write-Host "    [1] Skip build - Use existing image (default)" -ForegroundColor White
-    Write-Host "    [2] Rebuild - Get latest code changes" -ForegroundColor White
+    Write-Host "    [1] Rebuild - Get latest code changes" -ForegroundColor White
+    Write-Host "    [2] Skip build - Use existing image (default)" -ForegroundColor White
     Write-Host ""
     $buildChoice = Read-Host "  Enter choice [default 1]"
 
-    if ($buildChoice -eq "2") {
+    if ($buildChoice -eq "1") {
+		Write-Host "  [SKIP] Using existing image" -ForegroundColor Cyan
+	} else {
         Write-Host "  [BUILD] Building EquiLens image from current code..." -ForegroundColor Gray
         docker-compose build
 
@@ -146,8 +148,6 @@ if ($imageExists) {
             Write-Host "[ERROR] Build failed!" -ForegroundColor Red
             exit 1
         }
-    } else {
-        Write-Host "  [SKIP] Using existing image" -ForegroundColor Cyan
     }
 } else {
     Write-Host "  [BUILD] Building EquiLens image from current code..." -ForegroundColor Gray

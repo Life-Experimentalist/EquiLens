@@ -9,8 +9,16 @@ import subprocess
 from pathlib import Path
 
 import gradio as gr
+from gradio.themes import Soft
 
 from equilens.core.manager import EquiLensManager
+from equilens.core.ollama_config import get_ollama_url
+
+# # Helper to get Ollama API URL
+# def get_ollama_url() -> str:
+#     """Return the Ollama API URL, using environment variable or default."""
+#     return os.environ.get("OLLAMA_API_URL", "http://localhost:11434")
+
 
 # Initialize the manager
 manager = EquiLensManager()
@@ -42,19 +50,15 @@ def get_system_info() -> str:
 
         # Docker Services
         docker_info = status["docker"]
-        output += "\n🐳 **Docker & Services:**\n"
+        ollama_url = get_ollama_url()
         if docker_info["docker_available"]:
             output += "  ✅ **Docker:** Available and running\n"
             if docker_info["ollama_accessible"]:
-                output += "  ✅ **Ollama API:** Connected (http://localhost:11434)\n"
-
-                # Add model count info
+                output += f"  ✅ **Ollama API:** Connected ({ollama_url})\n"
                 try:
                     import requests
 
-                    response = requests.get(
-                        "http://localhost:11434/api/tags", timeout=5
-                    )
+                    response = requests.get(f"{ollama_url}/api/tags", timeout=5)
                     if response.status_code == 200:
                         models = response.json().get("models", [])
                         output += (
@@ -137,8 +141,9 @@ def list_models() -> str:
     try:
         import requests
 
+        ollama_url = get_ollama_url()
         # Try to get models from Ollama API
-        response = requests.get("http://localhost:11434/api/tags", timeout=10)
+        response = requests.get(f"{ollama_url}/api/tags", timeout=10)
         if response.status_code == 200:
             data = response.json()
             models = data.get("models", [])
@@ -395,10 +400,7 @@ def create_interface():
     """
 
     with gr.Blocks(
-        # ignore pylance errors it is a simple index depth error not being detected properly
-        theme=gr.themes.Soft(
-            primary_hue="blue", secondary_hue="purple", neutral_hue="slate"
-        ),
+        theme=Soft(primary_hue="blue", secondary_hue="purple", neutral_hue="slate"),
         css=custom_css,
         title="EquiLens - AI Bias Detection Platform",
     ) as demo:

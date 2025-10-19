@@ -47,6 +47,18 @@ import pandas as pd
 import requests
 from tqdm import tqdm
 
+# Import smart Ollama configuration
+try:
+    from equilens.core.ollama_config import get_ollama_url, is_running_in_container
+except ImportError:
+    # Fallback for standalone execution
+    def get_ollama_url(force_refresh=False):
+        return os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+
+    def is_running_in_container():
+        return Path("/.dockerenv").exists()
+
+
 # Color support with fallback
 try:
     import colorama
@@ -330,13 +342,21 @@ class ModelAuditor:
         self.progress.session_id = self.session_id
         self.progress.results_file = str(self.results_file)
 
-        # API configuration - try multiple host options for multi-container setup
+        # Smart API configuration with environment detection
+        # This automatically detects:
+        # - Whether EquiLens is running in container or locally
+        # - Whether Ollama is containerized or on host
+        # - Returns the correct URL for the environment
+        self.ollama_url = get_ollama_url()
+
+        # Fallback hosts for manual retry if smart detection fails
         self.ollama_hosts = [
-            "http://ollama:11434",  # Docker compose service name (primary)
-            "http://localhost:11434",  # Local container
-            "http://127.0.0.1:11434",  # Local loopback
+            self.ollama_url,  # Primary: smart detected URL
+            "http://ollama:11434",  # Docker Compose service name
+            "http://host.docker.internal:11434",  # Container to host
+            "http://localhost:11434",  # Local
+            "http://127.0.0.1:11434",  # Loopback
         ]
-        self.ollama_url = None
         self.max_retries = 5
         self.base_delay = 1.0
         self.max_delay = 60.0
@@ -344,7 +364,18 @@ class ModelAuditor:
         logger.info(f"Initialized audit session {self.session_id}")
 
     def check_ollama_service(self) -> bool:
-        """Check if Ollama service is running on any available host"""
+        """Check if Ollama service is running - will retry all configured hosts"""
+        # First try the smart-detected URL
+        if self.ollama_url:
+            try:
+                response = requests.get(f"{self.ollama_url}/api/tags", timeout=10)
+                if response.status_code == 200:
+                    logger.info(f"✅ Ollama service confirmed at {self.ollama_url}")
+                    return True
+            except Exception as e:
+                logger.debug(f"Smart-detected URL failed: {e}")
+
+        # Fallback: try all configured hosts
         for host in self.ollama_hosts:
             try:
                 response = requests.get(f"{host}/api/tags", timeout=10)

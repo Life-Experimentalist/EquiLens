@@ -8,6 +8,8 @@ import requests
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
+from .ollama_config import get_ollama_url
+
 console = Console()
 
 
@@ -19,6 +21,7 @@ class DockerManager:
         self.compose_file = project_root / "docker-compose.yml"
         self.ollama_container = "equilens-ollama"
         self.app_container = "equilens-app"
+        self.ollama_url = get_ollama_url()
 
     def _run_command(
         self, cmd: list[str], capture_output: bool = False, silent_fail: bool = False
@@ -103,7 +106,7 @@ class DockerManager:
                     ports = parts[1] if len(parts) > 1 else ""
 
                     # Test connectivity to ensure it's actually working
-                    if self._test_ollama_connection("http://localhost:11434"):
+                    if self._test_ollama_connection(self.ollama_url):
                         console.print(f"✅ Found working Ollama container: {name}")
                         console.print(f"   Ports: {ports}")
                         return name
@@ -142,7 +145,7 @@ class DockerManager:
                         console.print(f"✅ Restarted Ollama container: {name}")
                         # Wait a moment for it to start
                         time.sleep(3)
-                        if self._test_ollama_connection("http://localhost:11434"):
+                        if self._test_ollama_connection(self.ollama_url):
                             console.print(f"✅ Container {name} is now accessible")
                             return name
                         else:
@@ -250,7 +253,7 @@ class DockerManager:
             )
 
             for i in range(max_wait):
-                if self._test_ollama_connection("http://localhost:11434", timeout=2):
+                if self._test_ollama_connection(self.ollama_url, timeout=2):
                     progress.update(task, description="✅ Ollama is ready")
                     time.sleep(2)  # Give app container time to start
                     return True
@@ -315,9 +318,7 @@ class DockerManager:
 
         if status["docker_available"]:
             # Check Ollama API
-            status["ollama_accessible"] = self._test_ollama_connection(
-                "http://localhost:11434"
-            )
+            status["ollama_accessible"] = self._test_ollama_connection(self.ollama_url)
 
             # Check containers (commenting out app container for now)
             result = self._run_command(

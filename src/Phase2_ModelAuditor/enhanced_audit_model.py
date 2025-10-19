@@ -26,6 +26,19 @@ import pandas as pd
 import requests
 from rich.console import Console
 from rich.panel import Panel
+
+# Import smart Ollama configuration
+try:
+    from equilens.core.ollama_config import get_ollama_url, is_running_in_container
+except ImportError:
+    # Fallback for standalone execution
+    def get_ollama_url(force_refresh=False):
+        return os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+
+    def is_running_in_container():
+        return Path("/.dockerenv").exists()
+
+
 from rich.progress import (
     BarColumn,
     MofNCompleteColumn,
@@ -219,13 +232,17 @@ class EnhancedBiasAuditor:
         # Graceful shutdown handler
         self.killer = GracefulKiller()
 
-        # Enhanced API configuration with connection pooling
+        # Smart API configuration with environment detection
+        self.ollama_url = get_ollama_url()
+
+        # Fallback hosts for manual retry if smart detection fails
         self.ollama_hosts = [
-            "http://ollama:11434",
-            "http://localhost:11434",
-            "http://127.0.0.1:11434",
+            self.ollama_url,  # Primary: smart detected URL
+            "http://ollama:11434",  # Docker Compose service name
+            "http://host.docker.internal:11434",  # Container to host
+            "http://localhost:11434",  # Local
+            "http://127.0.0.1:11434",  # Loopback
         ]
-        self.ollama_url = None
         self.max_retries = 3
         self.base_delay = 0.5
         self.max_delay = 30.0
@@ -242,25 +259,29 @@ class EnhancedBiasAuditor:
         logger.info(f"🚀 Enhanced audit session {self.session_id} initialized")
 
     def check_ollama_service(self) -> bool:
-        """Check if Ollama service is running with simplified logic"""
+        """Check if Ollama service is running with smart detection"""
         console.print("🔍 [blue]Checking Ollama service availability...[/blue]")
 
-        # Try localhost first (most common case)
-        primary_host = "http://localhost:11434"
-        try:
-            response = self.session.get(f"{primary_host}/api/version", timeout=5)
-            if response.status_code == 200:
-                version_info = response.json()
-                self.ollama_url = primary_host
-                console.print(f"✅ [green]Connected to Ollama at {primary_host}[/green]")
-                console.print(f"📊 [cyan]Version: {version_info.get('version', 'unknown')}[/cyan]")
-                return True
-        except Exception as e:
-            console.print(f"❌ [red]{primary_host}: Connection failed[/red]: {e}")
+        # Try the smart-detected URL first
+        if self.ollama_url:
+            try:
+                response = self.session.get(f"{self.ollama_url}/api/version", timeout=5)
+                if response.status_code == 200:
+                    version_info = response.json()
+                    console.print(
+                        f"✅ [green]Connected to Ollama at {self.ollama_url}[/green]"
+                    )
+                    console.print(
+                        f"📊 [cyan]Version: {version_info.get('version', 'unknown')}[/cyan]"
+                    )
+                    return True
+            except Exception:
+                console.print(
+                    "⚠️  [yellow]Smart-detected URL failed, trying fallbacks...[/yellow]"
+                )
 
-        # Try other hosts as fallback
-        fallback_hosts = ["http://127.0.0.1:11434"]
-        for host in fallback_hosts:
+        # Try fallback hosts
+        for host in self.ollama_hosts[1:]:  # Skip first one as we already tried it
             try:
                 response = self.session.get(f"{host}/api/version", timeout=3)
                 if response.status_code == 200:

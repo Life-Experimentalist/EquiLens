@@ -11,6 +11,7 @@ from rich.table import Table
 
 from .docker import DockerManager
 from .gpu import GPUManager
+from .ollama_config import get_ollama_url
 
 console = Console()
 
@@ -84,11 +85,12 @@ class EquiLensManager:
         table.add_column("Status", style="magenta")
         table.add_column("Details", style="green")
 
-        # Ollama API status
+        # Ollama API status with smart detection
+        ollama_url = get_ollama_url()
         ollama_status = (
             "🟢 Ready" if docker_status["ollama_accessible"] else "🔴 Not accessible"
         )
-        table.add_row("Ollama API", ollama_status, "http://localhost:11434")
+        table.add_row("Ollama API", ollama_status, ollama_url)
 
         # Container status
         if docker_status["containers"]:
@@ -113,8 +115,9 @@ class EquiLensManager:
 
     def _display_models_status(self) -> None:
         """Display available models status"""
+        ollama_url = get_ollama_url()
         try:
-            response = requests.get("http://localhost:11434/api/tags", timeout=5)
+            response = requests.get(f"{ollama_url}/api/tags", timeout=5)
             if response.status_code == 200:
                 data = response.json()
                 models = data.get("models", [])
@@ -171,9 +174,11 @@ class EquiLensManager:
         """List available Ollama models"""
         console.print("📋 [bold]Available Ollama models:[/bold]")
 
+        ollama_url = get_ollama_url()
+
         # Try direct API call first
         try:
-            response = requests.get("http://localhost:11434/api/tags", timeout=10)
+            response = requests.get(f"{ollama_url}/api/tags", timeout=10)
             if response.status_code == 200:
                 data = response.json()
                 models = data.get("models", [])
@@ -221,10 +226,12 @@ class EquiLensManager:
         console.print(f"📥 [bold]Downloading model: {model_name}[/bold]")
         console.print("   [yellow]This may take several minutes...[/yellow]")
 
+        ollama_url = get_ollama_url()
+
         # Try direct API call first
         try:
             response = requests.post(
-                "http://localhost:11434/api/pull",
+                f"{ollama_url}/api/pull",
                 json={"name": model_name},
                 timeout=300,  # 5 minutes timeout
             )

@@ -21,11 +21,16 @@ RUN useradd -m -u 1000 -s /bin/bash equilens && \
 USER equilens
 WORKDIR /workspace
 
-# Copy dependency files and README (needed by pyproject.toml)
-COPY --chown=equilens:equilens pyproject.toml uv.lock* README.md ./
+# Copy dependency files ONLY first (for better caching)
+COPY --chown=equilens:equilens pyproject.toml README.md ./
+COPY --chown=equilens:equilens uv.lock* ./
 
-RUN uv sync --frozen --no-dev || uv sync --no-dev
+# Use BuildKit cache mount for UV cache directory
+# This persists the UV cache between builds, avoiding re-downloads
+RUN --mount=type=cache,target=/home/equilens/.cache/uv,uid=1000,gid=1000 \
+	uv sync --frozen --no-dev || uv sync --no-dev
 
+# Copy the rest of the application (this layer changes more frequently)
 COPY --chown=equilens:equilens . .
 
 RUN mkdir -p data/results data/logs data/corpus src/Phase1_CorpusGenerator/corpus public && \

@@ -3,6 +3,8 @@ Enhanced Gradio Web UI for EquiLens - AI Bias Detection Platform
 
 A comprehensive, professional web interface using Gradio.
 Provides full functionality for bias detection workflows with real-time progress tracking.
+
+Optimized for fast Docker builds with BuildKit caching.
 """
 
 import subprocess
@@ -10,6 +12,8 @@ from pathlib import Path
 
 import gradio as gr
 import requests
+
+# (Remove this import from the global scope. Instead, import get_ollama_url inside the functions that use it.)
 
 try:
     import psutil
@@ -28,6 +32,8 @@ progress_state = {"current_operation": None, "progress": 0, "status": "Ready"}
 def get_system_info() -> str:
     """Get enhanced system information"""
     try:
+        from equilens.core.ollama_config import get_ollama_url
+
         status = manager.check_system_status()
 
         # Enhanced status formatting with emojis and better structure
@@ -48,17 +54,16 @@ def get_system_info() -> str:
 
         # Docker Services
         docker_info = status["docker"]
+        ollama_url = get_ollama_url()
         output += "\n🐳 **Docker & Services:**\n"
         if docker_info["docker_available"]:
             output += "  ✅ **Docker:** Available and running\n"
             if docker_info["ollama_accessible"]:
-                output += "  ✅ **Ollama API:** Connected (http://localhost:11434)\n"
+                output += f"  ✅ **Ollama API:** Connected ({ollama_url})\n"
 
                 # Add model count info
                 try:
-                    response = requests.get(
-                        "http://localhost:11434/api/tags", timeout=5
-                    )
+                    response = requests.get(f"{ollama_url}/api/tags", timeout=5)
                     if response.status_code == 200:
                         models = response.json().get("models", [])
                         output += (
@@ -140,8 +145,11 @@ def stop_services() -> str:
 def list_models() -> str:
     """List available Ollama models"""
     try:
+        from equilens.core.ollama_config import get_ollama_url
+
+        ollama_url = get_ollama_url()
         # Try to get models from Ollama API
-        response = requests.get("http://localhost:11434/api/tags", timeout=10)
+        response = requests.get(f"{ollama_url}/api/tags", timeout=10)
         if response.status_code == 200:
             data = response.json()
             models = data.get("models", [])

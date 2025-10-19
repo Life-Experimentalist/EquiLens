@@ -25,7 +25,7 @@ logs/audit_session.log
 
 # Keep essential docs in container but exclude temp files
 !README.md
-!docs/
+
 !ONE_CLICK_SETUP.md
 !SETUP_COMPLETE.md
 !RECOVERY_NOTES.md

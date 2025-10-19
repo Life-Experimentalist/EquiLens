@@ -48,7 +48,7 @@ class BiasAnalytics:
     def __init__(
         self,
         results_file: str,
-        ollama_url: str = "http://localhost:11434",
+        ollama_url: str | None = None,
         report_model: str | None = None,
         ai_num_predict: int = 512,
     ):
@@ -57,13 +57,15 @@ class BiasAnalytics:
 
         Args:
             results_file: Path to CSV results file
-            ollama_url: Ollama API endpoint for AI report generation
+            ollama_url: Ollama API endpoint for AI report generation (defaults to environment variable or host.docker.internal)
             report_model: Model to use for AI-generated reports (optional)
             ai_num_predict: Number of tokens to predict for AI-generated content (default: 512)
         """
         self.results_file = results_file
         self.results_dir = Path(os.path.dirname(results_file) or ".")
-        self.ollama_url = ollama_url
+        self.ollama_url = ollama_url or os.getenv(
+            "OLLAMA_BASE_URL", "http://host.docker.internal:11434"
+        )
         self.report_model = report_model
         self.ai_num_predict = ai_num_predict
 
@@ -1847,7 +1849,7 @@ Examples:
     # Run analysis
     analyzer = BiasAnalytics(
         results_file=args.results_file,
-        ollama_url="http://localhost:11434",  # Default Ollama URL, or make configurable if desired
+        ollama_url=os.getenv("OLLAMA_BASE_URL", "http://host.docker.internal:11434"),
         report_model=args.model,
         ai_num_predict=512,  # You can make this configurable via CLI if desired
     )

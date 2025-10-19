@@ -6,6 +6,7 @@ Features interactive commands, beautiful output formatting, and comprehensive he
 """
 
 import json
+import os
 import subprocess
 from pathlib import Path
 from typing import Annotated
@@ -171,9 +172,10 @@ def format_file_size(size_bytes: int) -> str:
 
 def get_available_models() -> list[str]:
     """Get available models from Ollama API"""
+    ollama_url = os.getenv("OLLAMA_BASE_URL", "http://host.docker.internal:11434")
     try:
         # Try direct API call first (Docker-based Ollama)
-        response = requests.get("http://localhost:11434/api/tags", timeout=10)
+        response = requests.get(f"{ollama_url}/api/tags", timeout=10)
         if response.status_code == 200:
             data = response.json()
             models = data.get("models", [])
