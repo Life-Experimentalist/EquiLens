@@ -509,7 +509,7 @@ class BiasAnalytics:
         colors = ["#e74c3c" if abs(d) > 0.8 else "#f39c12" if abs(d) > 0.5 else "#27ae60"
                   for d in cohens_d]
 
-        bars = ax.barh(professions, cohens_d, color=colors, edgecolor="black")
+        ax.barh(professions, cohens_d, color=colors, edgecolor="black")
 
         # Add reference lines
         ax.axvline(0, color="black", linewidth=0.8, linestyle="-")
@@ -526,13 +526,14 @@ class BiasAnalytics:
             pad=20,
         )
         ax.text(
-            0.95, 0.95,
+            0.95,
+            0.95,
             "Green: Small | Orange: Medium | Red: Large",
             transform=ax.transAxes,
             fontsize=10,
             verticalalignment="top",
             horizontalalignment="right",
-            bbox=dict(boxstyle="round", facecolor="white", alpha=0.8),
+            bbox={"boxstyle": "round", "facecolor": "white", "alpha": 0.8},
         )
 
         plt.tight_layout()
@@ -946,9 +947,10 @@ Interpretation:
             try:
                 # Calculate exponential backoff delay
                 if attempt > 0:
-                            "temperature": 0.7,
-                            "num_predict": getattr(self, "ai_num_predict", 512),
-                            "top_p": 0.9,
+                    # compute a delay using base_delay and max_delay if available
+                    base = getattr(self, "base_delay", 0.5)
+                    maxd = getattr(self, "max_delay", 30.0)
+                    delay = min(base * (2**attempt), maxd)
                     time.sleep(delay)
 
                 response = requests.post(
@@ -1849,7 +1851,7 @@ Examples:
         report_model=args.model,
         ai_num_predict=512,  # You can make this configurable via CLI if desired
     )
-    success = analyzer.run_complete_analysis(
+
     success = analyzer.run_complete_analysis(
         generate_html=True,
         generate_ai_insights=not args.no_ai

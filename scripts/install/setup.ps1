@@ -301,7 +301,7 @@ function Show-NextSteps {
 
     Write-Host "`n📚 Documentation:" -ForegroundColor Green
     Write-Host "   SETUP_COMPLETE.md" -ForegroundColor White
-    Write-Host "   docs/QUICKSTART.md" -ForegroundColor White
+    Write-Host "   docs/setup/QUICKSTART.md" -ForegroundColor White
 
     Write-Host "`n🔧 Useful Commands:" -ForegroundColor Green
     Write-Host "   docker-compose up -d ollama" -ForegroundColor White

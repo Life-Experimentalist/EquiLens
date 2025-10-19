@@ -2403,6 +2403,6 @@ def _run_auto_analytics(analytics_preference: str, latest_results: Path):
             "[dim]You can run analysis manually later using: uv run equilens analyze[/dim]"
         )
 
-if __name__ == "__main__":
+
 if __name__ == "__main__":
     app()

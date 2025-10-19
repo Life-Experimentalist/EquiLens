@@ -20,4 +20,8 @@
         "**/Thumbs.db": true
     },
 	"powershell.integratedConsole.suppressStartupBanner": false,
+	"python.analysis.extraPaths": [
+		"./src"
+	],
+	"python.defaultInterpreterPath": ".venv\\Scripts\\python.exe"
 }

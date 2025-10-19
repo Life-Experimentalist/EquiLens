@@ -90,7 +90,7 @@ if [ -n "$EXISTING_OLLAMA" ]; then
     echo ""
     echo -e "${YELLOW}  You can reuse an existing Ollama volume to keep your models.${NC}"
     echo -e "${YELLOW}  Edit docker-compose.yml and set 'external: true' for ollama_models volume.${NC}"
-    echo -e "${YELLOW}  See docs/DOCKER_SETUP.md for details.${NC}"
+    echo -e "${YELLOW}  See docs/docker/DOCKER_SETUP.md for details.${NC}"
     echo ""
 fi
 

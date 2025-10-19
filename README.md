@@ -111,7 +111,7 @@ curl -fsSL https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/
 irm https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/scripts/install/setup-docker.ps1 | iex
 ```
 
-Full documentation: [ONE_CLICK_SETUP.md](docs/ONE_CLICK_SETUP.md)
+Full documentation: [Documentation Index](docs/README.md)
 
 ## Basic Usage
 
@@ -711,7 +711,7 @@ Comprehensive documentation available in the `docs/` directory:
 
 ### Setup & Deployment
 - **[QUICKSTART.md](docs/QUICKSTART.md)** - Get started in 5 minutes
-- **[ONE_CLICK_SETUP.md](docs/ONE_CLICK_SETUP.md)** - Automated setup guide
+- **[Documentation Index](docs/README.md)** - Consolidated documentation and setup links
 - **[DOCKER_HUB_DEPLOYMENT.md](docs/DOCKER_HUB_DEPLOYMENT.md)** - Complete Docker Hub deployment guide
 - **[DOCKER_DEPLOY_QUICKREF.md](docs/DOCKER_DEPLOY_QUICKREF.md)** - Quick reference for Docker deployment
 - **[OLLAMA_SETUP.md](docs/OLLAMA_SETUP.md)** - Ollama installation and configuration

@@ -4,7 +4,7 @@ This directory contains the GitHub Pages website for the EquiLens project.
 
 ## 🌐 Live Site
 
-Visit the live site at: [https://life-Experimentalist.github.io/EquiLens/](https://life-Experimentalist.github.io/EquiLens/)
+Visit the live site at: [https://Life-Experimentalist.github.io/EquiLens/](https://Life-Experimentalist.github.io/EquiLens/)
 
 ## 📁 Structure
 

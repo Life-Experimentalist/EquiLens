@@ -3,8 +3,8 @@
 EquiLens CLI entry point.
 This script ensures the CLI works from any directory in Docker or host.
 """
+
 import sys
-import os
 from pathlib import Path
 
 # Add the project root to Python path

@@ -116,6 +116,7 @@ ignore = [
     "B008", # do not perform function calls in argument defaults
     "C901", # too complex
     "W293", # blank line contains whitespace
+	"E402", # module level import not at top of file
 ]
 
 [tool.ruff.per-file-ignores]
