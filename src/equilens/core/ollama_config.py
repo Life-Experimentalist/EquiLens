@@ -180,10 +180,6 @@ class OllamaConfig:
                 self._cached_url = env_url
                 return env_url
             else:
-            if self._test_connection(env_url):
-                self._cached_url = env_url
-                return env_url
-            else:
                 import warnings
 
                 warnings.warn(
