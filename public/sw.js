@@ -1,4 +1,4 @@
-const CACHE_NAME = "equilens-v1.0.0";
+const CACHE_NAME = "equilens-v2.0.0";
 const urlsToCache = [
 	"/EquiLens/",
 	"/EquiLens/index.html",

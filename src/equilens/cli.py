@@ -543,9 +543,9 @@ def audit(
         typer.Option(
             "--enhanced",
             "-e",
-            help="[BETA] Use experimental enhanced auditor (may have reliability issues)",
+            help="Use enhanced auditor with dynamic concurrency and better progress tracking (default, auto-fallback to standard if issues occur)",
         ),
-    ] = False,
+    ] = True,
     batch_size: Annotated[
         int,
         typer.Option(
@@ -619,7 +619,10 @@ def audit(
             "[cyan]--output-dir, -o[/cyan]   Output directory for results (default: results)"
         )
         console.print(
-            "[cyan]--enhanced, -e[/cyan]     Use experimental enhanced auditor"
+            "[cyan]--enhanced[/cyan]         Use enhanced auditor (default: true, auto-fallback enabled)"
+        )
+        console.print(
+            "[cyan]--no-enhanced[/cyan]      Disable enhanced auditor, use standard mode"
         )
         console.print(
             "[cyan]--batch-size, -b[/cyan]   Number of concurrent requests (default: 5)"
@@ -898,6 +901,42 @@ def audit(
         )
     )
 
+    # Step 3.5: Analytics Preference (only for new audits, not resume)
+    analytics_preference = "none"  # Default: no auto-analysis
+
+    if not resume:
+        console.print(
+            Panel.fit(
+                "[bold magenta]Step 3.5: Post-Audit Analytics Preference[/bold magenta]\n\n"
+                "Would you like to automatically run analytics after the audit completes?\n\n"
+                "[cyan]Options:[/cyan]\n"
+                "  1. [green]None[/green] - Skip automatic analysis (run manually later)\n"
+                "  2. [yellow]Standard[/yellow] - Quick analysis with basic visualizations (~5 sec)\n"
+                "  3. [blue]Advanced[/blue] - Comprehensive analysis with 8+ charts + statistical report (~15 sec)\n\n"
+                "[dim]You can always run analysis manually later using:[/dim]\n"
+                "[dim]  uv run equilens analyze[/dim]",
+                border_style="magenta",
+            )
+        )
+
+        console.print("\n[bold]Select analytics preference (1/2/3):[/bold]")
+        while True:
+            choice = typer.prompt("", default="1")
+            if choice in ["1", "2", "3"]:
+                if choice == "1":
+                    analytics_preference = "none"
+                    console.print("[green]✓[/green] No automatic analysis selected")
+                elif choice == "2":
+                    analytics_preference = "standard"
+                    console.print("[green]✓[/green] Standard analytics will run after audit")
+                elif choice == "3":
+                    analytics_preference = "advanced"
+                    console.print("[green]✓[/green] Advanced analytics will run after audit")
+                break
+            else:
+                console.print("[red]Invalid choice. Please enter 1, 2, or 3.[/red]")
+
+
     console.print("\n[bold]Proceed with bias audit?[/bold]")
     if not typer.confirm(""):
         console.print("[yellow]Audit cancelled by user.[/yellow]")
@@ -915,17 +954,9 @@ def audit(
 
     try:
         if enhanced:
-            # Warning for beta enhanced auditor
-            console.print(
-                "⚠️ [bold yellow]BETA WARNING: Enhanced auditor is experimental and may have reliability issues[/bold yellow]"
-            )
-            console.print(
-                "💡 [dim]For stable results, use the standard auditor (without --enhanced flag)[/dim]\n"
-            )
-
             # Use enhanced auditor with Rich progress bars
             console.print(
-                "🚀 [bold cyan]Starting enhanced audit with real-time progress...[/bold cyan]"
+                "🚀 [bold cyan]Starting enhanced audit with dynamic concurrency...[/bold cyan]"
             )
 
             # Import the enhanced auditor with better error handling
@@ -955,13 +986,21 @@ def audit(
                         "\n✅ [bold green]Enhanced audit completed successfully![/bold green]"
                     )
                 else:
-                    console.print("\n❌ [bold red]Enhanced audit failed![/bold red]")
-                    raise typer.Exit(1)
+                    console.print(
+                        f"\n⚠️ [yellow]Enhanced audit encountered issues: {success}. Falling back to standard auditor...[/yellow]"
+                    )
+                    enhanced = False
 
             except ImportError as e:
-                console.print(f"[red]❌ Failed to import enhanced auditor: {e}[/red]")
+                console.print(f"[yellow]⚠️ Enhanced auditor import failed: {e}[/yellow]")
                 console.print(
-                    "[yellow]Falling back to enhanced auditor via subprocess...[/yellow]"
+                    "[yellow]Falling back to standard auditor...[/yellow]"
+                )
+                enhanced = False
+            except Exception as e:
+                console.print(f"[yellow]⚠️ Enhanced auditor error: {e}[/yellow]")
+                console.print(
+                    "[yellow]Falling back to standard auditor...[/yellow]"
                 )
                 enhanced = False
 
@@ -1243,7 +1282,9 @@ def audit(
             "  • Use [cyan]--silent[/cyan] flag if you see Unicode encoding errors"
         )
 
-        console.print(Panel.fit(success_message, border_style="green"))
+        # Auto-run analytics if preference was set (only for new audits)
+        if not resume and analytics_preference != "none" and latest_results:
+            _run_auto_analytics(analytics_preference, latest_results)
 
     except subprocess.CalledProcessError as e:
         console.print(
@@ -1340,8 +1381,24 @@ def analyze(
             help="Suppress subprocess output to avoid emoji encoding errors",
         ),
     ] = False,
+    advanced: Annotated[
+        bool,
+        typer.Option(
+            "--advanced",
+            "-a",
+            help="Use advanced analytics with comprehensive visualizations and statistics",
+        ),
+    ] = False,
 ):
-    """📊 Analyze bias audit results with enhanced visual interface"""
+    """📊 Analyze bias audit results with enhanced visual interface
+
+    Use --advanced for comprehensive statistical analysis with:
+    - Violin plots, box plots, heatmaps, scatter plots
+    - Effect sizes (Cohen's d), confidence intervals
+    - Time-series progression analysis
+    - Statistical significance testing (t-tests)
+    - Professional presentation-ready dashboard
+    """
 
     # Step 1: Results File Selection
     if results is None:
@@ -1415,117 +1472,145 @@ def analyze(
         console.print(f"[red]❌ Results file not found: {results}[/red]")
         raise typer.Exit(1)
 
+    # Step 1.5: Analytics Mode Selection (if not specified via flag)
+    if not advanced:
+        # Check if user explicitly used --advanced=False or just didn't use the flag
+        # We'll ask interactively
+        console.print(
+            Panel.fit(
+                "[bold magenta]Step 1.5: Analytics Mode Selection[/bold magenta]\n\n"
+                "Choose the type of analysis you want to perform:\n\n"
+                "[cyan]Options:[/cyan]\n"
+                "  1. [yellow]Standard[/yellow] - Quick analysis with basic bar chart (~5 sec)\n"
+                "     • Single bias_report.png visualization\n"
+                "     • Console statistics summary\n"
+                "     • Perfect for quick checks\n\n"
+                "  2. [blue]Advanced[/blue] - Comprehensive analysis with 8+ charts + statistical report (~15 sec)\n"
+                "     • comprehensive_dashboard.png (multi-panel overview)\n"
+                "     • 7 additional professional charts\n"
+                "     • statistical_report.md (full statistical analysis)\n"
+                "     • Effect sizes, t-tests, confidence intervals\n"
+                "     • Perfect for presentations and research\n\n"
+                "[dim]Tip: Use --advanced flag to skip this prompt next time[/dim]",
+                border_style="magenta",
+            )
+        )
+
+        console.print("\n[bold]Select analysis mode (1 or 2):[/bold]")
+        while True:
+            choice = typer.prompt("", default="1")
+            if choice in ["1", "2"]:
+                if choice == "2":
+                    advanced = True
+                    console.print("[green]✓[/green] Advanced analytics selected")
+                else:
+                    console.print("[green]✓[/green] Standard analytics selected")
+                break
+            else:
+                console.print("[red]Invalid choice. Please enter 1 or 2.[/red]")
+
     # Step 2: Configuration Review
     results_size = Path(results).stat().st_size / 1024
+
+    analysis_type = "Advanced (Comprehensive)" if advanced else "Standard (Quick)"
+    output_desc = (
+        "8+ charts + statistical report + dashboard"
+        if advanced
+        else "bias_report.png + console summary"
+    )
+
     console.print(
         Panel.fit(
             f"[bold green]Step 2: Analysis Configuration[/bold green]\n\n"
             f"[bold]Results File:[/bold] [cyan]{results}[/cyan] ([dim]{results_size:.1f} KB[/dim])\n"
+            f"[bold]Analysis Type:[/bold] [cyan]{analysis_type}[/cyan]\n"
             f"[bold]Silent Mode:[/bold] [cyan]{'Enabled' if silent else 'Disabled'}[/cyan]\n"
-            f"[bold]Output:[/bold] [cyan]bias_report.png + console summary[/cyan]",
+            f"[bold]Output:[/bold] [cyan]{output_desc}[/cyan]",
             border_style="green",
         )
     )
 
     # Step 3: Execute Analysis
+    analysis_desc = (
+        "Generating comprehensive statistical analysis with multiple visualizations..."
+        if advanced
+        else "Generating statistical summary and visualization chart..."
+    )
+    output_note = (
+        "[dim]This will create 8+ charts, statistical report, and comprehensive dashboard.[/dim]"
+        if advanced
+        else "[dim]This will create bias_report.png and display metrics in the console.[/dim]"
+    )
+
     console.print(
         Panel.fit(
-            "[bold yellow]Step 3: Executing Bias Analysis[/bold yellow]\n"
-            "Generating statistical summary and visualization chart...\n"
-            "[dim]This will create bias_report.png and display metrics in the console.[/dim]",
+            f"[bold yellow]Step 3: Executing Bias Analysis[/bold yellow]\n"
+            f"{analysis_desc}\n"
+            f"{output_note}",
             border_style="yellow",
         )
     )
 
     try:
-        # Configure subprocess parameters based on silent mode
-        if silent:
-            # Redirect both stdout and stderr to suppress emoji encoding errors
-            subprocess.run(
-                [
-                    "python",
-                    "src/Phase3_Analysis/analyze_results.py",
-                    results,
-                ],
-                check=True,
-                stderr=subprocess.DEVNULL,
-                stdout=subprocess.DEVNULL,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-            )
-            # Show clean progress feedback
-            console.print(
-                "[green]✓[/green] Analysis process completed successfully (output suppressed)"
+        # Import the unified analytics module
+        # Add project root to path if not already there
+        import sys
+        project_root = Path(__file__).parent.parent.parent
+        if str(project_root) not in sys.path:
+            sys.path.insert(0, str(project_root))
+
+        from Phase3_Analysis.analytics import BiasAnalytics
+
+        # Run analysis using the unified analytics class
+        analytics = BiasAnalytics(str(results))
+
+        if advanced:
+            # Generate comprehensive analysis with HTML report and AI insights
+            analytics.run_complete_analysis(
+                generate_html=True,
+                generate_ai_insights=True
             )
         else:
-            # Normal execution with full output but with proper encoding handling
-            try:
-                subprocess.run(
-                    [
-                        "python",
-                        "src/Phase3_Analysis/analyze_results.py",
-                        results,
-                    ],
-                    check=True,
-                    text=True,
-                    encoding="utf-8",
-                    errors="replace",
-                )
-            except UnicodeDecodeError:
-                # Fallback for Unicode issues - run in silent mode automatically
-                console.print(
-                    "[yellow]⚠ Unicode display issues detected, switching to silent mode...[/yellow]"
-                )
-                subprocess.run(
-                    [
-                        "python",
-                        "src/Phase3_Analysis/analyze_results.py",
-                        results,
-                    ],
-                    check=True,
-                    stderr=subprocess.DEVNULL,
-                    stdout=subprocess.DEVNULL,
-                    text=True,
-                )
-                console.print(
-                    "[green]✓[/green] Analysis completed (Unicode issues bypassed)"
-                )
+            # Generate basic analysis only
+            analytics.run_complete_analysis(
+                generate_html=False,
+                generate_ai_insights=False
+            )
 
-        # Check if bias_report.png was generated (check multiple possible locations)
-        report_paths = [
-            Path("bias_report.png"),  # Current directory
-            Path("results/bias_report.png"),  # Results directory
-        ]
+        # Show success message
+        if not silent:
+            console.print(
+                "[green]✓[/green] Analysis completed successfully"
+            )
 
-        # Check if results file is in a session directory (new structure)
+        # Check for generated files based on mode
         if results:
             results_path = Path(results)
             results_dir = results_path.parent
+        else:
+            results_dir = Path(".")
 
-            # If the results file is in a session directory, check there first
-            if results_dir.name != "results":
-                report_paths.insert(0, results_dir / "bias_report.png")
+        # List of expected output files
+        if advanced:
+            expected_files = [
+                "comprehensive_dashboard.png",
+                "violin_plot_distribution.png",
+                "box_plot_profession.png",
+                "heatmap_bias_matrix.png",
+                "scatter_correlations.png",
+                "effect_sizes_cohens_d.png",
+                "time_series_progression.png",
+                "statistical_report.md",
+            ]
+        else:
+            expected_files = ["bias_report.png"]
 
-            # Also check legacy model-specific directory structure
-            model_name = results_path.stem.replace("results_", "")
-            # Remove session timestamp if present
-            model_name = (
-                "_".join(model_name.split("_")[:-1])
-                if "_" in model_name
-                else model_name
-            )
-            model_dir_path = Path(f"results/{model_name}")
-            if model_dir_path.exists():
-                report_paths.append(model_dir_path / "bias_report.png")
-
-        report_path = None
-        for path in report_paths:
-            if path.exists():
-                report_path = path
-                break
-
-        report_exists = report_path is not None
+        # Find generated files
+        generated_files = []
+        for filename in expected_files:
+            filepath = results_dir / filename
+            if filepath.exists():
+                generated_files.append(filepath)
 
         # Enhanced success panel with file information
         success_message = (
@@ -1534,30 +1619,41 @@ def analyze(
         success_message += (
             f"[bold]Analyzed File:[/bold] [cyan]{Path(results).name}[/cyan]\n"
         )
-
-        if report_exists:
-            report_size = report_path.stat().st_size / 1024
-            success_message += f"[bold]Generated Report:[/bold] [cyan]{report_path}[/cyan] ([dim]{report_size:.1f} KB[/dim])\n"
-        else:
-            success_message += "[bold]Generated Report:[/bold] [yellow]bias_report.png (check output above)[/yellow]\n"
+        success_message += (
+            f"[bold]Analysis Type:[/bold] [cyan]{'Advanced' if advanced else 'Standard'}[/cyan]\n"
+        )
+        success_message += (
+            f"[bold]Output Directory:[/bold] [cyan]{results_dir}[/cyan]\n"
+        )
 
         success_message += "\n[bold]Generated Files:[/bold]\n"
-        if report_exists:
-            success_message += f"  • [green]✓[/green] [cyan]{report_path}[/cyan] - Visualization chart\n"
+
+        if generated_files:
+            for filepath in generated_files:
+                file_size = filepath.stat().st_size / 1024
+                success_message += f"  • [green]✓[/green] [cyan]{filepath.name}[/cyan] ([dim]{file_size:.1f} KB[/dim])\n"
         else:
-            success_message += "  • [yellow]?[/yellow] [cyan]bias_report.png[/cyan] - Check console output\n"
-        success_message += (
-            "  • [green]✓[/green] [cyan]Console statistics[/cyan] - Detailed analysis\n"
-        )
-        success_message += "\n[bold]Next Steps:[/bold]\n"
-        if report_exists:
+            success_message += "  • [yellow]?[/yellow] Files generated (check output directory)\n"
+
+        if not advanced:
             success_message += (
-                f"  • Open [cyan]{report_path}[/cyan] to view bias metrics\n"
+                "  • [green]✓[/green] [cyan]Console statistics[/cyan] - Detailed analysis\n"
             )
-        success_message += "  • Review console statistics for detailed analysis\n"
-        success_message += (
-            "  • Use [cyan]--silent[/cyan] flag if you see Unicode encoding errors"
-        )
+
+        success_message += "\n[bold]Next Steps:[/bold]\n"
+
+        if advanced:
+            success_message += "  • Open [cyan]comprehensive_dashboard.png[/cyan] for overview\n"
+            success_message += "  • Read [cyan]statistical_report.md[/cyan] for detailed findings\n"
+            success_message += "  • Explore individual charts for specific insights\n"
+        else:
+            if generated_files:
+                success_message += f"  • Open [cyan]{generated_files[0].name}[/cyan] to view bias metrics\n"
+            success_message += "  • Review console statistics for detailed analysis\n"
+            success_message += "  • Use [cyan]--advanced[/cyan] flag for comprehensive analysis\n"
+
+        success_message += "  • Share results with your team or faculty\n"
+        success_message += "  • Use [cyan]--silent[/cyan] flag if you see Unicode encoding errors"
 
         console.print(Panel.fit(success_message, border_style="green"))
 
@@ -2247,7 +2343,66 @@ def resume_clean(
     except Exception as e:
         console.print(f"[red]❌ Error cleaning resume sessions: {e}[/red]")
         raise typer.Exit(1) from e
+def _run_auto_analytics(analytics_preference: str, latest_results: Path):
+    """
+    Run automatic analytics after audit completes, based on user preference.
+    """
+    console.print("\n" + "=" * 70)
+    console.print(
+        Panel.fit(
+            f"[bold cyan]🚀 Auto-Running {analytics_preference.title()} Analytics[/bold cyan]\n\n"
+            f"[dim]As requested during setup, running {analytics_preference} analysis...[/dim]",
+            border_style="cyan",
+        )
+    )
 
+    try:
+        # Import the unified analytics module
+        # Add project root to path if not already there
+        import sys
+        project_root = Path(__file__).parent.parent.parent
+        if str(project_root) not in sys.path:
+            sys.path.insert(0, str(project_root))
 
+        from Phase3_Analysis.analytics import BiasAnalytics
+
+        # Run analysis using the unified analytics class
+        analytics = BiasAnalytics(str(latest_results))
+
+        if analytics_preference == "advanced":
+            # Generate comprehensive analysis with HTML report
+            analytics.run_complete_analysis(
+                generate_html=True,
+                generate_ai_insights=True
+            )
+        else:
+            # Generate basic analysis only
+            analytics.run_complete_analysis(
+                generate_html=False,
+                generate_ai_insights=False
+            )
+
+        console.print(
+            Panel.fit(
+                f"[bold green]✅ {analytics_preference.title()} Analysis Complete![/bold green]\n\n"
+                f"[bold]Analytics files saved to:[/bold] [cyan]{latest_results.parent}/[/cyan]\n\n"
+                f"{'[bold]Generated:[/bold] 8+ charts + statistical_report.md' if analytics_preference == 'advanced' else '[bold]Generated:[/bold] bias_report.png'}",
+                border_style="green",
+            )
+        )
+    except subprocess.CalledProcessError as e:
+        console.print(
+            f"[yellow]⚠️  Auto-analysis failed (exit code: {e.returncode})[/yellow]"
+        )
+        console.print(
+            "[dim]You can run analysis manually later using: uv run equilens analyze[/dim]"
+        )
+    except Exception as e:
+        console.print(f"[yellow]⚠️  Auto-analysis error: {e}[/yellow]")
+        console.print(
+            "[dim]You can run analysis manually later using: uv run equilens analyze[/dim]"
+        )
+
+if __name__ == "__main__":
 if __name__ == "__main__":
     app()

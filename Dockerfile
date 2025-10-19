@@ -1,65 +1,51 @@
-# EquiLens Application Dockerfile - ULTRA-OPTIMIZED & SECURE
-FROM python:3.13.3-slim
+﻿FROM python:3.13.3-slim
 
-# Metadata for security and traceability
-LABEL author="VKrishna04 <https://github.com/VKrishna04>"
-LABEL org.opencontainers.image.source="https://github.com/Life-Experimentalists/EquiLens"
+LABEL author="VKrishna04"
+LABEL org.opencontainers.image.source="https://github.com/Life-Experimentalist/EquiLens"
 LABEL org.opencontainers.image.description="EquiLens AI Bias Detection Platform"
 LABEL org.opencontainers.image.licenses="Apache-2.0"
-LABEL org.opencontainers.image.version="1.0.0"
-LABEL org.opencontainers.image.created="2025-08-08"
+LABEL org.opencontainers.image.version="2.0.0"
 
-# Security: Update base packages and install only essential tools
 RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
-	curl \
-	git \
-	ca-certificates \
-	&& rm -rf /var/lib/apt/lists/* \
-	&& apt-get clean \
-	&& apt-get autoremove -y
+	curl git ca-certificates && \
+	rm -rf /var/lib/apt/lists/* && \
+	apt-get clean && apt-get autoremove -y
 
-# Install UV for fast Python package management
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
 	pip install --no-cache-dir uv
 
-# Security: Create non-root user with explicit shell
 RUN useradd -m -u 1000 -s /bin/bash equilens && \
-	mkdir -p /workspace && \
-	chown equilens:equilens /workspace
+	mkdir -p /workspace/data/results /workspace/data/logs /workspace/data/corpus && \
+	chown -R equilens:equilens /workspace
 
-# Switch to non-root user for security
 USER equilens
 WORKDIR /workspace
 
-# Copy UV configuration files first for better layer caching
-COPY --chown=equilens:equilens pyproject.toml uv.lock ./
+# Copy dependency files and README (needed by pyproject.toml)
+COPY --chown=equilens:equilens pyproject.toml uv.lock* README.md ./
 
-# Install Python dependencies with UV (OPTIMIZED)
-RUN uv sync --frozen --no-dev
+RUN uv sync --frozen --no-dev || uv sync --no-dev
 
-# Copy application files (this layer changes most often)
 COPY --chown=equilens:equilens . .
 
-# Create necessary directories with proper permissions
-RUN mkdir -p logs results src/Phase1_CorpusGenerator/corpus && \
-	chmod 755 logs results
-
-# Security: Clean up Python cache and temporary files
-RUN find . -name "*.pyc" -delete && \
+RUN mkdir -p data/results data/logs data/corpus src/Phase1_CorpusGenerator/corpus public && \
+	chmod -R 755 data && \
+	find . -name "*.pyc" -delete && \
 	find . -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
 
-# Health check for container monitoring
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-	CMD python -c "import sys; print('🚀 EquiLens healthy'); sys.exit(0)" || exit 1
+	CMD python -c "import sys; print('EquiLens healthy'); sys.exit(0)" || exit 1
 
-# Expose port for future web interface
-EXPOSE 8000
+EXPOSE 7860 8000
 
-# Set environment variables for better Unicode support
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONIOENCODING=utf-8
-ENV LANG=C.UTF-8
-ENV LC_ALL=C.UTF-8
+ENV PYTHONUNBUFFERED=1 \
+	PYTHONIOENCODING=utf-8 \
+	LANG=C.UTF-8 \
+	LC_ALL=C.UTF-8 \
+	PYTHONPATH=/workspace/src:/workspace \
+	OLLAMA_BASE_URL=http://localhost:11434 \
+	GRADIO_SERVER_PORT=7860 \
+	GRADIO_SERVER_NAME=0.0.0.0
 
-# Default command - ready for interactive use
-CMD ["uv", "run", "equilens", "--help"]
+# Run the Gradio GUI by default
+CMD [".venv/bin/equilens", "gui"]

@@ -5196,3 +5196,51 @@
 
 2025-10-16 01:11:46,290 - INFO - 💾 Results saved to results\llama2_latest_20251016_011024\results_llama2_latest_20251016_011024.csv
 2025-10-16 01:11:46,296 - INFO - 💾 Full responses saved to results\llama2_latest_20251016_011024\results_llama2_latest_20251016_011024_responses.csv
+2025-10-16 01:25:09,365 - INFO - 💾 Results saved to results\llama2_latest_20251016_011024\results_llama2_latest_20251016_011024.csv
+2025-10-16 01:25:09,373 - INFO - 💾 Full responses saved to results\llama2_latest_20251016_011024\results_llama2_latest_20251016_011024_responses.csv
+2025-10-16 01:37:32,876 - INFO - 💾 Results saved to results\llama2_latest_20251016_011024\results_llama2_latest_20251016_011024.csv
+2025-10-16 01:37:32,882 - INFO - 💾 Full responses saved to results\llama2_latest_20251016_011024\results_llama2_latest_20251016_011024_responses.csv
+2025-10-16 01:37:32,982 - INFO - ✅ Concurrent processing completed!
+2025-10-16 01:37:32,983 - INFO - 🤖 Final worker count: 2
+2025-10-16 01:37:32,985 - INFO - 🎉 Audit completed successfully!
+2025-10-16 01:37:32,986 - INFO - 📁 Next steps:
+2025-10-16 01:37:32,987 - INFO -    1. Review results: results\llama2_latest_20251016_011024\results_llama2_latest_20251016_011024.csv
+2025-10-16 01:37:32,988 - INFO -    2. Run analysis: uv run equilens analyze --results results\llama2_latest_20251016_011024\results_llama2_latest_20251016_011024.csv
+2025-10-18 23:57:56,291 - INFO - Initialized audit session 20251018_235756
+2025-10-18 23:57:59,058 - INFO - ✅ Ollama service found at http://localhost:11434
+2025-10-18 23:57:59,064 - INFO - Available models: ['llama2:latest']
+2025-10-18 23:57:59,064 - INFO - ✅ Model llama2:latest is already available
+2025-10-18 23:57:59,064 - INFO - 📂 Loading corpus from src\Phase1_CorpusGenerator\corpus\test_corpus_sample.csv
+2025-10-18 23:57:59,086 - INFO - 🎯 Starting audit: 40 total tests
+2025-10-18 23:57:59,086 - INFO - 📊 Model: llama2:latest
+2025-10-18 23:57:59,086 - INFO - 💾 Results will be saved to: results\llama2_latest_20251018_235756\results_llama2_latest_20251018_235756.csv
+2025-10-18 23:57:59,087 - INFO - ┌───────────────────────────────────────────────────────────────────────────────────────────┐
+2025-10-18 23:57:59,087 - INFO - │ Session: 20251018_235756                                                                  │
+2025-10-18 23:57:59,087 - INFO - │ Model:   llama2:latest                                                                    │
+2025-10-18 23:57:59,087 - INFO - │ Corpus:  src\Phase1_CorpusGenerator\corpus\test_corpus_sample.csv                         │
+2025-10-18 23:57:59,088 - INFO - │ Progress:0/40 (0.0%)                                                                      │
+2025-10-18 23:57:59,088 - INFO - │ Output:  results\llama2_latest_20251018_235756\results_llama2_latest_20251018_235756.csv  │
+2025-10-18 23:57:59,088 - INFO - │ ETA Mode:Dynamic                                                                          │
+2025-10-18 23:57:59,088 - INFO - └───────────────────────────────────────────────────────────────────────────────────────────┘
+2025-10-18 23:57:59,088 - INFO - 📈 ETA will be calculated dynamically based on actual performance
+2025-10-18 23:57:59,090 - INFO - 🚀 Starting fresh audit with 40 tests
+2025-10-18 23:57:59,250 - INFO - � Starting concurrent processing with 3 workers...
+2025-10-18 23:57:59,251 - INFO - 📊 Processing 40 tests
+2025-10-18 23:57:59,252 - INFO - 
+🔍 AI Bias Detection Audit Progress
+2025-10-18 23:57:59,252 - INFO - Testing AI model responses against bias detection corpus
+2025-10-18 23:57:59,252 - INFO - Progress shows: Completed/Total | Elapsed Time | Remaining Time | Success Rate
+2025-10-18 23:57:59,253 - INFO - 💡 Press 'p' at any time to pause/resume the audit
+
+2025-10-19 00:00:45,088 - INFO - 💾 Results saved to results\llama2_latest_20251018_235756\results_llama2_latest_20251018_235756.csv
+2025-10-19 00:00:45,102 - INFO - 💾 Full responses saved to results\llama2_latest_20251018_235756\results_llama2_latest_20251018_235756_responses.csv
+2025-10-19 00:23:21,931 - INFO - 💾 Results saved to results\llama2_latest_20251018_235756\results_llama2_latest_20251018_235756.csv
+2025-10-19 00:23:21,948 - INFO - 💾 Full responses saved to results\llama2_latest_20251018_235756\results_llama2_latest_20251018_235756_responses.csv
+2025-10-19 00:43:53,058 - INFO - 💾 Results saved to results\llama2_latest_20251018_235756\results_llama2_latest_20251018_235756.csv
+2025-10-19 00:43:53,073 - INFO - 💾 Full responses saved to results\llama2_latest_20251018_235756\results_llama2_latest_20251018_235756_responses.csv
+2025-10-19 00:43:53,154 - INFO - ✅ Concurrent processing completed!
+2025-10-19 00:43:53,157 - INFO - 🤖 Final worker count: 3
+2025-10-19 00:43:53,161 - INFO - 🎉 Audit completed successfully!
+2025-10-19 00:43:53,163 - INFO - 📁 Next steps:
+2025-10-19 00:43:53,163 - INFO -    1. Review results: results\llama2_latest_20251018_235756\results_llama2_latest_20251018_235756.csv
+2025-10-19 00:43:53,164 - INFO -    2. Run analysis: uv run equilens analyze --results results\llama2_latest_20251018_235756\results_llama2_latest_20251018_235756.csv

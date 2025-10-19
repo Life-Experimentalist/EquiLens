@@ -1,6 +1,6 @@
 [project]
 name = "equilens"
-version = "1.0.0"
+version = "2.0.0"
 description = "AI Bias Detection Platform - A comprehensive platform for detecting and analyzing bias in AI language models"
 readme = "README.md"
 authors = [
@@ -50,6 +50,7 @@ dependencies = [
     "psutil>=7.0.0",
     "pytest>=8.4.1",
     "textual>=6.2.1",
+    "scipy>=1.16.1",
 ]
 
 [project.optional-dependencies]

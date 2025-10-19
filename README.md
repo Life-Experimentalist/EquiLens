@@ -89,25 +89,28 @@ uv run equilens
 or
 
 ### One Click Installation
+The installation scripts have been moved to `scripts/install/` to make it easier to find the right one.
+
 #### PowerShell (Recommended)
 ```powershell
-irm https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/setup.ps1 | iex
+irm https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/scripts/install/setup.ps1 | iex
 ```
 
 #### Command Prompt
-```bash
-powershell -ExecutionPolicy Bypass -Command "irm 'https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/setup.ps1' | iex"
+```powershell
+powershell -ExecutionPolicy Bypass -Command "irm 'https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/scripts/install/setup.ps1' | iex"
 ```
 
 #### Git Bash / WSL
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/setup.ps1 | powershell -ExecutionPolicy Bypass -
+curl -fsSL https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/scripts/install/setup.ps1 | powershell -ExecutionPolicy Bypass -
 ```
 
-#### Universal (works everywhere)
+#### Docker one-line install (PowerShell)
 ```powershell
-powershell -c "IEX (IRM 'https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/setup.ps1')"
+irm https://raw.githubusercontent.com/Life-Experimentalist/EquiLens/main/scripts/install/setup-docker.ps1 | iex
 ```
+
 Full documentation: [ONE_CLICK_SETUP.md](docs/ONE_CLICK_SETUP.md)
 
 ## Basic Usage
@@ -271,6 +274,71 @@ pip install -e .
 # 🐳 Start services
 docker compose up -d
 ```
+
+---
+
+## 🐳 Docker Deployment
+
+### ⚡ Smart Setup (Recommended)
+
+**One command handles everything** - install, start, repair, check status:
+
+```powershell
+.\setup-docker.ps1
+```
+
+**✨ Smart Features:**
+- ✅ **Auto-detects** if container exists
+- ✅ **Default action**: Just press Enter to start
+- ✅ **Smart repair**: Choose recreate if issues
+- ✅ **Health checks**: Waits for EquiLens to be ready
+- ✅ **Quick**: 1-2 minutes first time, instant after that
+
+**Three scenarios handled automatically:**
+1. **Container running** → Shows you it's ready, exits
+2. **Container stopped** → Ask: Start (default) or Recreate?
+3. **No container** → Pulls image and creates new container
+
+📘 **[SMART_SETUP_GUIDE.md](docs/SMART_SETUP_GUIDE.md)** - Complete guide with examples
+
+---
+
+### 🏗️ Developer Setup (Build from Source)
+
+For developers who want to modify EquiLens code:
+
+```powershell
+.\setup-docker-dev.ps1
+```
+
+**What it does:**
+- ✅ Clones full repository
+- ✅ Builds from Dockerfile
+- ✅ Full source code access
+- ✅ Development environment
+
+---
+
+### 🚀 Deploy to Docker Hub
+
+For developers deploying their own EquiLens image:
+
+```powershell
+# One-command deployment
+.\deploy-docker.ps1 -Version "v2.0.0"
+```
+
+**Documentation:**
+- 📘 **[DOCKER_HUB_DEPLOYMENT.md](docs/DOCKER_HUB_DEPLOYMENT.md)** - Complete deployment guide
+- 📄 **[DOCKER_DEPLOY_QUICKREF.md](docs/DOCKER_DEPLOY_QUICKREF.md)** - Quick reference
+- 🔄 **[DOCKER_SETUP_COMPARISON.md](docs/DOCKER_SETUP_COMPARISON.md)** - Setup vs Dev comparison
+
+**Available Scripts:**
+- `setup-docker.ps1` - **Smart setup** (pull & run with auto-detection)
+- `setup-docker-dev.ps1` - Developer setup (build from source)
+- `deploy-docker.ps1` - Deploy to Docker Hub
+
+---
 
 ## 📋 Command Reference
 
@@ -640,6 +708,29 @@ uv run equilens status
 ## 📚 Documentation
 
 Comprehensive documentation available in the `docs/` directory:
+
+### Setup & Deployment
+- **[QUICKSTART.md](docs/QUICKSTART.md)** - Get started in 5 minutes
+- **[ONE_CLICK_SETUP.md](docs/ONE_CLICK_SETUP.md)** - Automated setup guide
+- **[DOCKER_HUB_DEPLOYMENT.md](docs/DOCKER_HUB_DEPLOYMENT.md)** - Complete Docker Hub deployment guide
+- **[DOCKER_DEPLOY_QUICKREF.md](docs/DOCKER_DEPLOY_QUICKREF.md)** - Quick reference for Docker deployment
+- **[OLLAMA_SETUP.md](docs/OLLAMA_SETUP.md)** - Ollama installation and configuration
+
+### Architecture & Design
+- **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Complete system architecture
+- **[ARCHITECTURE_SIMPLE.md](docs/ARCHITECTURE_SIMPLE.md)** - Simplified architecture overview
+- **[PIPELINE.md](docs/PIPELINE.md)** - Processing pipeline details
+
+### User Guides
+- **[EXECUTION_GUIDE.md](docs/EXECUTION_GUIDE.md)** - Complete execution workflow
+- **[INTERACTIVE_ANALYTICS_GUIDE.md](docs/INTERACTIVE_ANALYTICS_GUIDE.md)** - Interactive analytics features
+- **[ADVANCED_ANALYTICS_GUIDE.md](docs/ADVANCED_ANALYTICS_GUIDE.md)** - Advanced analytics and N-category support
+
+### Technical Documentation
+- **[AUDITING_MECHANISM.md](docs/AUDITING_MECHANISM.md)** - Auditing system details
+- **[ENHANCED_AUDITOR_DEFAULT.md](docs/ENHANCED_AUDITOR_DEFAULT.md)** - Enhanced auditor features
+- **[CODE_ANALYSIS_REPORT.md](docs/CODE_ANALYSIS_REPORT.md)** - Codebase analysis
+- **[REPORT.md](docs/REPORT.md)** - Technical report
 
 
 ## 🔧 Advanced Configuration
@@ -1160,7 +1251,6 @@ uv run equilens status
 - **📖 [QUICKSTART.md](docs/QUICKSTART.md)** - Quick setup guide
 - **📖 [PIPELINE.md](docs/PIPELINE.md)** - Complete workflow guide
 - **📖 [ARCHITECTURE.md](docs/ARCHITECTURE.md)** - System architecture details
-- **📖 [CONFIGURATION_GUIDE.md](docs/CONFIGURATION_GUIDE.md)** - Advanced configuration
 - **📖 [EXECUTION_GUIDE.md](docs/EXECUTION_GUIDE.md)** - Detailed execution instructions
 - **📖 [OLLAMA_SETUP.md](docs/OLLAMA_SETUP.md)** - Ollama configuration guide
 
@@ -1435,7 +1525,7 @@ If you use EquiLens in your research, please cite:
   publisher={Zenodo},
   doi={10.5281/zenodo.17014103},
   url={https://github.com/Life-Experimentalist/EquiLens},
-  version={1.0.0}
+  version={2.0.0}
 }
 ```
 

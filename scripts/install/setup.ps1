@@ -1,5 +1,5 @@
-# EquiLens One-Click Setup Script
-# Compatible with PowerShell, cmd, and various Windows shells
+﻿# EquiLens One-Click Setup Script (moved to scripts/install)
+﻿# Compatible with PowerShell, cmd, and various Windows shells
 
 param(
     [switch]$SkipDocker,
@@ -10,7 +10,7 @@ param(
 
 # Configuration
 $REPO_URL = "https://github.com/Life-Experimentalist/EquiLens.git"
-$SCRIPT_VERSION = "1.0.0"
+$SCRIPT_VERSION = "2.0.0"
 $REQUIRED_PYTHON = "3.11"
 $REQUIRED_MEMORY_GB = 4
 $REQUIRED_DISK_GB = 2
