@@ -1,9 +1,6 @@
 ﻿services:
   equilens:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: equilens:latest
+    image: ghcr.io/life-experimentalist/equilens:latest
     container_name: equilens-app
     ports:
       - "7860:7860"

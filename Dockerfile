@@ -1,4 +1,4 @@
-﻿FROM python:3.13.3-slim
+﻿FROM python:3.13.3-slim-bullsey
 
 LABEL author="VKrishna04"
 LABEL org.opencontainers.image.source="https://github.com/Life-Experimentalist/EquiLens"

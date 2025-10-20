@@ -4,7 +4,7 @@
 # ============================================================================
 # CONFIGURATION - Customize these settings
 # ============================================================================
-$EQUILENS_IMAGE = "vkrishna04/equilens:latest"   # Docker Hub image to use
+$EQUILENS_IMAGE = "ghcr.io/life-experimentalist/equilens:latest"   # GitHub Container Registry image
 $CONTAINER_NAME = "equilens-app"                 # Container name
 $VOLUME_NAME = "equilens-data"                   # Data volume name
 $OLLAMA_URL = "http://localhost:11434"           # Ollama API URL

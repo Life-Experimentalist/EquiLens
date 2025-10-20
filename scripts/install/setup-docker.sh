@@ -96,10 +96,7 @@ fi
 
 # Create EquiLens-specific volumes and new Ollama volume if needed
 VOLUMES=(
-    "ollama-models"
     "equilens-data"
-    "equilens-results"
-    "equilens-logs"
 )
 
 for vol in "${VOLUMES[@]}"; do
@@ -113,7 +110,12 @@ done
 echo -e "${GREEN} Volumes created${NC}"
 
 # Pull Docker images
+# Pull EquiLens official image from GitHub Container Registry
+EQUILENS_IMAGE="ghcr.io/life-experimentalist/equilens:latest"
 echo -e "${YELLOW}[6/8] Pulling Docker images (this may take a while)...${NC}"
+echo -e "${GRAY}  Pulling EquiLens...${NC}"
+docker pull $EQUILENS_IMAGE
+
 echo -e "${GRAY}  Pulling Ollama...${NC}"
 docker pull ollama/ollama:latest
 

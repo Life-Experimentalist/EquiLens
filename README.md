@@ -6,8 +6,8 @@
 [![Python](https://img.shields.io/badge/Python-3.11%2B-green.svg)](https://python.org)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://docker.com)
 [![UV](https://img.shields.io/badge/UV-Supported-yellow.svg)](https://github.com/astral-sh/uv)
+[![Docker Build and Publish](https://github.com/Life-Experimentalist/EquiLens/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/Life-Experimentalist/EquiLens/actions/workflows/docker-publish.yml)
 [![DOI](https://zenodo.org/badge/1033993763.svg)](https://doi.org/10.5281/zenodo.17014103)
-
 ---
 
 **EquiLens** is a state-of-the-art bias detection framework designed for **Small Language Models (SLMs)** and **Large Language Models (LLMs)**. Built as part of a final-year research project at **Amrita Vishwa Vidyapeetham**, EquiLens provides researchers, developers, and organizations with powerful tools to identify, measure, and analyze bias in AI systems.
@@ -47,10 +47,20 @@
 - Statistical analysis with visualization
 - Export capabilities for further research
 
+
 ### 🐳 **Docker Integration**
 - Containerized Ollama with GPU passthrough support
 - Automatic service detection and management
 - Persistent model storage
+
+#### Official Container Image
+
+- **GitHub Container Registry:**
+  - [ghcr.io/life-experimentalist/equilens](https://github.com/Life-Experimentalist/EquiLens/pkgs/container/equilens)
+  - Pull the latest image:
+    ```powershell
+    docker pull ghcr.io/life-experimentalist/equilens:latest
+    ```
 
 ### 🛡️ **Dual Auditor System**
 - Production-ready auditor for reliable results
@@ -277,7 +287,21 @@ docker compose up -d
 
 ---
 
+
 ## 🐳 Docker Deployment
+
+### 🚀 Using the Official Container Image
+
+You can run EquiLens directly from the published image:
+
+```powershell
+docker pull ghcr.io/life-experimentalist/equilens:latest
+docker compose up -d
+```
+
+This will use the latest published image from GitHub Container Registry.
+
+---
 
 ### ⚡ Smart Setup (Recommended)
 
@@ -303,9 +327,10 @@ docker compose up -d
 
 ---
 
+
 ### 🏗️ Developer Setup (Build from Source)
 
-For developers who want to modify EquiLens code:
+For developers who want to modify EquiLens code and build their own image:
 
 ```powershell
 .\setup-docker-dev.ps1
@@ -316,6 +341,8 @@ For developers who want to modify EquiLens code:
 - ✅ Builds from Dockerfile
 - ✅ Full source code access
 - ✅ Development environment
+
+If you want to use your own custom image, edit `docker-compose.yml` to point to your image name instead of the official one.
 
 ---
 
