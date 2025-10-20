@@ -22,6 +22,7 @@ jobs:
             contents: read
             packages: write
             id-token: write
+            attestations: write
 
         steps:
             - name: Checkout repository
@@ -79,7 +80,7 @@ jobs:
                   build-args: |
                       VERSION=${{steps.get_version.outputs.VERSION}}
 
-            - name: Generate artifact attestation
+            - name: Attest Docker image
               if: github.event_name != 'pull_request'
               uses: actions/attest-build-provenance@v1
               with:
