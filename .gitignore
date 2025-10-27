@@ -15,14 +15,6 @@ logs/audit_session.log
 .gitignore
 .gitattributes
 
-# Documentation and non-essential files
-*.md
-*.pdf
-*.png
-*.jpg
-*.jpeg
-*.gif
-
 # Keep essential docs in container but exclude temp files
 !README.md
 
