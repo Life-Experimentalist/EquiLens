@@ -33,7 +33,7 @@ localhost:8000/openapi.json        → OpenAPI 3.1 contract (machine-readable)
 
 ## 3. Dashboard Pages
 
-All pages share a sidebar nav + top error banner. No JavaScript frameworks — vanilla JS + fetch + EventSource.
+All pages share a sidebar nav + top error banner. **Alpine.js** (CDN, ~15KB, no build step) for reactive UI state — same paradigm as Vue (`x-data`, `x-bind`, `x-on`, `x-show`) but works directly with Jinja2 templates without delimiter conflicts. Zero tooling: no npm, no vite, no webpack. Plus **Chart.js** (CDN) for bias score visualizations.
 
 ### 3.1 Dashboard (Home)
 - System health cards: Ollama status (green/red), GPU detected (yes/no), Docker mode
@@ -149,8 +149,9 @@ src/equilens/
       jobs.html            # jobs table with filter + log expansion
       results.html         # results browser
     static/
-      app.js               # SSE client, fetch wrappers, auto-retry, polling, error banner
-      style.css            # clean minimal CSS (no framework, dark/light via prefers-color-scheme)
+      app.js               # SSE client, fetch wrappers, auto-retry, polling, Alpine.js stores
+      style.css            # clean minimal CSS (CSS variables, dark/light via prefers-color-scheme)
+      # Alpine.js + Chart.js loaded from CDN in base.html — no build step
   backup.py                # APScheduler backup task + retention cleanup
 ```
 

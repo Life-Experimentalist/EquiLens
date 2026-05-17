@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  # FastAPI Backend
+  backend:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+    container_name: equilens-backend
+    command: .venv/bin/python -m equilens.backend_server
+    ports:
+      - "8000:8000"
+    environment:
+      - DOCKER_ENV=true
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ../data:/workspace/data
+      - ../results:/workspace/results
+      - ../src:/workspace/src
+    networks:
+      - equilens-network
+    depends_on:
+      - ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Gradio Frontend
+  frontend:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+    container_name: equilens-frontend
+    command: .venv/bin/python -m equilens.gradio_app
+    ports:
+      - "7860:7860"
+    environment:
+      - DOCKER_ENV=true
+      - BACKEND_URL=http://backend:8000
+      - PYTHONUNBUFFERED=1
+      - GRADIO_SERVER_PORT=7860
+      - GRADIO_SERVER_NAME=0.0.0.0
+    volumes:
+      - ../src:/workspace/src
+    networks:
+      - equilens-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # Ollama Service
+  ollama:
+    image: ollama/ollama:latest
+    container_name: equilens-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - equilens-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+volumes:
+  ollama_data:
+    driver: local
+
+networks:
+  equilens-network:
+    driver: bridge
