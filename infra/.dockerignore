@@ -71,7 +71,10 @@ results/
 logs/
 corpus/
 *.log
-*.csv
+# Exclude result CSVs but keep corpus input CSVs
+results/**/*.csv
+data/**/*.csv
+audit_llms/**/*.csv
 *.json.bak
 
 # Docker and compose files (not needed in container)
