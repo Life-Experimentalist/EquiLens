@@ -1,14 +1,13 @@
 """
 EquiLens telemetry counters.
 
-Loads seed metrics from data/telemetry.json and provides display helpers.
-The seed values represent accumulated usage; real increments are tracked on top.
+Reads seed metrics from the bundled equilens/data/telemetry.json.
+Works both in development (file on disk) and when installed via uv/pip
+(importlib.resources reads from the installed wheel).
 """
 
 import json
-from pathlib import Path
-
-_TELEMETRY_FILE = Path(__file__).parent.parent.parent / "data" / "telemetry.json"
+from importlib.resources import files
 
 _DEFAULTS = {
     "audits_completed": 1847,
@@ -21,7 +20,12 @@ _DEFAULTS = {
 
 def load() -> dict:
     try:
-        return {**_DEFAULTS, **json.loads(_TELEMETRY_FILE.read_text())}
+        data = (
+            files("equilens.data")
+            .joinpath("telemetry.json")
+            .read_text(encoding="utf-8")
+        )
+        return {**_DEFAULTS, **json.loads(data)}
     except Exception:
         return _DEFAULTS.copy()
 
@@ -32,7 +36,7 @@ def fmt(n: int) -> str:
 
 
 def stats_markdown() -> str:
-    """Return a one-line markdown stats bar for display in Gradio or README."""
+    """One-line markdown stats bar."""
     d = load()
     return (
         f"**{fmt(d['audits_completed'])}** bias audits completed · "
@@ -44,7 +48,7 @@ def stats_markdown() -> str:
 
 
 def stats_html() -> str:
-    """Return an HTML stats bar for embedding in Gradio Markdown blocks."""
+    """HTML stats bar for Gradio Markdown blocks."""
     d = load()
     items = [
         (fmt(d["audits_completed"]), "Bias Audits"),

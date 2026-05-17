@@ -1143,9 +1143,17 @@ def audit(
             # Import the enhanced auditor with better error handling
             import sys
 
-            enhanced_path = Path("src/Phase2_ModelAuditor").resolve()
-            if str(enhanced_path) not in sys.path:
-                sys.path.insert(0, str(enhanced_path))
+            try:
+                from Phase2_ModelAuditor.enhanced_audit_model import EnhancedBiasAuditor
+            except ImportError:
+                # Dev-tree fallback: add src/Phase2_ModelAuditor to sys.path
+                for _candidate in [
+                    Path(__file__).resolve().parent.parent / "Phase2_ModelAuditor",
+                    Path("src/Phase2_ModelAuditor").resolve(),
+                ]:
+                    if _candidate.exists() and str(_candidate) not in sys.path:
+                        sys.path.insert(0, str(_candidate))
+                        break
 
             try:
                 from Phase2_ModelAuditor.enhanced_audit_model import EnhancedBiasAuditor
@@ -1248,26 +1256,32 @@ def audit(
                     console.print(f"[dim]✓ Found auditor: {p.name}[/dim]")
                     break
 
-            if auditor_script is None:
-                msg = (
-                    "No auditor script found. Expected one of: "
-                    "audit_model.py, enhanced_audit_model.py, or run_both_auditors.py"
-                )
-                console.print(f"[red]❌ {msg}[/red]")
-                console.print(
-                    f"[dim]Searched in: {repo_root / 'src' / 'Phase2_ModelAuditor'}[/dim]"
-                )
-                console.print(f"[dim]Module location: {Path(__file__).resolve()}[/dim]")
-                logging.error(msg)
-                raise typer.Exit(2)
-
             # Convert paths to absolute paths for reliable subprocess execution
             corpus_abs = Path(corpus).resolve()
             output_dir_abs = Path(output_dir).resolve()
 
-            base_cmd = [
-                "python",
-                str(auditor_script),
+            if auditor_script is not None:
+                # Dev tree: run script directly
+                base_cmd = [sys.executable, str(auditor_script)]
+            else:
+                # Installed package: use module invocation
+                import importlib.util
+
+                if importlib.util.find_spec("Phase2_ModelAuditor") is not None:
+                    console.print(
+                        "[dim]✓ Using installed Phase2_ModelAuditor module[/dim]"
+                    )
+                    base_cmd = [sys.executable, "-m", "Phase2_ModelAuditor.audit_model"]
+                else:
+                    msg = "No auditor found. Install EquiLens properly or run from the project root."
+                    console.print(f"[red]❌ {msg}[/red]")
+                    console.print(
+                        f"[dim]Module location: {Path(__file__).resolve()}[/dim]"
+                    )
+                    logging.error(msg)
+                    raise typer.Exit(2)
+
+            base_cmd += [
                 "--model",
                 model,
                 "--corpus",
@@ -1295,7 +1309,7 @@ def audit(
             base_cmd.extend(["--temperature", str(temperature)])
 
             def run_audit(cmd, silent_mode=False):
-                cwd = repo_root
+                cwd = repo_root if repo_root.exists() else Path.cwd()
                 try:
                     if silent_mode:
                         subprocess.run(
@@ -1545,9 +1559,32 @@ def generate(
         )
 
         try:
+            import importlib.util
+            import sys
+
+            # Prefer installed module; fall back to dev-tree script
+            _gen_script = (
+                Path(__file__).resolve().parent.parent
+                / "Phase1_CorpusGenerator"
+                / "generate_corpus.py"
+            )
+            if _gen_script.exists():
+                _corpus_cmd = [sys.executable, str(_gen_script)]
+            elif importlib.util.find_spec("Phase1_CorpusGenerator") is not None:
+                _corpus_cmd = [
+                    sys.executable,
+                    "-m",
+                    "Phase1_CorpusGenerator.generate_corpus",
+                ]
+            else:
+                _dev_script = Path(
+                    "src/Phase1_CorpusGenerator/generate_corpus.py"
+                ).resolve()
+                _corpus_cmd = [sys.executable, str(_dev_script)]
+
             # Run the corpus generator in interactive mode
             subprocess.run(
-                ["python", "src/Phase1_CorpusGenerator/generate_corpus.py"],
+                _corpus_cmd,
                 check=True,
                 text=True,
                 encoding="utf-8",
@@ -1555,7 +1592,7 @@ def generate(
             )
             console.print("✅ [green]Corpus generated successfully![/green]")
             console.print(
-                "📁 [cyan]Check the src/Phase1_CorpusGenerator/corpus/ directory for the generated files.[/cyan]"
+                "📁 [cyan]Check the corpus/ directory for the generated files.[/cyan]"
             )
         except subprocess.CalledProcessError as e:
             console.print(
@@ -1565,7 +1602,7 @@ def generate(
         except FileNotFoundError as e:
             console.print("[red]❌ Could not find corpus generator script[/red]")
             console.print(
-                "[yellow]💡 Make sure you're in the EquiLens project root directory[/yellow]"
+                "[yellow]💡 Install EquiLens properly or run from the project root[/yellow]"
             )
             raise typer.Exit(1) from e
     else:

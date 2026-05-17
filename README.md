@@ -91,7 +91,23 @@ Phase 3: Statistical Analysis
 
 ## Quick Start
 
-### Option 1 — UV (Recommended)
+### Option 1 — UV Tool Install (Anywhere, No Clone Required)
+
+```bash
+# Install as a global UV tool — works on any machine with uv + Ollama
+uv tool install git+https://github.com/Life-Experimentalist/EquiLens.git
+
+# Start Ollama
+ollama serve && ollama pull llama3.2:latest
+
+# Run immediately
+equilens web          # → http://localhost:7860
+equilens --help       # see all commands
+```
+
+> Or try without installing: `uvx --from git+https://github.com/Life-Experimentalist/EquiLens.git equilens --help`
+
+### Option 2 — UV Dev Install (Clone + Develop)
 
 ```bash
 # Install UV if you don't have it
@@ -112,7 +128,7 @@ uv run equilens web
 # → API:    http://localhost:8000
 ```
 
-### Option 2 — Docker (One Command)
+### Option 3 — Docker (One Command)
 
 ```bash
 git clone https://github.com/Life-Experimentalist/EquiLens.git

@@ -1,13 +1,13 @@
 [project]
 name = "equilens"
-version = "2.0.0"
-description = "AI Bias Detection Platform - A comprehensive platform for detecting and analyzing bias in AI language models"
+version = "2.1.0"
+description = "Black-box AI bias detection framework for SLMs and LLMs via prompt engineering"
 readme = "README.md"
 authors = [
     { name = "VKrishna04", email = "krishnagsvv@gmail.com", url = "https://vkrishna04.github.io" }
 ]
 license = { text = "Apache-2.0" }
-keywords = ["ai", "bias", "detection", "audit", "llm", "language-models", "audit-toolkit", "bias-audit", "fairness", "transparency", "accountability", "ethics", "mlops", "model-evaluation", "data-ethics", "responsible-ai"]
+keywords = ["ai", "bias", "detection", "audit", "llm", "slm", "language-models", "bias-audit", "fairness", "transparency", "accountability", "ethics", "prompt-engineering", "black-box-testing", "responsible-ai", "ollama"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -20,49 +20,45 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Software Development :: Testing",
+    "Topic :: Scientific/Engineering :: Information Analysis",
 ]
 requires-python = ">=3.11"
 dependencies = [
-    # Core dependencies
+    # Core — required for CLI and pipeline
     "pandas>=2.0.0",
     "numpy>=1.24.0",
     "requests>=2.28.0",
     "tqdm>=4.64.0",
     "jsonschema>=4.17.0",
-    # Interactive CLI & Web UI
+    "colorama>=0.4.6",
+    "psutil>=7.0.0",
+    # CLI
     "rich>=13.0.0",
     "typer>=0.9.0",
+    # Web UI + REST backend
     "gradio>=4.0.0",
-    "colorama>=0.4.6",
-    # Async HTTP for enhanced performance
-    "aiohttp>=3.12.15",
-    # Data visualization
-    "matplotlib>=3.6.0",
-    "plotly>=5.15.0",
-    # Text processing
-    "spacy>=3.8.11",
-    # Web framework
     "fastapi>=0.104.0",
     "uvicorn>=0.24.0",
+    "python-multipart>=0.0.6",
+    # Analytics + visualisation
+    "matplotlib>=3.6.0",
     "seaborn>=0.13.2",
-    # Data processing
-    "psutil>=7.0.0",
-    "pytest>=8.4.1",
-    "textual>=6.2.1",
+    "plotly>=5.15.0",
     "scipy>=1.16.1",
+    # Async HTTP
+    "aiohttp>=3.12.15",
+    # Text NLP (Phase 2 enhanced auditor)
+    "spacy>=3.8.11",
+    "pytest>=8.4.1",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.0.0",
+    "pytest>=8.0.0",
     "pytest-cov>=4.0.0",
-    "ruff>=0.1.0",
+    "ruff>=0.6.0",
     "mypy>=1.5.0",
     "pre-commit>=3.0.0",
-]
-web = [
-    "jinja2>=3.1.0",
-    "python-multipart>=0.0.6",
 ]
 ml = [
     "sentence-transformers>=2.2.0",
@@ -70,9 +66,9 @@ ml = [
     "transformers>=4.21.0",
 ]
 viz = [
-    "seaborn>=0.12.0",
     "wordcloud>=1.9.0",
     "textstat>=0.7.0",
+    "jinja2>=3.1.0",
 ]
 
 [project.urls]
@@ -89,7 +85,30 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/equilens"]
+packages = [
+    "src/equilens",
+    "src/Phase1_CorpusGenerator",
+    "src/Phase2_ModelAuditor",
+    "src/Phase3_Analysis",
+]
+
+[tool.hatch.build.targets.wheel.shared-data]
+# Bundle word lists and schema alongside the package
+"src/Phase1_CorpusGenerator/word_lists.json" = "share/equilens/word_lists.json"
+"src/Phase1_CorpusGenerator/word_lists_schema.json" = "share/equilens/word_lists_schema.json"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/",
+    "data/",
+    "docs/",
+    "tests/",
+    "pyproject.toml",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE.md",
+    "CLAUDE.md",
+]
 
 [tool.uv]
 # Fix hardlink issues on Windows and cross-filesystem scenarios
