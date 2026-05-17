@@ -16,7 +16,7 @@ def extract_version():
     except ImportError:
         # Python < 3.11
         try:
-            import tomli as tomllib
+            import tomli as tomllib  # type: ignore[import-not-found]
         except ImportError:
             print("Error: tomli package required for Python < 3.11", file=sys.stderr)
             print("Install with: pip install tomli", file=sys.stderr)

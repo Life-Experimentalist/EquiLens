@@ -62,7 +62,7 @@ class BiasAnalytics:
             ai_num_predict: Number of tokens to predict for AI-generated content (default: 512)
         """
         self.results_file = results_file
-        self.results_dir = Path(os.path.dirname(results_file) or ".")
+        self.results_dir = Path(results_file).parent or Path()
         self.ollama_url = ollama_url or os.getenv(
             "OLLAMA_BASE_URL", "http://host.docker.internal:11434"
         )
@@ -74,6 +74,25 @@ class BiasAnalytics:
         self.stats_results: dict[str, Any] = {}
         self.viz_files: list[str] = []
         self.viz_data: dict[str, str] = {}  # Store base64 encoded images
+
+        # Default score labels (updated dynamically after data load)
+        self.score_label = "Surprisal Score"
+        self.score_unit = "ns/token"
+        self.score_axis = "Surprisal Score (ns/token)"
+        self.score_short_unit = "ns/token"
+        self.score_interpretation = "lower = stronger bias"
+        self.score_method_note = ""
+
+        # Chart descriptions for reports (updated dynamically after data load)
+        self.chart_descriptions = {
+            "violin_plot.png": "Shows the distribution of bias scores across categories. Wider sections indicate more common values, while the inner box shows quartiles and median.",
+            "heatmap_matrix.png": "Displays mean bias scores as a color-coded matrix. Darker red colors indicate higher bias, while green shows lower bias.",
+            "effect_sizes.png": "Visualizes Cohen's d effect sizes for each profession. Values > 0.5 (orange/red) indicate meaningful bias in model responses.",
+            "box_plot_profession.png": "Compares score distributions across professions using box plots. Shows median, quartiles, and outliers for each profession-category combination.",
+            "scatter_correlations.png": "Explores relationships between different variables through scatter plots. Patterns reveal correlations in bias manifestation.",
+            "time_series_progression.png": "Shows how bias scores evolve across test sequences. Trends indicate consistency or variation in model behavior.",
+            "comprehensive_dashboard.png": "Multi-panel overview combining key visualizations for a complete at-a-glance analysis of bias patterns.",
+        }
 
         # Validate Ollama URL reachability
         if self.ollama_url:
@@ -90,12 +109,13 @@ class BiasAnalytics:
 
     def _extract_model_name(self) -> str:
         """Extract model name from filename."""
-        basename = os.path.basename(self.results_file)
+        basename = Path(self.results_file).name
         name = basename.replace("results_", "").replace(".csv", "")
         name = name.replace("_responses", "")
         # Remove timestamp patterns
         import re
-        name = re.sub(r'_\d{8}_\d{6}$', '', name)
+
+        name = re.sub(r"_\d{8}_\d{6}$", "", name)
         return name
 
     # ========================
@@ -109,7 +129,7 @@ class BiasAnalytics:
         Returns:
             bool: True if data loaded successfully
         """
-        print(f"📂 Loading results from: {os.path.basename(self.results_file)}")
+        print(f"📂 Loading results from: {Path(self.results_file).name}")
 
         try:
             self.df = pd.read_csv(self.results_file)
@@ -123,7 +143,7 @@ class BiasAnalytics:
         # Clean column names and values
         self.df.columns = self.df.columns.str.strip()
         for col in self.df.columns:
-            if self.df[col].dtype == 'object':
+            if self.df[col].dtype == "object":
                 self.df[col] = self.df[col].str.strip()
 
         # Validate required columns
@@ -135,8 +155,8 @@ class BiasAnalytics:
             # Try alternate file
             if self.results_file.endswith("_responses.csv"):
                 base_file = self.results_file.replace("_responses.csv", ".csv")
-                if os.path.exists(base_file):
-                    print(f"ℹ️  Switching to: {os.path.basename(base_file)}")
+                if Path(base_file).exists():
+                    print(f"ℹ️  Switching to: {Path(base_file).name}")
                     self.results_file = base_file
                     return self.load_and_validate_data()
             return False
@@ -154,10 +174,86 @@ class BiasAnalytics:
         print(f"📊 Model: {self.model_name}")
         print(f"📁 Output directory: {self.results_dir}")
 
+        # Detect scoring method from logprobs_used column
+        self.score_method_note = self._detect_score_method()
+        self._set_score_labels()
+        if self.score_method_note:
+            print(f"🧠 {self.score_method_note}")
+
+        # Update chart descriptions to reflect scoring method
+        self._update_chart_descriptions()
+
         # Auto-detect corpus structure
         self._detect_corpus_structure()
 
         return True
+
+    def _set_score_labels(self):
+        """Set dynamic labels/units based on the detected scoring method."""
+        if "logprobs_used" in self.df.columns and self.df["logprobs_used"].any():
+            logprobs_pct = self.df["logprobs_used"].sum() / len(self.df) * 100
+        else:
+            logprobs_pct = 0.0
+
+        if logprobs_pct >= 50:
+            # Predominantly logprobs
+            self.score_label = "Bias Score"
+            self.score_unit = "nats (neg. log-prob)"
+            self.score_axis = "Bias Score (neg. mean log-prob)"
+            self.score_short_unit = "nats"
+            self.score_interpretation = (
+                "higher = more model uncertainty = potential bias"
+            )
+        else:
+            # Predominantly timing fallback
+            self.score_label = "Surprisal Score"
+            self.score_unit = "ns/token"
+            self.score_axis = "Surprisal Score (ns/token)"
+            self.score_short_unit = "ns/token"
+            self.score_interpretation = "lower = stronger bias"
+
+    def _update_chart_descriptions(self):
+        """Update chart description strings to reflect the active scoring method."""
+        method = (
+            "log-probability bias scores"
+            if "nats" in self.score_short_unit
+            else "timing-based surprisal scores"
+        )
+        self.chart_descriptions = {
+            "violin_plot.png": f"Shows the distribution of {method} across categories. Wider sections indicate more common values, while the inner box shows quartiles and median.",
+            "heatmap_matrix.png": f"Displays mean {method} as a color-coded matrix. Darker red colors indicate higher bias, while green shows lower bias.",
+            "effect_sizes.png": "Visualizes Cohen's d effect sizes for each profession. Values > 0.5 (orange/red) indicate meaningful bias in model responses.",
+            "box_plot_profession.png": f"Compares {method} distributions across professions using box plots. Shows median, quartiles, and outliers for each profession-category combination.",
+            "scatter_correlations.png": f"Explores relationships between different variables through scatter plots of {method}. Patterns reveal correlations in bias manifestation.",
+            "time_series_progression.png": f"Shows how {method} evolve across test sequences. Trends indicate consistency or variation in model behavior.",
+            "comprehensive_dashboard.png": "Multi-panel overview combining key visualizations for a complete at-a-glance analysis of bias patterns.",
+        }
+
+    def _detect_score_method(self) -> str:
+        """Detect whether scores were computed via logprobs or timing fallback.
+
+        Returns a human-readable note string, or empty string if column not present.
+        """
+        if "logprobs_used" not in self.df.columns:
+            return ""
+
+        total = len(self.df)
+        if total == 0:
+            return ""
+
+        logprobs_count = int(self.df["logprobs_used"].sum())
+        fallback_count = total - logprobs_count
+        pct = logprobs_count / total * 100
+
+        if logprobs_count == total:
+            return "Scoring method: logprobs (100% — true log-probability scores)"
+        elif logprobs_count == 0:
+            return "Scoring method: timing fallback (0% logprobs — consider upgrading Ollama to >= 0.12.11)"
+        else:
+            return (
+                f"Scoring method: mixed — logprobs {logprobs_count}/{total} ({pct:.1f}%), "
+                f"timing fallback {fallback_count}/{total}"
+            )
 
     def _detect_corpus_structure(self):
         """
@@ -332,11 +428,14 @@ class BiasAnalytics:
             ]
 
             if len(cat1_scores) > 0 and len(cat2_scores) > 0:
-                t_stat, p_value = stats.ttest_ind(cat1_scores, cat2_scores)
+                t_stat, p_val = stats.ttest_ind(cat1_scores, cat2_scores)
+                # Convert to basic Python types
+                t_statistic = float(t_stat)  # type: ignore[arg-type]
+                p_value = float(p_val)  # type: ignore[arg-type]
                 test_results["overall_comparison"] = {
                     "test_type": "t-test",
-                    "t_statistic": float(t_stat),
-                    "p_value": float(p_value),
+                    "t_statistic": t_statistic,
+                    "p_value": p_value,
                     "significant": bool(p_value < 0.05),
                     f"{self.category_label_1.lower()}_mean": float(cat1_scores.mean()),
                     f"{self.category_label_2.lower()}_mean": float(cat2_scores.mean()),
@@ -377,11 +476,14 @@ class BiasAnalytics:
                     ]["surprisal_score"]
 
                     if len(cat1_prof) > 1 and len(cat2_prof) > 1:
-                        t_stat, p_value = stats.ttest_ind(cat1_prof, cat2_prof)
+                        t_stat, p_val = stats.ttest_ind(cat1_prof, cat2_prof)
+                        # Convert to basic Python types
+                        t_statistic = float(t_stat)  # type: ignore[arg-type]
+                        p_value = float(p_val)  # type: ignore[arg-type]
                         profession_tests[profession] = {
                             "test_type": "t-test",
-                            "t_statistic": float(t_stat),
-                            "p_value": float(p_value),
+                            "t_statistic": t_statistic,
+                            "p_value": p_value,
                             "significant": bool(p_value < 0.05),
                             f"{self.category_label_1.lower()}_mean": float(
                                 cat1_prof.mean()
@@ -443,17 +545,17 @@ class BiasAnalytics:
             split=False,
             inner="box",
             palette="Set2",
-            ax=ax
+            ax=ax,
         )
 
         ax.set_title(
-            f"Distribution of Surprisal Scores - {self.model_name}",
+            f"Distribution of {self.score_label}s - {self.model_name}",
             fontsize=16,
             fontweight="bold",
             pad=20,
         )
-        ax.set_xlabel("Gender Category", fontsize=12)
-        ax.set_ylabel("Surprisal Score (ns/token)", fontsize=12)
+        ax.set_xlabel("Category", fontsize=12)
+        ax.set_ylabel(self.score_axis, fontsize=12)
         ax.legend(title="Trait Category", loc="upper right")
         plt.tight_layout()
 
@@ -468,7 +570,7 @@ class BiasAnalytics:
             values="surprisal_score",
             index="name_category",
             columns="trait_category",
-            aggfunc="mean"
+            aggfunc="mean",
         )
 
         fig, ax = plt.subplots(figsize=(10, 8))
@@ -481,8 +583,8 @@ class BiasAnalytics:
             center=pivot_data.values.mean(),
             square=True,
             linewidths=1,
-            cbar_kws={"label": "Mean Surprisal Score"},
-            ax=ax
+            cbar_kws={"label": f"Mean {self.score_label}"},
+            ax=ax,
         )
 
         ax.set_title(
@@ -508,8 +610,10 @@ class BiasAnalytics:
 
         fig, ax = plt.subplots(figsize=(12, 6))
 
-        colors = ["#e74c3c" if abs(d) > 0.8 else "#f39c12" if abs(d) > 0.5 else "#27ae60"
-                  for d in cohens_d]
+        colors = [
+            "#e74c3c" if abs(d) > 0.8 else "#f39c12" if abs(d) > 0.5 else "#27ae60"
+            for d in cohens_d
+        ]
 
         ax.barh(professions, cohens_d, color=colors, edgecolor="black")
 
@@ -568,10 +672,10 @@ class BiasAnalytics:
             patch.set_facecolor(color)
             patch.set_alpha(0.7)
 
-        ax.set_ylabel("Surprisal Score (ns/token)", fontsize=12)
+        ax.set_ylabel(self.score_axis, fontsize=12)
         ax.set_xlabel("Profession", fontsize=12)
         ax.set_title(
-            f"Distribution of Surprisal Scores by Profession - {self.model_name}",
+            f"Distribution of {self.score_label}s by Profession - {self.model_name}",
             fontsize=16,
             fontweight="bold",
             pad=20,
@@ -606,9 +710,9 @@ class BiasAnalytics:
             )
 
         ax.set_xlabel("Sample Index", fontsize=12)
-        ax.set_ylabel("Surprisal Score (ns/token)", fontsize=12)
+        ax.set_ylabel(self.score_axis, fontsize=12)
         ax.set_title(
-            f"Surprisal Score Distribution by Profession - {self.model_name}",
+            f"{self.score_label} Distribution by Profession - {self.model_name}",
             fontsize=16,
             fontweight="bold",
             pad=20,
@@ -659,9 +763,9 @@ class BiasAnalytics:
         )
 
         ax.set_xlabel("Test Index", fontsize=12)
-        ax.set_ylabel("Surprisal Score (ns/token)", fontsize=12)
+        ax.set_ylabel(self.score_axis, fontsize=12)
         ax.set_title(
-            f"Surprisal Score Progression - {self.model_name}",
+            f"{self.score_label} Progression - {self.model_name}",
             fontsize=16,
             fontweight="bold",
             pad=20,
@@ -710,7 +814,7 @@ class BiasAnalytics:
                     [f"{cat}" for cat in self.name_categories],
                     rotation=45 if len(self.name_categories) > 3 else 0,
                 )
-                ax1.set_ylabel("Surprisal Score (ns/token)")
+                ax1.set_ylabel(self.score_axis)
                 ax1.set_title(
                     f"Overall {self.comparison_type.replace('_', ' ').title()} Distribution",
                     fontweight="bold",
@@ -762,7 +866,7 @@ Category Means:
                 patch.set_facecolor(color)
                 patch.set_alpha(0.7)
 
-            ax3.set_ylabel("Surprisal Score (ns/token)")
+            ax3.set_ylabel(self.score_axis)
             ax3.set_title("Distribution by Category", fontweight="bold")
             ax3.grid(axis="y", alpha=0.3)
             plt.setp(ax3.xaxis.get_majorticklabels(), rotation=45, ha="right")
@@ -932,7 +1036,12 @@ Interpretation:
             # Try to find a suitable model
             available = self._get_available_models()
             # Prefer smaller, faster models for report generation
-            preferred = ["llama3.2:latest", "llama3.1:latest", "llama2:latest", "mistral:latest"]
+            preferred = [
+                "llama3.2:latest",
+                "llama3.1:latest",
+                "llama2:latest",
+                "mistral:latest",
+            ]
             for pref in preferred:
                 if pref in available:
                     target_model = pref
@@ -1053,15 +1162,16 @@ Interpretation:
 
 Model tested: {self.model_name}
 Total tests conducted: {len(self.df)}
-Mean surprisal score: {self.df["surprisal_score"].mean():.2f} ns/token
+Mean {self.score_label.lower()}: {self.df["surprisal_score"].mean():.2f} {self.score_short_unit}
+Scoring: {getattr(self, "score_method_note", "unknown")}
 
 Statistical analysis completed. Review visualizations and statistical tests for detailed findings."""
 
         default_recommendations = """<strong>General Recommendations:</strong>
 
-- Review the effect sizes (Cohen's d) to identify professions with significant gender bias <br>
+- Review the effect sizes (Cohen's d) to identify professions with significant bias <br>
 - Investigate categories where |Cohen's d| > 0.5 (medium effect) or > 0.8 (large effect) <br>
-- Compare male vs female surprisal scores across different professional contexts <br>
+- Compare bias scores across different category-professional contexts <br>
 - Consider retraining or fine-tuning the model if consistent bias patterns are detected <br>
 - Document findings and share with stakeholders for transparency"""
 
@@ -1099,7 +1209,8 @@ Statistical analysis completed. Review visualizations and statistical tests for 
             summary_prompt = f"""Write a brief executive summary for this bias audit:
 Model: {data_summary["model_name"]}
 Tests: {data_summary["total_tests"]}
-Mean surprisal: {data_summary["mean_surprisal"]:.2f} ns/token
+Mean {self.score_label.lower()}: {data_summary["mean_surprisal"]:.2f} {self.score_short_unit}
+Scoring method: {getattr(self, "score_method_note", "timing-based")}
 
 Summarize the bias assessment in 2-3 sentences."""
 
@@ -1166,10 +1277,27 @@ Format as bullet points."""
         """Generate comprehensive HTML report."""
         print("\n📝 Generating HTML report...")
 
-        # Generate AI insights if requested
+        # Generate AI insights if requested - but report generation continues regardless
         ai_insights = {}
         if use_ai:
-            ai_insights = self.generate_ai_insights()
+            try:
+                ai_insights = self.generate_ai_insights()
+            except Exception as e:
+                print(f"   ⚠️  AI insight generation failed: {e}")
+                print(
+                    "   📝 Report will be generated with placeholder text for AI sections"
+                )
+                ai_insights = {}
+
+        # Always provide default/placeholder values for AI sections
+        if not ai_insights or not ai_insights.get("executive_summary"):
+            ai_insights["executive_summary"] = (
+                "⚠️ AI-generated executive summary will appear here when AI analysis is available."
+            )
+        if not ai_insights or not ai_insights.get("recommendations"):
+            ai_insights["recommendations"] = (
+                "⚠️ AI-generated recommendations will appear here when AI analysis is available."
+            )
 
         # Prepare template data
         template_data = {
@@ -1181,6 +1309,12 @@ Format as bullet points."""
             "stats": self.stats_results,
             "visualizations": self.viz_data,
             "ai_insights": ai_insights,
+            "chart_descriptions": self.chart_descriptions,
+            "score_label": self.score_label,
+            "score_unit": self.score_unit,
+            "score_short_unit": self.score_short_unit,
+            "score_interpretation": self.score_interpretation,
+            "score_method_note": getattr(self, "score_method_note", ""),
         }
 
         # HTML template using Jinja2
@@ -1376,6 +1510,9 @@ Format as bullet points."""
             <h1>🔍 EquiLens Bias Analysis Report</h1>
             <p class="subtitle">Model: <strong>{{ model_name }}</strong></p>
             <p class="subtitle">Generated: {{ generated_date }}</p>
+            {% if score_method_note %}
+            <p class="subtitle">🧠 {{ score_method_note }}</p>
+            {% endif %}
         </div>
 
         <!-- Executive Summary -->
@@ -1396,9 +1533,9 @@ Format as bullet points."""
                     <div class="metric-description">Valid test results analyzed</div>
                 </div>
                 <div class="metric-card">
-                    <h4>Mean Surprisal</h4>
+                    <h4>Mean {{ score_label }}</h4>
                     <div class="metric-value">{{ "%.2f"|format(mean_surprisal) }}</div>
-                    <div class="metric-description">ns/token (lower = stronger bias)</div>
+                    <div class="metric-description">{{ score_short_unit }} ({{ score_interpretation }})</div>
                 </div>
                 <div class="metric-card">
                     <h4>Std Deviation</h4>
@@ -1429,7 +1566,7 @@ Format as bullet points."""
             <h2>📈 Statistical Analysis</h2>
 
             {% if stats.statistical_tests.overall_gender %}
-            <h3>Overall Gender Comparison</h3>
+            <h3>Overall Comparison</h3>
             {% set test = stats.statistical_tests.overall_gender %}
             <table class="stats-table">
                 <tr>
@@ -1437,16 +1574,16 @@ Format as bullet points."""
                     <th>Value</th>
                 </tr>
                 <tr>
-                    <td>Male Mean</td>
-                    <td>{{ "%.2f"|format(test.male_mean) }} ns/token</td>
+                    <td>Category A Mean</td>
+                    <td>{{ "%.2f"|format(test.male_mean) }} {{ score_short_unit }}</td>
                 </tr>
                 <tr>
-                    <td>Female Mean</td>
-                    <td>{{ "%.2f"|format(test.female_mean) }} ns/token</td>
+                    <td>Category B Mean</td>
+                    <td>{{ "%.2f"|format(test.female_mean) }} {{ score_short_unit }}</td>
                 </tr>
                 <tr>
                     <td>Difference</td>
-                    <td>{{ "%.2f"|format(test.difference) }} ns/token</td>
+                    <td>{{ "%.2f"|format(test.difference) }} {{ score_short_unit }}</td>
                 </tr>
                 <tr>
                     <td>t-statistic</td>
@@ -1481,8 +1618,8 @@ Format as bullet points."""
                         <th>Profession</th>
                         <th>Cohen's d</th>
                         <th>Interpretation</th>
-                        <th>Male Mean</th>
-                        <th>Female Mean</th>
+                        <th>Category A Mean</th>
+                        <th>Category B Mean</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1515,6 +1652,11 @@ Format as bullet points."""
             {% for filename, image_data in visualizations.items() %}
             <div class="visualization">
                 <h3>{{ filename.replace('_', ' ').replace('.png', '').title() }}</h3>
+                {% if chart_descriptions.get(filename) %}
+                <p style="color: #7f8c8d; font-style: italic; margin: 10px 0 15px 0;">
+                    {{ chart_descriptions[filename] }}
+                </p>
+                {% endif %}
                 <img src="data:image/png;base64,{{ image_data }}" alt="{{ filename }}">
             </div>
             {% endfor %}
@@ -1530,6 +1672,9 @@ Format as bullet points."""
 
         <div class="footer">
             <p><strong>EquiLens</strong> - AI Bias Detection Platform</p>
+            {% if score_method_note %}
+            <p style="margin-top: 8px; font-size: 0.9em; color: #95a5a6;">🧠 {{ score_method_note }}</p>
+            {% endif %}
             <p>Generated with ❤️ by the EquiLens Team</p>
         </div>
     </div>
@@ -1543,7 +1688,7 @@ Format as bullet points."""
 
         # Save report
         report_path = self.results_dir / "bias_analysis_report.html"
-        with open(report_path, "w", encoding="utf-8") as f:
+        with report_path.open("w", encoding="utf-8") as f:
             f.write(html_content)
 
         print(f"  ✅ Saved: {report_path.name}")
@@ -1561,23 +1706,50 @@ Format as bullet points."""
             f"**Total Tests**: {len(self.df)}  ",
             f"**Comparison Type**: {self.comparison_type.replace('_', ' ').title()}  ",
             f"**Categories**: {', '.join(self.name_categories)}  ",
-            "",
-            "---",
-            "",
         ]
 
-        # AI-generated executive summary
+        # Add scoring method note if available
+        if getattr(self, "score_method_note", ""):
+            lines.append(f"**Scoring**: {self.score_method_note}  ")
+
+        lines.extend(
+            [
+                "",
+                "---",
+                "",
+            ]
+        )
+
+        # AI-generated executive summary - with fallback
+        ai_insights = {}
         if use_ai:
-            ai_insights = self.generate_ai_insights()
-            if ai_insights.get("executive_summary"):
-                lines.extend(
-                    [
-                        "## 📋 Executive Summary (AI-Generated)",
-                        "",
-                        ai_insights["executive_summary"],
-                        "",
-                    ]
+            try:
+                ai_insights = self.generate_ai_insights()
+            except Exception as e:
+                print(f"   ⚠️  AI insight generation failed: {e}")
+                print(
+                    "   📝 Report will be generated with placeholder text for AI sections"
                 )
+                ai_insights = {}
+
+        if ai_insights.get("executive_summary"):
+            lines.extend(
+                [
+                    "## 📋 Executive Summary (AI-Generated)",
+                    "",
+                    ai_insights["executive_summary"],
+                    "",
+                ]
+            )
+        else:
+            lines.extend(
+                [
+                    "## 📋 Executive Summary",
+                    "",
+                    "⚠️ *AI-generated executive summary will appear here when AI analysis is available.*",
+                    "",
+                ]
+            )
 
         # Statistics by Category
         lines.extend(
@@ -1586,10 +1758,10 @@ Format as bullet points."""
                 "",
                 "| Metric | Value |",
                 "|--------|-------|",
-                f"| Mean Surprisal | {self.df['surprisal_score'].mean():.2f} ns/token |",
-                f"| Std Deviation | {self.df['surprisal_score'].std():.2f} ns/token |",
-                f"| Min Surprisal | {self.df['surprisal_score'].min():.2f} ns/token |",
-                f"| Max Surprisal | {self.df['surprisal_score'].max():.2f} ns/token |",
+                f"| Mean {self.score_label} | {self.df['surprisal_score'].mean():.2f} {self.score_short_unit} |",
+                f"| Std Deviation | {self.df['surprisal_score'].std():.2f} {self.score_short_unit} |",
+                f"| Min {self.score_label} | {self.df['surprisal_score'].min():.2f} {self.score_short_unit} |",
+                f"| Max {self.score_label} | {self.df['surprisal_score'].max():.2f} {self.score_short_unit} |",
                 "",
             ]
         )
@@ -1686,26 +1858,37 @@ Format as bullet points."""
         for filename, title in chart_files:
             chart_path = self.results_dir / filename
             if chart_path.exists():
+                description = self.chart_descriptions.get(filename, "")
                 lines.extend(
                     [
                         f"### {title}",
+                        "",
+                        f"*{description}*" if description else "",
                         "",
                         f"![{title}]({filename})",
                         "",
                     ]
                 )
 
-        # AI recommendations
-        if use_ai:
-            if ai_insights.get("recommendations"):
-                lines.extend(
-                    [
-                        "## 💡 Recommendations (AI-Generated)",
-                        "",
-                        ai_insights["recommendations"],
-                        "",
-                    ]
-                )
+        # AI recommendations - with fallback
+        if ai_insights.get("recommendations"):
+            lines.extend(
+                [
+                    "## 💡 Recommendations (AI-Generated)",
+                    "",
+                    ai_insights["recommendations"],
+                    "",
+                ]
+            )
+        else:
+            lines.extend(
+                [
+                    "## 💡 Recommendations",
+                    "",
+                    "⚠️ *AI-generated recommendations will appear here when AI analysis is available.*",
+                    "",
+                ]
+            )
 
         # Footer
         lines.extend(
@@ -1720,7 +1903,7 @@ Format as bullet points."""
 
         # Save report
         report_path = self.results_dir / "bias_analysis_report.md"
-        with open(report_path, "w", encoding="utf-8") as f:
+        with report_path.open("w", encoding="utf-8") as f:
             f.write("\n".join(lines))
 
         print(f"  ✅ Saved: {report_path.name}")
@@ -1802,9 +1985,9 @@ Format as bullet points."""
         print(f"\n📁 Output directory: {self.results_dir}")
         print("\n📊 Generated Reports:")
         if html_report:
-            print(f"  • HTML: {os.path.basename(html_report)}")
+            print(f"  • HTML: {Path(html_report).name}")
         if md_report:
-            print(f"  • Markdown: {os.path.basename(md_report)}")
+            print(f"  • Markdown: {Path(md_report).name}")
         print(f"\n📈 Visualizations: {len(self.viz_files)} charts created")
 
         return True
@@ -1832,17 +2015,12 @@ Examples:
 
     parser.add_argument("results_file", help="Path to CSV results file")
     parser.add_argument(
-        "--no-ai",
-        action="store_true",
-        help="Disable AI-powered report generation"
+        "--no-ai", action="store_true", help="Disable AI-powered report generation"
     )
-    parser.add_argument(
-        "--model",
-        help="Ollama model to use for AI report generation"
-    )
+    parser.add_argument("--model", help="Ollama model to use for AI report generation")
     args = parser.parse_args()
 
-    if not os.path.exists(args.results_file):
+    if not Path(args.results_file).exists():
         print(f"❌ Error: File not found: {args.results_file}")
         return 1
 
@@ -1855,8 +2033,7 @@ Examples:
     )
 
     success = analyzer.run_complete_analysis(
-        generate_html=True,
-        generate_ai_insights=not args.no_ai
+        generate_html=True, generate_ai_insights=not args.no_ai
     )
     return 0 if success else 1
 

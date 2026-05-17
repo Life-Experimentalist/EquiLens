@@ -1,0 +1,7 @@
+{
+	"reportPrivateImportUsage": "none",
+	"extraPaths": [
+		".",
+		"src"
+	]
+}

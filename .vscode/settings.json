@@ -1,27 +1,6 @@
 {
-    "cSpell.words": [
-		"barplot",
-		"datavalues",
-		"Equi",
-		"equilens",
-		"fontsize",
-		"inbrowser",
-		"minmax",
-		"PYTHONPATH",
-		"redoc",
-		"viridis",
-		"xticks"
-	],
-    "files.exclude": {
-        "**/.git": true,
-        "**/.svn": true,
-        "**/.hg": true,
-        "**/.DS_Store": true,
-        "**/Thumbs.db": true
-    },
-	"powershell.integratedConsole.suppressStartupBanner": false,
-	"python.analysis.extraPaths": [
-		"./src"
-	],
-	"python.defaultInterpreterPath": ".venv\\Scripts\\python.exe"
+  "files.associations": {
+    "_headers": "plaintext",
+    "_redirects": "plaintext"
+  }
 }

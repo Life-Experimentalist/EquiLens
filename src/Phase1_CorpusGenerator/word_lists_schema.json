@@ -9,16 +9,6 @@
 		"comparisons"
 	],
 	"properties": {
-		"active_comparison": {
-			"type": "string",
-			"description": "The currently active comparison type. Must match one of the keys in the 'comparisons' object. Change this to switch between different bias tests.",
-			"examples": [
-				"gender_bias",
-				"nationality_bias",
-				"cross_cultural_gender"
-			],
-			"pattern": "^[a-z][a-z0-9_]*$"
-		},
 		"comparisons": {
 			"type": "object",
 			"description": "Collection of different bias comparison configurations. Each key represents a unique bias test scenario.",

@@ -19,11 +19,12 @@ Usage: python switch_comparison.py [comparison_type]
 
 import argparse
 import json
+from pathlib import Path
 
 
 def list_available_comparisons() -> None:
     """List all available comparison types."""
-    with open("word_lists.json") as f:
+    with Path("word_lists.json").open() as f:
         config = json.load(f)
 
     print("Available comparison types:")
@@ -31,16 +32,16 @@ def list_available_comparisons() -> None:
     for comp_name, comp_data in config["comparisons"].items():
         print(f"🔍 {comp_name}")
         print(f"   Description: {comp_data['description']}")
-        name_cats = [cat['category'] for cat in comp_data['name_categories']]
-        trait_cats = [cat['category'] for cat in comp_data['trait_categories']]
+        name_cats = [cat["category"] for cat in comp_data["name_categories"]]
+        trait_cats = [cat["category"] for cat in comp_data["trait_categories"]]
         print(f"   Name categories: {' vs '.join(name_cats)}")
         print(f"   Trait categories: {' vs '.join(trait_cats)}")
 
         # Calculate total combinations
-        names = sum(len(cat['items']) for cat in comp_data['name_categories'])
-        profs = len(comp_data['professions'])
-        traits = sum(len(cat['items']) for cat in comp_data['trait_categories'])
-        templates = len(comp_data['templates'])
+        names = sum(len(cat["items"]) for cat in comp_data["name_categories"])
+        profs = len(comp_data["professions"])
+        traits = sum(len(cat["items"]) for cat in comp_data["trait_categories"])
+        templates = len(comp_data["templates"])
         total = names * profs * traits * templates
         print(f"   Total combinations: {total:,}")
         print()
@@ -48,7 +49,7 @@ def list_available_comparisons() -> None:
 
 def switch_comparison(comparison_type):
     """Switch to a specific comparison type."""
-    with open("word_lists.json") as f:
+    with Path("word_lists.json").open() as f:
         config = json.load(f)
 
     if comparison_type not in config["comparisons"]:
@@ -58,28 +59,28 @@ def switch_comparison(comparison_type):
 
     config["active_comparison"] = comparison_type
 
-    with open("word_lists.json", "w") as f:
+    with Path("word_lists.json").open("w") as f:
         json.dump(config, f, indent=2)
 
     comp_data = config["comparisons"][comparison_type]
     print(f"✅ Successfully switched to: {comparison_type}")
     print(f"   Description: {comp_data['description']}")
-    name_cats = [cat['category'] for cat in comp_data['name_categories']]
+    name_cats = [cat["category"] for cat in comp_data["name_categories"]]
     print(f"   Comparing: {' vs '.join(name_cats)}")
     return True
 
 
 def get_current_comparison():
     """Get the currently active comparison type."""
-    with open("word_lists.json") as f:
+    with Path("word_lists.json").open() as f:
         config = json.load(f)
 
     current = config["active_comparison"]
     comp_data = config["comparisons"][current]
     print(f"📊 Current active comparison: {current}")
     print(f"   Description: {comp_data['description']}")
-    name_cats = [cat['category'] for cat in comp_data['name_categories']]
-    trait_cats = [cat['category'] for cat in comp_data['trait_categories']]
+    name_cats = [cat["category"] for cat in comp_data["name_categories"]]
+    trait_cats = [cat["category"] for cat in comp_data["trait_categories"]]
     print(f"   Name categories: {' vs '.join(name_cats)}")
     print(f"   Trait categories: {' vs '.join(trait_cats)}")
 
@@ -94,17 +95,13 @@ Examples:
   python switch_comparison.py gender_bias       # Switch to gender bias
   python switch_comparison.py nationality_bias  # Switch to nationality bias
   python switch_comparison.py cross_cultural_gender # Switch to cross-cultural gender
-        """
+        """,
     )
     parser.add_argument(
-        "comparison_type",
-        nargs="?",
-        help="The comparison type to switch to (optional)"
+        "comparison_type", nargs="?", help="The comparison type to switch to (optional)"
     )
     parser.add_argument(
-        "--list", "-l",
-        action="store_true",
-        help="List all available comparison types"
+        "--list", "-l", action="store_true", help="List all available comparison types"
     )
 
     args = parser.parse_args()

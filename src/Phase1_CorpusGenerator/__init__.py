@@ -4,4 +4,4 @@ The EquiLens Corpus Generator (CorpusGen) is a dataset-generation tool for **aud
 
 __version__ = "1.0.0"
 __author__ = "VKrishna04"
-__email__ = "pensive@vkrishna04.me"
+__email__ = "equilens@vkrishna04.me"

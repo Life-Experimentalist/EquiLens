@@ -301,7 +301,7 @@ def analyze_results(results_file: str) -> str:
         )
 
         if result.returncode == 0:
-            return "✅ **Analysis completed successfully!**\n\n📈 **Generated outputs:**\n  • bias_report.png - Visual bias analysis\n  • Statistical summary in console\n  • Detailed bias metrics\n\n💡 **Check the results directory for all generated files**"
+            return "✅ **Analysis completed successfully!**\n\n📈 **Generated outputs:**\n  • Visualizations (violin, heatmap, effect sizes, dashboard, etc.)\n  • `bias_analysis_report.html` — Interactive HTML report\n  • `bias_analysis_report.md` — Markdown report\n  • Statistical summary with scoring method details\n\n🧠 **Scoring**: Reports indicate whether log-probability or timing-based scoring was used.\n\n💡 **Check the results directory for all generated files**"
         else:
             error_msg = result.stderr[:800] if result.stderr else "Unknown error"
             return f"❌ **Analysis failed:**\n\n```\n{error_msg}\n```\n\n💡 **Troubleshooting:**\n  • Ensure results file is valid CSV format\n  • Check for required analysis dependencies\n  • Verify file permissions"
@@ -738,15 +738,32 @@ def create_interface():
 
 def main():
     """Main function to launch the Gradio interface"""
-    print("🚀 Starting EquiLens Web Interface...")
-    print("🌐 This will open in your browser automatically...")
+    from equilens.core.ports import get_frontend_port
+
+    # Get available port
+    port = get_frontend_port()
+
+    print("=" * 70)
+    print("🚀 EquiLens Web Interface (Legacy Standalone)")
+    print("=" * 70)
+    print()
+    print(f"🌐 Starting on port {port}...")
+    print(f"   URL: http://localhost:{port}")
+    print()
+    print("💡 Tip: Set custom port with environment variable:")
+    print(f"   $env:FRONTEND_PORT = {port + 1}")
+    print()
+    print("📝 Note: This is the legacy standalone UI.")
+    print("   For the new backend-connected UI, use: uv run equilens web")
+    print("=" * 70)
+    print()
 
     demo = create_interface()
 
     # Launch with optimal configuration
     demo.launch(
         server_name="0.0.0.0",  # Allow external connections
-        server_port=7860,  # Standard Gradio port
+        server_port=port,  # Auto-detected port
         share=False,  # Set to True for public links
         show_api=False,  # Hide API documentation
         show_error=True,  # Show detailed errors

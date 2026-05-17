@@ -8,6 +8,7 @@ Features interactive commands, beautiful output formatting, and comprehensive he
 import json
 import os
 import subprocess
+from datetime import datetime
 from pathlib import Path
 from typing import Annotated
 
@@ -99,8 +100,28 @@ def interactive_corpus_selection(user_path: str | None = None) -> Path | None:
     # Single file found - auto-select with confirmation
     if len(corpus_files) == 1:
         selected = corpus_files[0]
-        console.print(f"\n[green]✓ Found corpus:[/green] [cyan]{selected.name}[/cyan]")
-        console.print(f"  [dim]Location: {selected.parent}[/dim]")
+        try:
+            import csv
+
+            # Count rows in CSV
+            row_count = 0
+            with Path.open(selected, encoding="utf-8") as f:
+                row_count = sum(1 for _ in csv.reader(f)) - 1  # Subtract header
+
+            file_size = selected.stat().st_size / 1024  # KB
+            console.print(
+                f"\n[green]✓ Found corpus:[/green] [cyan]{selected.name}[/cyan]"
+            )
+            console.print(f"  [dim]Location: {selected.parent}[/dim]")
+            console.print(
+                f"  [dim]💾 {file_size:.1f} KB | 📊 {row_count:,} tuples[/dim]"
+            )
+        except (PermissionError, OSError, Exception):
+            console.print(
+                f"\n[green]✓ Found corpus:[/green] [cyan]{selected.name}[/cyan]"
+            )
+            console.print(f"  [dim]Location: {selected.parent}[/dim]")
+
         console.print("\n[bold]Use this corpus?[/bold]")
         if typer.confirm("", default=True):
             return selected
@@ -110,12 +131,22 @@ def interactive_corpus_selection(user_path: str | None = None) -> Path | None:
     console.print(f"\n[cyan]📊 Found {len(corpus_files)} corpus files:[/cyan]\n")
     for idx, corpus in enumerate(corpus_files, 1):
         try:
+            import csv
+
             file_size = corpus.stat().st_size / 1024  # KB
+
+            # Count rows in CSV
+            row_count = 0
+            with Path.open(corpus, encoding="utf-8") as f:
+                row_count = sum(1 for _ in csv.reader(f)) - 1  # Subtract header
+
             console.print(
                 f"  [bold cyan][{idx}][/bold cyan] [white]{corpus.name}[/white]"
             )
             console.print(f"      [dim]📁 {corpus.parent}[/dim]")
-            console.print(f"      [dim]💾 {file_size:.1f} KB[/dim]")
+            console.print(
+                f"      [dim]💾 {file_size:.1f} KB | 📊 {row_count:,} tuples[/dim]"
+            )
             console.print()
         except (PermissionError, OSError):
             console.print(
@@ -409,6 +440,41 @@ def audit_run(
             help="Suppress subprocess output to avoid emoji encoding errors",
         ),
     ] = False,
+    logprobs: Annotated[
+        bool,
+        typer.Option(
+            "--logprobs/--no-logprobs",
+            help="Use Ollama logprobs API for bias scoring (requires Ollama >= 0.12.11). Default: enabled.",
+        ),
+    ] = True,
+    request_timeout: Annotated[
+        int,
+        typer.Option(
+            "--request-timeout",
+            help="Per-request timeout in seconds (default: 45)",
+        ),
+    ] = 45,
+    max_retries: Annotated[
+        int,
+        typer.Option(
+            "--max-retries",
+            help="Maximum retries per failed request (default: 2)",
+        ),
+    ] = 2,
+    num_predict: Annotated[
+        int,
+        typer.Option(
+            "--num-predict",
+            help="Max tokens generated per prompt (default: 32)",
+        ),
+    ] = 32,
+    temperature: Annotated[
+        float,
+        typer.Option(
+            "--temperature",
+            help="Sampling temperature (default: 0.2)",
+        ),
+    ] = 0.2,
     help_cmd: Annotated[
         bool, typer.Option("--help", help="Show this help message and exit")
     ] = False,
@@ -428,6 +494,11 @@ def audit_run(
         retry_batch_size=retry_batch_size,
         resume=resume,
         silent=silent,
+        logprobs=logprobs,
+        request_timeout=request_timeout,
+        max_retries=max_retries,
+        num_predict=num_predict,
+        temperature=temperature,
         help_cmd=help_cmd,
     )
 
@@ -446,7 +517,7 @@ def find_interrupted_sessions(model: str | None = None) -> list[tuple[str, dict]
             # Look for progress files
             for progress_file in session_dir.glob("progress_*.json"):
                 try:
-                    with open(progress_file, encoding="utf-8") as f:
+                    with Path.open(progress_file, encoding="utf-8") as f:
                         progress_data = json.load(f)
 
                     # Check if it's an incomplete session
@@ -486,8 +557,6 @@ def prompt_for_resume(model: str | None = None) -> str | None:
 
         # Parse start time for better display
         try:
-            from datetime import datetime
-
             start_dt = datetime.fromisoformat(start_time)
             time_str = start_dt.strftime("%Y-%m-%d %H:%M:%S")
         except Exception:
@@ -584,6 +653,41 @@ def audit(
             help="Suppress subprocess output to avoid emoji encoding errors",
         ),
     ] = False,
+    logprobs: Annotated[
+        bool,
+        typer.Option(
+            "--logprobs/--no-logprobs",
+            help="Use Ollama logprobs API for bias scoring (requires Ollama >= 0.12.11). Default: enabled.",
+        ),
+    ] = True,
+    request_timeout: Annotated[
+        int,
+        typer.Option(
+            "--request-timeout",
+            help="Per-request timeout in seconds (default: 45)",
+        ),
+    ] = 45,
+    max_retries: Annotated[
+        int,
+        typer.Option(
+            "--max-retries",
+            help="Maximum retries per failed request (default: 2)",
+        ),
+    ] = 2,
+    num_predict: Annotated[
+        int,
+        typer.Option(
+            "--num-predict",
+            help="Max tokens generated per prompt (default: 32)",
+        ),
+    ] = 32,
+    temperature: Annotated[
+        float,
+        typer.Option(
+            "--temperature",
+            help="Sampling temperature (default: 0.2)",
+        ),
+    ] = 0.2,
     help_cmd: Annotated[
         bool, typer.Option("--help", help="Show this help message and exit")
     ] = False,
@@ -637,6 +741,24 @@ def audit(
         )
         console.print("[cyan]--resume, -r[/cyan]       Resume from previous session")
         console.print("[cyan]--silent, -s[/cyan]       Suppress subprocess output")
+        console.print(
+            "[cyan]--logprobs[/cyan]         Use Ollama logprobs for bias scoring (default: enabled, requires Ollama >= 0.12.11)"
+        )
+        console.print(
+            "[cyan]--no-logprobs[/cyan]      Disable logprobs, use timing-based scoring fallback"
+        )
+        console.print(
+            "[cyan]--request-timeout[/cyan]  Per-request timeout in seconds (default: 45)"
+        )
+        console.print(
+            "[cyan]--max-retries[/cyan]      Maximum retries per failed request (default: 2)"
+        )
+        console.print(
+            "[cyan]--num-predict[/cyan]      Max tokens generated per prompt (default: 32)"
+        )
+        console.print(
+            "[cyan]--temperature[/cyan]      Sampling temperature (default: 0.2)"
+        )
         console.print("[cyan]--help[/cyan]             Show this help message")
 
         console.print("\n[bold green]🚀 Quick Start Examples:[/bold green]")
@@ -665,7 +787,8 @@ def audit(
     # If resuming, extract model and corpus from progress file
     if resume:
         try:
-            with open(resume, encoding="utf-8") as f:
+            resume_path = Path(resume)
+            with resume_path.open(encoding="utf-8") as f:
                 progress_data = json.load(f)
 
             resume_model = progress_data.get("model_name")
@@ -766,6 +889,7 @@ def audit(
             model = typer.prompt("")
 
     max_workers = 1  # Default concurrent workers
+    found_files: list[tuple[str, int]] = []  # Initialize for later use
 
     # Step 2: Corpus Selection
     if corpus is None:
@@ -819,16 +943,34 @@ def audit(
                 console.print("[red]❌ Invalid input, using single threaded[/red]")
                 max_workers = 1
 
-        # Auto-discover all corpus files in the corpus directory
-        corpus_dir = Path("src/Phase1_CorpusGenerator/corpus")
-        found_files = []
+        # Auto-discover all corpus files in the corpus directory using absolute paths
+        # First, find the repo root for absolute path resolution
+        def find_repo_root_for_paths() -> Path:
+            """Find repository root using module location."""
+            cli_file = Path(__file__).resolve()
+            search_start = cli_file.parent.parent.parent
+            current = search_start.resolve()
+            for parent in [current] + list(current.parents):
+                markers = [
+                    parent / "pyproject.toml",
+                    parent / ".git",
+                    parent / "README.md",
+                    parent / "src" / "Phase1_CorpusGenerator",
+                ]
+                if any(marker.exists() for marker in markers):
+                    return parent
+            return search_start
+
+        repo_root_for_paths = find_repo_root_for_paths().resolve()
+        corpus_dir = repo_root_for_paths / "src" / "Phase1_CorpusGenerator" / "corpus"
+        found_files.clear()  # Clear any previous entries
 
         if corpus_dir.exists() and corpus_dir.is_dir():
             # Find all CSV files in the corpus directory
             for csv_file in sorted(corpus_dir.glob("*.csv")):
                 if csv_file.is_file():
                     file_size = csv_file.stat().st_size
-                    found_files.append((str(csv_file), file_size))
+                    found_files.append((str(csv_file.resolve()), file_size))
 
         # Also check current directory for corpus files as fallback
         for csv_file in sorted(Path.cwd().glob("*.csv")):
@@ -840,21 +982,55 @@ def audit(
                     found_files.append((file_path, file_size))
 
         if found_files:
-            console.print("[green]✓ Found corpus files:[/green]")
+            console.print(f"\n[cyan]📊 Found {len(found_files)} corpus files:[/cyan]\n")
 
             for i, (path, size) in enumerate(found_files, 1):
-                file_size_formatted = format_file_size(size)
-                console.print(
-                    f"  {i}. [cyan]{path}[/cyan] ([dim]{file_size_formatted}[/dim])"
-                )
+                try:
+                    import csv
+
+                    # Count rows in CSV
+                    row_count = 0
+                    with Path(path).open(encoding="utf-8") as f:
+                        row_count = sum(1 for _ in csv.reader(f)) - 1  # Subtract header
+
+                    file_size_formatted = format_file_size(size)
+                    file_path = Path(path)
+
+                    console.print(
+                        f"  [bold cyan][{i}][/bold cyan] [white]{file_path.name}[/white]"
+                    )
+                    console.print(f"      [dim]📁 {file_path.parent}[/dim]")
+                    console.print(
+                        f"      [dim]💾 {file_size_formatted} | 📊 {row_count:,} tuples[/dim]"
+                    )
+                    console.print()
+                except Exception:
+                    # Fallback if can't read file
+                    file_size_formatted = format_file_size(size)
+                    file_path = Path(path)
+                    console.print(
+                        f"  [bold cyan][{i}][/bold cyan] [white]{file_path.name}[/white]"
+                    )
+                    console.print(f"      [dim]📁 {file_path.parent}[/dim]")
+                    console.print(f"      [dim]💾 {file_size_formatted}[/dim]")
+                    console.print()
 
             while True:
                 console.print(
-                    "\n[bold]Select corpus file number or enter custom path:[/bold]"
+                    f"[bold]Select corpus [1-{len(found_files)}] (or 'q' to quit):[/bold]"
                 )
                 choice = typer.prompt("")
+                if choice.lower() in ("q", "quit", "exit", ""):
+                    console.print(
+                        "[yellow]Corpus selection cancelled by user.[/yellow]"
+                    )
+                    raise typer.Exit(0)
+
                 if choice.isdigit() and 1 <= int(choice) <= len(found_files):
                     corpus = found_files[int(choice) - 1][0]
+                    console.print(
+                        f"\n[green]✓ Selected:[/green] [cyan]{Path(corpus).name}[/cyan]"
+                    )
                     break
                 elif Path(choice).exists():
                     corpus = choice
@@ -882,7 +1058,7 @@ def audit(
 
     # Determine if this is a custom path (not in the found_files list)
     is_custom_path = True
-    if "found_files" in locals() and found_files:
+    if found_files:
         for path, _ in found_files:
             if Path(corpus).resolve() == Path(path).resolve():
                 is_custom_path = False
@@ -930,14 +1106,17 @@ def audit(
                     console.print("[green]✓[/green] No automatic analysis selected")
                 elif choice == "2":
                     analytics_preference = "standard"
-                    console.print("[green]✓[/green] Standard analytics will run after audit")
+                    console.print(
+                        "[green]✓[/green] Standard analytics will run after audit"
+                    )
                 elif choice == "3":
                     analytics_preference = "advanced"
-                    console.print("[green]✓[/green] Advanced analytics will run after audit")
+                    console.print(
+                        "[green]✓[/green] Advanced analytics will run after audit"
+                    )
                 break
             else:
                 console.print("[red]Invalid choice. Please enter 1, 2, or 3.[/red]")
-
 
     console.print("\n[bold]Proceed with bias audit?[/bold]")
     if not typer.confirm(""):
@@ -976,6 +1155,7 @@ def audit(
                     model_name=model,
                     corpus_file=corpus,
                     output_dir=output_dir,
+                    use_logprobs=logprobs,
                 )
 
                 # Set batch size if specified
@@ -995,15 +1175,11 @@ def audit(
 
             except ImportError as e:
                 console.print(f"[yellow]⚠️ Enhanced auditor import failed: {e}[/yellow]")
-                console.print(
-                    "[yellow]Falling back to standard auditor...[/yellow]"
-                )
+                console.print("[yellow]Falling back to standard auditor...[/yellow]")
                 enhanced = False
             except Exception as e:
                 console.print(f"[yellow]⚠️ Enhanced auditor error: {e}[/yellow]")
-                console.print(
-                    "[yellow]Falling back to standard auditor...[/yellow]"
-                )
+                console.print("[yellow]Falling back to standard auditor...[/yellow]")
                 enhanced = False
 
         if not enhanced:
@@ -1031,49 +1207,63 @@ def audit(
                 format="%(asctime)s %(levelname)s: %(message)s",
             )
 
-            # Find repository root by looking for pyproject.toml or .git
-            def find_repo_root(start_path: Path = Path.cwd()) -> Path | None:
-                """Find repository root by looking for pyproject.toml or .git"""
-                current = start_path.resolve()
+            # Find repository root using absolute paths based on module location
+            def find_repo_root() -> Path:
+                """
+                Find repository root by looking for pyproject.toml or .git.
+                Uses the location of this module as starting point, then searches upward.
+                """
+                # Start from the directory containing this file
+                cli_file = Path(__file__).resolve()
+                # Navigate: cli.py -> src/equilens/ -> src/ -> repo_root
+                search_start = cli_file.parent.parent.parent
+
+                current = search_start.resolve()
                 for parent in [current] + list(current.parents):
-                    if (parent / "pyproject.toml").exists() or (
-                        parent / ".git"
-                    ).exists():
+                    markers = [
+                        parent / "pyproject.toml",
+                        parent / ".git",
+                        parent / "README.md",
+                        parent / "src" / "Phase1_CorpusGenerator",
+                    ]
+                    if any(marker.exists() for marker in markers):
                         return parent
-                return None
 
-            repo_root = find_repo_root()
-            if repo_root is None:
-                repo_root = Path.cwd()  # Fallback to current directory
+                # Fallback: return the calculated repo root based on module location
+                return search_start
 
-            # Candidate auditor scripts in preferred order (absolute paths from repo root)
+            repo_root = find_repo_root().resolve()
+
+            # Candidate auditor scripts in preferred order (all absolute paths)
             candidates = [
                 repo_root / "src" / "Phase2_ModelAuditor" / "audit_model.py",
                 repo_root / "src" / "Phase2_ModelAuditor" / "enhanced_audit_model.py",
-                Path(
-                    "src/Phase2_ModelAuditor/audit_model.py"
-                ),  # Fallback relative path
-                Path("src/Phase2_ModelAuditor/enhanced_audit_model.py"),
+                (repo_root / "src" / "Phase2_ModelAuditor" / "run_both_auditors.py"),
             ]
 
             auditor_script = None
             for p in candidates:
                 if p.exists():
                     auditor_script = p
-                    console.print(f"[dim]✓ Found auditor: {p}[/dim]")
+                    console.print(f"[dim]✓ Found auditor: {p.name}[/dim]")
                     break
 
             if auditor_script is None:
                 msg = (
                     "No auditor script found. Expected one of: "
-                    "src/Phase2_ModelAuditor/audit_model.py, audit_model.py, "
-                    "or enhanced_audit_model.py."
+                    "audit_model.py, enhanced_audit_model.py, or run_both_auditors.py"
                 )
                 console.print(f"[red]❌ {msg}[/red]")
-                console.print(f"[dim]Searched in repository root: {repo_root}[/dim]")
-                console.print(f"[dim]Current working directory: {Path.cwd()}[/dim]")
+                console.print(
+                    f"[dim]Searched in: {repo_root / 'src' / 'Phase2_ModelAuditor'}[/dim]"
+                )
+                console.print(f"[dim]Module location: {Path(__file__).resolve()}[/dim]")
                 logging.error(msg)
                 raise typer.Exit(2)
+
+            # Convert paths to absolute paths for reliable subprocess execution
+            corpus_abs = Path(corpus).resolve()
+            output_dir_abs = Path(output_dir).resolve()
 
             base_cmd = [
                 "python",
@@ -1081,9 +1271,9 @@ def audit(
                 "--model",
                 model,
                 "--corpus",
-                corpus,
+                str(corpus_abs),
                 "--output-dir",
-                output_dir,
+                str(output_dir_abs),
             ]
 
             # Add concurrency option only if the target script supports it
@@ -1096,9 +1286,16 @@ def audit(
                 base_cmd.append("--retry-immediate")
             if retry_batch_size is not None:
                 base_cmd.extend(["--retry-batch-size", str(retry_batch_size)])
+            # Forward logprobs option
+            if not logprobs:
+                base_cmd.append("--no-logprobs")
+            base_cmd.extend(["--request-timeout", str(request_timeout)])
+            base_cmd.extend(["--max-retries", str(max_retries)])
+            base_cmd.extend(["--num-predict", str(num_predict)])
+            base_cmd.extend(["--temperature", str(temperature)])
 
             def run_audit(cmd, silent_mode=False):
-                cwd = Path.cwd()
+                cwd = repo_root
                 try:
                     if silent_mode:
                         subprocess.run(
@@ -1206,6 +1403,12 @@ def audit(
                             alt_cmd.extend(
                                 ["--retry-batch-size", str(retry_batch_size)]
                             )
+                        if not logprobs:
+                            alt_cmd.append("--no-logprobs")
+                        alt_cmd.extend(["--request-timeout", str(request_timeout)])
+                        alt_cmd.extend(["--max-retries", str(max_retries)])
+                        alt_cmd.extend(["--num-predict", str(num_predict)])
+                        alt_cmd.extend(["--temperature", str(temperature)])
                         console.print(
                             f"[yellow]⚠ Trying alternative auditor script: {alt}[/yellow]"
                         )
@@ -1283,6 +1486,12 @@ def audit(
         success_message += (
             "  • Use [cyan]--silent[/cyan] flag if you see Unicode encoding errors"
         )
+
+        # Add scoring method note
+        if logprobs:
+            success_message += "\n\n[bold]Scoring:[/bold] [cyan]logprobs[/cyan] (log-probability bias scores, Ollama >= 0.12.11)"
+        else:
+            success_message += "\n\n[bold]Scoring:[/bold] [cyan]timing fallback[/cyan] (eval_duration / eval_count)"
 
         # Auto-run analytics if preference was set (only for new audits)
         if not resume and analytics_preference != "none" and latest_results:
@@ -1424,8 +1633,6 @@ def analyze(
                 for i, path in enumerate(result_files, 1):
                     file_size = path.stat().st_size / 1024
                     mod_time = path.stat().st_mtime
-                    from datetime import datetime
-
                     mod_str = datetime.fromtimestamp(mod_time).strftime(
                         "%Y-%m-%d %H:%M"
                     )
@@ -1557,6 +1764,7 @@ def analyze(
         # Import the unified analytics module
         # Add project root to path if not already there
         import sys
+
         project_root = Path(__file__).parent.parent.parent
         if str(project_root) not in sys.path:
             sys.path.insert(0, str(project_root))
@@ -1569,28 +1777,24 @@ def analyze(
         if advanced:
             # Generate comprehensive analysis with HTML report and AI insights
             analytics.run_complete_analysis(
-                generate_html=True,
-                generate_ai_insights=True
+                generate_html=True, generate_ai_insights=True
             )
         else:
             # Generate basic analysis only
             analytics.run_complete_analysis(
-                generate_html=False,
-                generate_ai_insights=False
+                generate_html=False, generate_ai_insights=False
             )
 
         # Show success message
         if not silent:
-            console.print(
-                "[green]✓[/green] Analysis completed successfully"
-            )
+            console.print("[green]✓[/green] Analysis completed successfully")
 
         # Check for generated files based on mode
         if results:
             results_path = Path(results)
             results_dir = results_path.parent
         else:
-            results_dir = Path(".")
+            results_dir = Path()
 
         # List of expected output files
         if advanced:
@@ -1621,9 +1825,7 @@ def analyze(
         success_message += (
             f"[bold]Analyzed File:[/bold] [cyan]{Path(results).name}[/cyan]\n"
         )
-        success_message += (
-            f"[bold]Analysis Type:[/bold] [cyan]{'Advanced' if advanced else 'Standard'}[/cyan]\n"
-        )
+        success_message += f"[bold]Analysis Type:[/bold] [cyan]{'Advanced' if advanced else 'Standard'}[/cyan]\n"
         success_message += (
             f"[bold]Output Directory:[/bold] [cyan]{results_dir}[/cyan]\n"
         )
@@ -1635,27 +1837,53 @@ def analyze(
                 file_size = filepath.stat().st_size / 1024
                 success_message += f"  • [green]✓[/green] [cyan]{filepath.name}[/cyan] ([dim]{file_size:.1f} KB[/dim])\n"
         else:
-            success_message += "  • [yellow]?[/yellow] Files generated (check output directory)\n"
+            success_message += (
+                "  • [yellow]?[/yellow] Files generated (check output directory)\n"
+            )
 
         if not advanced:
-            success_message += (
-                "  • [green]✓[/green] [cyan]Console statistics[/cyan] - Detailed analysis\n"
-            )
+            success_message += "  • [green]✓[/green] [cyan]Console statistics[/cyan] - Detailed analysis\n"
 
         success_message += "\n[bold]Next Steps:[/bold]\n"
 
         if advanced:
-            success_message += "  • Open [cyan]comprehensive_dashboard.png[/cyan] for overview\n"
-            success_message += "  • Read [cyan]statistical_report.md[/cyan] for detailed findings\n"
+            success_message += (
+                "  • Open [cyan]comprehensive_dashboard.png[/cyan] for overview\n"
+            )
+            success_message += (
+                "  • Read [cyan]statistical_report.md[/cyan] for detailed findings\n"
+            )
             success_message += "  • Explore individual charts for specific insights\n"
         else:
             if generated_files:
                 success_message += f"  • Open [cyan]{generated_files[0].name}[/cyan] to view bias metrics\n"
             success_message += "  • Review console statistics for detailed analysis\n"
-            success_message += "  • Use [cyan]--advanced[/cyan] flag for comprehensive analysis\n"
+            success_message += (
+                "  • Use [cyan]--advanced[/cyan] flag for comprehensive analysis\n"
+            )
 
         success_message += "  • Share results with your team or faculty\n"
-        success_message += "  • Use [cyan]--silent[/cyan] flag if you see Unicode encoding errors"
+        success_message += (
+            "  • Use [cyan]--silent[/cyan] flag if you see Unicode encoding errors"
+        )
+
+        # Detect and display scoring method from the results CSV
+        try:
+            import pandas as pd
+
+            df_check = pd.read_csv(results, nrows=5)
+            if "logprobs_used" in df_check.columns:
+                lp_used = df_check["logprobs_used"].any()
+                method_text = (
+                    "logprobs (log-probability scores)"
+                    if lp_used
+                    else "timing fallback (eval_duration / eval_count)"
+                )
+                success_message += (
+                    f"\n\n[bold]Scoring Method:[/bold] [cyan]{method_text}[/cyan]"
+                )
+        except Exception:
+            pass  # Don't break the panel if CSV read fails
 
         console.print(Panel.fit(success_message, border_style="green"))
 
@@ -1688,12 +1916,20 @@ def analyze(
 
 @app.command()
 def gui():
-    """🖥️ Launch web-based Gradio GUI"""
+    """
+    🖥️ Launch legacy web-based Gradio GUI
+
+    [LEGACY] This launches the original EquiLens web interface.
+    For the latest Gradio web interface, use the [bold cyan]web[/bold cyan] command instead.
+    """
     try:
         from equilens.web_ui import main as web_ui_main
 
-        console.print("🚀 [green]Starting EquiLens Web Interface...[/green]")
-        console.print("🌐 Opening web interface in your browser...")
+        console.print("🚀 [green]Starting EquiLens Legacy Web Interface...[/green]")
+        console.print("🌐 Opening legacy web interface in your browser...")
+        console.print(
+            "[yellow][LEGACY][/yellow] For the latest Gradio web interface, use [bold cyan]uv run equilens web[/bold cyan]."
+        )
         web_ui_main()
     except ImportError:
         console.print("[red]❌ Gradio dependencies not available[/red]")
@@ -1701,6 +1937,65 @@ def gui():
         raise typer.Exit(1) from None
     except Exception as e:
         console.print(f"[red]❌ Failed to start Web GUI: {e}[/red]")
+        raise typer.Exit(1) from e
+
+
+@app.command()
+def backend():
+    """🔧 Start the EquiLens backend API server"""
+    try:
+        from equilens.backend_server import main as backend_main
+
+        console.print("🚀 [green]Starting EquiLens Backend API...[/green]")
+        console.print("📡 API will be available at: [cyan]http://localhost:8000[/cyan]")
+        console.print("📖 API docs at: [cyan]http://localhost:8000/docs[/cyan]")
+        backend_main()
+    except ImportError as e:
+        console.print("[red]❌ Backend dependencies not available[/red]")
+        console.print(f"[dim]Error: {e}[/dim]")
+        console.print("Install with: [cyan]uv add fastapi uvicorn[/cyan]")
+        raise typer.Exit(1) from None
+    except Exception as e:
+        console.print(f"[red]❌ Failed to start backend: {e}[/red]")
+        raise typer.Exit(1) from e
+
+
+@app.command()
+def web():
+    """🌐 Launch the new Gradio web interface (connects to backend)"""
+    try:
+        from equilens.gradio_app import main as gradio_main
+
+        console.print("🚀 [green]Starting EquiLens Gradio Interface...[/green]")
+        console.print(
+            "📡 Make sure the backend is running at: [cyan]http://localhost:8000[/cyan]"
+        )
+        console.print("🌐 Web interface will open in your browser...")
+        gradio_main()
+    except ImportError as e:
+        console.print("[red]❌ Gradio dependencies not available[/red]")
+        console.print(f"[dim]Error: {e}[/dim]")
+        console.print("Install with: [cyan]uv add gradio requests[/cyan]")
+        raise typer.Exit(1) from None
+    except Exception as e:
+        console.print(f"[red]❌ Failed to start Gradio interface: {e}[/red]")
+        raise typer.Exit(1) from e
+
+
+@app.command()
+def serve():
+    """🚀 Start both backend API and Gradio frontend together"""
+    try:
+        from equilens.start_all import main as start_all_main
+
+        console.print("🚀 [green]Starting EquiLens Full Stack...[/green]")
+        start_all_main()
+    except ImportError as e:
+        console.print("[red]❌ Required dependencies not available[/red]")
+        console.print(f"[dim]Error: {e}[/dim]")
+        raise typer.Exit(1) from None
+    except Exception as e:
+        console.print(f"[red]❌ Failed to start services: {e}[/red]")
         raise typer.Exit(1) from e
 
 
@@ -1736,14 +2031,13 @@ def resume_list(
 
             # Parse start time for better display
             try:
-                from datetime import datetime
-
                 start_dt = datetime.fromisoformat(start_time)
                 time_str = start_dt.strftime("%Y-%m-%d %H:%M:%S")
             except Exception:
                 time_str = start_time
 
             # Parse last checkpoint time
+            checkpoint_dt = None
             try:
                 checkpoint_dt = datetime.fromisoformat(last_checkpoint)
                 checkpoint_str = checkpoint_dt.strftime("%Y-%m-%d %H:%M:%S")
@@ -1905,23 +2199,31 @@ def resume_remove(
             # Try to match by folder name (second most reliable)
             elif identifier in folder_map:
                 found_sessions = [folder_map[identifier]]
-                console.print(f"[cyan]📂 Found session by folder name: {identifier}[/cyan]")
+                console.print(
+                    f"[cyan]📂 Found session by folder name: {identifier}[/cyan]"
+                )
 
             # Try to match by session ID (least reliable due to duplicates)
             elif identifier in session_map:
                 found_sessions = session_map[identifier]
                 if len(found_sessions) > 1:
-                    console.print(f"[yellow]⚠️ Session ID '{identifier}' matches {len(found_sessions)} sessions:[/yellow]")
+                    console.print(
+                        f"[yellow]⚠️ Session ID '{identifier}' matches {len(found_sessions)} sessions:[/yellow]"
+                    )
                     for j, progress_file in enumerate(found_sessions, 1):
                         folder_name = Path(progress_file).parent.name
                         progress_data = session_details[progress_file]
                         completed = progress_data.get("completed_tests", 0)
                         console.print(f"  {j}. {folder_name} ({completed:,} tests)")
 
-                    console.print(f"[yellow]Use folder names instead: {' '.join([Path(pf).parent.name for pf in found_sessions])}[/yellow]")
+                    console.print(
+                        f"[yellow]Use folder names instead: {' '.join([Path(pf).parent.name for pf in found_sessions])}[/yellow]"
+                    )
                     continue
                 else:
-                    console.print(f"[cyan]🆔 Found session by session ID: {identifier}[/cyan]")
+                    console.print(
+                        f"[cyan]🆔 Found session by session ID: {identifier}[/cyan]"
+                    )
 
             else:
                 console.print(
@@ -1947,7 +2249,6 @@ def resume_remove(
 
                     # Parse timestamps
                     try:
-                        from datetime import datetime
                         start_dt = datetime.fromisoformat(start_time)
                         start_str = start_dt.strftime("%Y-%m-%d %H:%M:%S")
                     except Exception:
@@ -1978,12 +2279,16 @@ def resume_remove(
 
                     # Show detailed information about what will be removed
                     console.print("\n[yellow]🗑️ Session to remove:[/yellow]")
-                    console.print(f"     [bold]{session_model}[/bold] - {completed:,}/{total:,} tests ({completion_percent:.1f}% complete)")
+                    console.print(
+                        f"     [bold]{session_model}[/bold] - {completed:,}/{total:,} tests ({completion_percent:.1f}% complete)"
+                    )
                     console.print(f"     [dim]Matched by: {identifier}[/dim]")
                     console.print(f"     [dim]Started: {start_str}[/dim]")
                     console.print(f"     [dim]Last Save: {checkpoint_str}[/dim]")
                     console.print(f"     [dim]Failed Tests: {failed}[/dim]")
-                    console.print(f"     [dim]Files: {file_count} ({backup_count} backups)[/dim]")
+                    console.print(
+                        f"     [dim]Files: {file_count} ({backup_count} backups)[/dim]"
+                    )
                     console.print(f"     [dim]Size: {size_str}[/dim]")
                     console.print(f"     [dim]Folder: {folder_path}[/dim]")
 
@@ -1996,17 +2301,26 @@ def resume_remove(
 
                     # Remove the entire session folder
                     import shutil
+
                     if folder_path.exists():
                         shutil.rmtree(folder_path)
-                        console.print(f"[green]✅ Removed session: {folder_path.name}[/green]")
-                        console.print(f"[green]💾 Freed {size_str} of disk space[/green]")
+                        console.print(
+                            f"[green]✅ Removed session: {folder_path.name}[/green]"
+                        )
+                        console.print(
+                            f"[green]💾 Freed {size_str} of disk space[/green]"
+                        )
                         removed_count += 1
                         total_size_freed += folder_size
                     else:
-                        console.print(f"[yellow]⚠️ Folder not found: {folder_path}[/yellow]")
+                        console.print(
+                            f"[yellow]⚠️ Folder not found: {folder_path}[/yellow]"
+                        )
 
                 except Exception as e:
-                    console.print(f"[red]❌ Failed to remove session for '{identifier}': {e}[/red]")
+                    console.print(
+                        f"[red]❌ Failed to remove session for '{identifier}': {e}[/red]"
+                    )
 
         # Show final summary
         if removed_count > 0:
@@ -2017,7 +2331,9 @@ def resume_remove(
             else:
                 total_freed_str = f"{total_size_freed / 1024:.1f} KB"
 
-            console.print(f"\n[green]✅ Successfully removed {removed_count} session(s).[/green]")
+            console.print(
+                f"\n[green]✅ Successfully removed {removed_count} session(s).[/green]"
+            )
             console.print(f"[green]💾 Total space freed: {total_freed_str}[/green]")
         else:
             console.print("\n[yellow]📭 No sessions were removed.[/yellow]")
@@ -2025,6 +2341,8 @@ def resume_remove(
     except Exception as e:
         console.print(f"[red]❌ Error removing resume sessions: {e}[/red]")
         raise typer.Exit(1) from e
+
+
 @audit_app.command("remove-range")
 def resume_remove_range(
     range_spec: Annotated[
@@ -2057,15 +2375,17 @@ def resume_remove_range(
             indices_to_remove = set(range(1, total_sessions + 1))
         else:
             # Parse comma-separated ranges and individual numbers
-            parts = range_spec.split(',')
+            parts = range_spec.split(",")
             for part in parts:
                 part = part.strip()
-                if '-' in part:
+                if "-" in part:
                     # Handle range like "1-5"
                     try:
-                        start, end = map(int, part.split('-', 1))
+                        start, end = map(int, part.split("-", 1))
                         if start < 1 or end > total_sessions:
-                            console.print(f"[red]❌ Range {start}-{end} is out of bounds (1-{total_sessions})[/red]")
+                            console.print(
+                                f"[red]❌ Range {start}-{end} is out of bounds (1-{total_sessions})[/red]"
+                            )
                             return
                         indices_to_remove.update(range(start, end + 1))
                     except ValueError:
@@ -2076,7 +2396,9 @@ def resume_remove_range(
                     try:
                         index = int(part)
                         if index < 1 or index > total_sessions:
-                            console.print(f"[red]❌ Index {index} is out of bounds (1-{total_sessions})[/red]")
+                            console.print(
+                                f"[red]❌ Index {index} is out of bounds (1-{total_sessions})[/red]"
+                            )
                             return
                         indices_to_remove.add(index)
                     except ValueError:
@@ -2088,13 +2410,17 @@ def resume_remove_range(
             return
 
         # Show what will be removed
-        console.print(f"[yellow]🗑️ Will remove {len(indices_to_remove)} session(s):[/yellow]\n")
+        console.print(
+            f"[yellow]🗑️ Will remove {len(indices_to_remove)} session(s):[/yellow]\n"
+        )
 
         total_size_to_remove = 0
         sessions_to_remove = []
 
         for index in sorted(indices_to_remove):
-            progress_file, progress_data = interrupted_sessions[index - 1]  # Convert to 0-based
+            progress_file, progress_data = interrupted_sessions[
+                index - 1
+            ]  # Convert to 0-based
             sessions_to_remove.append((progress_file, progress_data))
 
             session_model = progress_data.get("model_name", "Unknown")
@@ -2102,9 +2428,11 @@ def resume_remove_range(
             total = progress_data.get("total_tests", 0)
             completion_percent = (completed / total * 100) if total > 0 else 0
 
+            folder_path = Path(progress_file).parent
             try:
-                folder_path = Path(progress_file).parent
-                folder_size = sum(f.stat().st_size for f in folder_path.rglob("*") if f.is_file())
+                folder_size = sum(
+                    f.stat().st_size for f in folder_path.rglob("*") if f.is_file()
+                )
                 total_size_to_remove += folder_size
 
                 if folder_size > 1024 * 1024:
@@ -2114,7 +2442,9 @@ def resume_remove_range(
             except Exception:
                 size_str = "Unknown"
 
-            console.print(f"  {index:2d}. [red]{session_model}[/red] - {completed:,}/{total:,} ({completion_percent:.1f}%) - {folder_path.name} ({size_str})")
+            console.print(
+                f"  {index:2d}. [red]{session_model}[/red] - {completed:,}/{total:,} ({completion_percent:.1f}%) - {folder_path.name} ({size_str})"
+            )
 
         # Show total space to be freed
         if total_size_to_remove > 1024 * 1024 * 1024:  # GB
@@ -2124,7 +2454,9 @@ def resume_remove_range(
         else:
             total_size_str = f"{total_size_to_remove / 1024:.1f} KB"
 
-        console.print(f"\n[yellow]💾 Total disk space to be freed: {total_size_str}[/yellow]")
+        console.print(
+            f"\n[yellow]💾 Total disk space to be freed: {total_size_str}[/yellow]"
+        )
 
         if not force:
             console.print()
@@ -2138,13 +2470,15 @@ def resume_remove_range(
         freed_space = 0
 
         for progress_file, _progress_data in sessions_to_remove:
+            folder_path = Path(progress_file).parent
             try:
-                folder_path = Path(progress_file).parent
-
                 # Calculate size before removal
-                folder_size = sum(f.stat().st_size for f in folder_path.rglob("*") if f.is_file())
+                folder_size = sum(
+                    f.stat().st_size for f in folder_path.rglob("*") if f.is_file()
+                )
 
                 import shutil
+
                 if folder_path.exists():
                     shutil.rmtree(folder_path)
                     removed_count += 1
@@ -2161,7 +2495,9 @@ def resume_remove_range(
         else:
             freed_str = f"{freed_space / 1024:.1f} KB"
 
-        console.print(f"\n[green]✅ Successfully removed {removed_count} session(s).[/green]")
+        console.print(
+            f"\n[green]✅ Successfully removed {removed_count} session(s).[/green]"
+        )
         console.print(f"[green]💾 Freed {freed_str} of disk space.[/green]")
 
     except Exception as e:
@@ -2187,25 +2523,32 @@ def resume_clean(
             return
 
         if len(interrupted_sessions) <= keep:
-            console.print(f"[green]✅ Only {len(interrupted_sessions)} sessions found. Nothing to clean.[/green]")
+            console.print(
+                f"[green]✅ Only {len(interrupted_sessions)} sessions found. Nothing to clean.[/green]"
+            )
             return
 
         # Sort sessions by start time (most recent first)
         try:
             interrupted_sessions.sort(
-                key=lambda x: x[1].get("start_time", ""),
-                reverse=True
+                key=lambda x: x[1].get("start_time", ""), reverse=True
             )
         except Exception:
-            console.print("[yellow]⚠️ Could not sort sessions by time. Using current order.[/yellow]")
+            console.print(
+                "[yellow]⚠️ Could not sort sessions by time. Using current order.[/yellow]"
+            )
 
         sessions_to_keep = interrupted_sessions[:keep]
         sessions_to_remove = interrupted_sessions[keep:]
 
-        console.print(f"\n[yellow]🧹 Found {len(interrupted_sessions)} sessions. Will keep {keep} most recent.[/yellow]")
+        console.print(
+            f"\n[yellow]🧹 Found {len(interrupted_sessions)} sessions. Will keep {keep} most recent.[/yellow]"
+        )
 
         # Show sessions that will be kept
-        console.print(f"\n[green]✅ Sessions to KEEP ({len(sessions_to_keep)}):[/green]")
+        console.print(
+            f"\n[green]✅ Sessions to KEEP ({len(sessions_to_keep)}):[/green]"
+        )
         for i, (progress_file, progress_data) in enumerate(sessions_to_keep, 1):
             session_model = progress_data.get("model_name", "Unknown")
             completed = progress_data.get("completed_tests", 0)
@@ -2214,7 +2557,6 @@ def resume_clean(
             start_time = progress_data.get("start_time", "Unknown")
 
             try:
-                from datetime import datetime
                 start_dt = datetime.fromisoformat(start_time)
                 time_str = start_dt.strftime("%Y-%m-%d %H:%M:%S")
             except Exception:
@@ -2237,7 +2579,9 @@ def resume_clean(
                 folder_name = "Unknown"
                 size_str = "Unknown"
 
-            console.print(f"  {i}. [green]{session_model}[/green] - {completed:,}/{total:,} ({completion_percent:.1f}%) - {time_str} - {folder_name} ({size_str})")
+            console.print(
+                f"  {i}. [green]{session_model}[/green] - {completed:,}/{total:,} ({completion_percent:.1f}%) - {time_str} - {folder_name} ({size_str})"
+            )
 
         # Show sessions that will be removed
         console.print(f"\n[red]🗑️ Sessions to REMOVE ({len(sessions_to_remove)}):[/red]")
@@ -2253,7 +2597,6 @@ def resume_clean(
             last_checkpoint = progress_data.get("last_checkpoint", "Unknown")
 
             try:
-                from datetime import datetime
                 start_dt = datetime.fromisoformat(start_time)
                 time_str = start_dt.strftime("%Y-%m-%d %H:%M:%S")
             except Exception:
@@ -2288,8 +2631,12 @@ def resume_clean(
                 size_str = "Unknown"
                 file_count = 0
 
-            console.print(f"  {i}. [red]{session_model}[/red] - {completed:,}/{total:,} ({completion_percent:.1f}%) - Started: {time_str}")
-            console.print(f"     [dim]Last Save: {checkpoint_str} | Failed: {failed} | Files: {file_count} | Size: {size_str}[/dim]")
+            console.print(
+                f"  {i}. [red]{session_model}[/red] - {completed:,}/{total:,} ({completion_percent:.1f}%) - Started: {time_str}"
+            )
+            console.print(
+                f"     [dim]Last Save: {checkpoint_str} | Failed: {failed} | Files: {file_count} | Size: {size_str}[/dim]"
+            )
             console.print(f"     [dim]Folder: {folder_name}[/dim]")
 
         # Show total space that will be freed
@@ -2300,7 +2647,9 @@ def resume_clean(
         else:
             total_size_str = f"{total_size_to_remove / 1024:.1f} KB"
 
-        console.print(f"\n[yellow]💾 Total disk space to be freed: {total_size_str}[/yellow]")
+        console.print(
+            f"\n[yellow]💾 Total disk space to be freed: {total_size_str}[/yellow]"
+        )
 
         if not force:
             console.print()
@@ -2313,9 +2662,8 @@ def resume_clean(
         removed_count = 0
         freed_space = 0
         for progress_file, _ in sessions_to_remove:
+            folder_path = Path(progress_file).parent
             try:
-                folder_path = Path(progress_file).parent
-
                 # Calculate size before removal
                 folder_size = 0
                 for file in folder_path.rglob("*"):
@@ -2323,6 +2671,7 @@ def resume_clean(
                         folder_size += file.stat().st_size
 
                 import shutil
+
                 if folder_path.exists():
                     shutil.rmtree(folder_path)
                     removed_count += 1
@@ -2339,12 +2688,16 @@ def resume_clean(
         else:
             freed_str = f"{freed_space / 1024:.1f} KB"
 
-        console.print(f"\n[green]✅ Successfully cleaned up {removed_count} old sessions.[/green]")
+        console.print(
+            f"\n[green]✅ Successfully cleaned up {removed_count} old sessions.[/green]"
+        )
         console.print(f"[green]💾 Freed {freed_str} of disk space.[/green]")
 
     except Exception as e:
         console.print(f"[red]❌ Error cleaning resume sessions: {e}[/red]")
         raise typer.Exit(1) from e
+
+
 def _run_auto_analytics(analytics_preference: str, latest_results: Path):
     """
     Run automatic analytics after audit completes, based on user preference.
@@ -2362,6 +2715,7 @@ def _run_auto_analytics(analytics_preference: str, latest_results: Path):
         # Import the unified analytics module
         # Add project root to path if not already there
         import sys
+
         project_root = Path(__file__).parent.parent.parent
         if str(project_root) not in sys.path:
             sys.path.insert(0, str(project_root))
@@ -2374,14 +2728,12 @@ def _run_auto_analytics(analytics_preference: str, latest_results: Path):
         if analytics_preference == "advanced":
             # Generate comprehensive analysis with HTML report
             analytics.run_complete_analysis(
-                generate_html=True,
-                generate_ai_insights=True
+                generate_html=True, generate_ai_insights=True
             )
         else:
             # Generate basic analysis only
             analytics.run_complete_analysis(
-                generate_html=False,
-                generate_ai_insights=False
+                generate_html=False, generate_ai_insights=False
             )
 
         console.print(

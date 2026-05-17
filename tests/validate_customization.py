@@ -5,14 +5,15 @@ Simple validation of Enhanced Auditor customization features
 
 import os
 import sys
+from pathlib import Path
 
 # Change to the project directory
-os.chdir(r"v:\Code\ProjectCode\EquiLens")
-sys.path.insert(0, r"v:\Code\ProjectCode\EquiLens\src\Phase2_ModelAuditor")
+_PROJECT_ROOT = str(Path(__file__).parent.parent)
+os.chdir(_PROJECT_ROOT)
+sys.path.insert(0, _PROJECT_ROOT)
 
 try:
     from src.Phase2_ModelAuditor.enhanced_audit_model import (
-        ConfigurableEnhancedAuditor,
         SystemInstructionPresets,
     )
 

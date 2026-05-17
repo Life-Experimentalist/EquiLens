@@ -6,33 +6,51 @@
 
 This guide covers Ollama installation, configuration, and troubleshooting for EquiLens. Includes GPU acceleration setup, connection issue resolution, and concurrent processing optimization.
 
+EquiLens **automatically detects** and works with both local and Docker Ollama installations.
+
+---
+
 ## 🚀 Installation & Setup
 
-### 1. Install Ollama on Windows Host
+### Setup Options
 
-1. **Download Ollama**: Go to [https://ollama.ai/download](https://ollama.ai/download) or from the docker hub [https://hub.docker.com/r/ollama/ollama](https://hub.docker.com/r/ollama/ollama).
+EquiLens supports **two deployment methods** — choose one:
+
+#### 🖥️ Option A: Local Windows Ollama (Simple)
+
+**Best for:** Direct control, quick testing, development
+
+1. **Download Ollama**: Go to [https://ollama.ai/download](https://ollama.ai/download) or [Docker Hub](https://hub.docker.com/r/ollama/ollama)
 2. **Install**: Run the installer with Administrator privileges
 3. **Verify**: Open PowerShell and run `ollama --version`
+4. **Start Ollama**:
+   ```powershell
+   ollama serve
+   ```
+   Server runs on `http://localhost:11434`
 
-### 2. Start Ollama Server
+5. **Start EquiLens**:
+   ```bash
+   uv run equilens start
+   ```
+   ✅ Auto-detects local Ollama and connects
 
-**Option A: Using EquiLens (Recommended)**
-```bash
-# Start Ollama services through EquiLens
-uv run equilens start
+#### 🐳 Option B: Docker Containerized Ollama (Recommended)
+
+**Best for:** Production, isolation, reproducibility, GPU passthrough
+
+```powershell
+# One-command setup with EquiLens + Ollama containerized
+.\setup-docker.ps1
 ```
 
-**Option B: Manual start**
-```bash
-# In PowerShell as Administrator
-ollama serve
-```
+Ollama Docker documentation: [docs.ollama.com/docker](https://docs.ollama.com/docker)
 
-The server will start on `http://localhost:11434` and be accessible to EquiLens.
+---
 
-### 3. Download Models
+### Download Models
 
-**Option A: Using EquiLens**
+**Option A: Using EquiLens** (works with both setups)
 ```bash
 # Download recommended models
 uv run equilens models pull phi3:mini

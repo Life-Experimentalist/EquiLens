@@ -9,8 +9,8 @@ import sys
 import tempfile
 from pathlib import Path
 
-# Add the source directory to the path
-sys.path.insert(0, str(Path(__file__).parent.parent / "src" / "Phase2_ModelAuditor"))
+# Add the project root to the path so 'src.*' imports resolve correctly
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.Phase2_ModelAuditor.enhanced_audit_model import (
     ConfigurableEnhancedAuditor,
@@ -30,9 +30,9 @@ def test_system_instruction_presets():
 
     # Test dangerous presets
     dangerous_presets = SystemInstructionPresets.get_dangerous_presets()
-    assert len(dangerous_presets) >= 2, (
-        "Should have dangerous presets for documentation"
-    )
+    assert (
+        len(dangerous_presets) >= 2
+    ), "Should have dangerous presets for documentation"
 
     print("✅ System instruction presets working correctly")
 
@@ -127,6 +127,9 @@ def test_configuration_export_import():
     """Test configuration export and import"""
     print("🧪 Testing Configuration Export/Import...")
 
+    corpus_file: str = ""
+    config_file: str = ""
+
     # Create dummy corpus file
     with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
         f.write("prompt,target_group\\n")
@@ -168,8 +171,10 @@ def test_configuration_export_import():
 
     finally:
         # Clean up
-        Path(corpus_file).unlink(missing_ok=True)
-        Path(config_file).unlink(missing_ok=True)
+        if corpus_file:
+            Path(corpus_file).unlink(missing_ok=True)
+        if config_file:
+            Path(config_file).unlink(missing_ok=True)
 
 
 def test_runtime_modification():

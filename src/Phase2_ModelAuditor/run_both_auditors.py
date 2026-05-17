@@ -95,7 +95,7 @@ def main():
         manifest["runs"]["enhanced"] = enhanced_results
 
     manifest_path = Path(args.output_dir) / f"compare_manifest_{datetime_now()}.json"
-    with open(manifest_path, "w", encoding="utf-8") as f:
+    with manifest_path.open("w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2, ensure_ascii=False)
 
     print(f"\n✅ Comparison manifest written to {manifest_path}")

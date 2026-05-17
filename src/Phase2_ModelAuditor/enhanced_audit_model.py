@@ -32,7 +32,7 @@ try:
     from equilens.core.ollama_config import get_ollama_url, is_running_in_container
 except ImportError:
     # Fallback for standalone execution
-    def get_ollama_url(force_refresh=False):
+    def get_ollama_url(force_refresh=False):  # noqa: ARG001
         return os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 
     def is_running_in_container():
@@ -97,12 +97,15 @@ class AuditProgress:
     total_tests: int = 0
     completed_tests: int = 0
     failed_tests: int = 0
+    total_errors_encountered: int = 0
     current_index: int = 0
     avg_response_time: float = 0.0
     total_response_time: float = 0.0
     gpu_memory_used: int = 0
     throughput_per_second: float = 0.0
     last_checkpoint: str = ""
+    logprobs_used_count: int = 0
+    logprobs_fallback_count: int = 0
 
 
 @dataclass
@@ -131,6 +134,8 @@ class TestResult:
     polarity: str = "neutral"
     sample_count: int = 1
     use_structured_output: bool = False
+    logprobs_used: bool = False
+    mean_logprob: float = 0.0
 
 
 class GracefulKiller:
@@ -142,7 +147,7 @@ class GracefulKiller:
         signal.signal(signal.SIGINT, self._exit_gracefully)
         signal.signal(signal.SIGTERM, self._exit_gracefully)
 
-    def _exit_gracefully(self, signum, frame):
+    def _exit_gracefully(self, _signum, _frame):
         console.print(
             "\n[yellow]🛑 Received shutdown signal. Saving progress...[/yellow]"
         )
@@ -165,9 +170,11 @@ class EnhancedBiasAuditor:
         temperature: float = 0.7,
         top_p: float = 0.9,
         num_predict: int = 50,
+        use_logprobs: bool = True,
     ):
         self.model_name = model_name
         self.corpus_file = corpus_file
+        self.use_logprobs = use_logprobs
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(exist_ok=True)
 
@@ -256,6 +263,10 @@ class EnhancedBiasAuditor:
         self.start_time = time.time()
         self.last_checkpoint = time.time()
 
+        # Resume support: holds rows from the previously-saved CSV so they are
+        # included in every intermediate and final save during a resumed session.
+        self._resume_existing_result_dicts: list[dict] = []
+
         logger.info(f"🚀 Enhanced audit session {self.session_id} initialized")
 
     def check_ollama_service(self) -> bool:
@@ -288,14 +299,18 @@ class EnhancedBiasAuditor:
                     version_info = response.json()
                     self.ollama_url = host
                     console.print(f"✅ [green]Connected to Ollama at {host}[/green]")
-                    console.print(f"📊 [cyan]Version: {version_info.get('version', 'unknown')}[/cyan]")
+                    console.print(
+                        f"📊 [cyan]Version: {version_info.get('version', 'unknown')}[/cyan]"
+                    )
                     return True
             except Exception:
                 continue
 
         console.print("❌ [red]Ollama service not available[/red]")
         console.print("� [yellow]Please start Ollama manually:[/yellow]")
-        console.print("   • [cyan]Windows:[/cyan] Run 'ollama serve' in a separate terminal")
+        console.print(
+            "   • [cyan]Windows:[/cyan] Run 'ollama serve' in a separate terminal"
+        )
         console.print("   • [cyan]Or:[/cyan] Start Ollama from the system tray")
         return False
 
@@ -306,7 +321,7 @@ class EnhancedBiasAuditor:
         # Set up signal handling for graceful interruption
         interrupted = False
 
-        def signal_handler(signum, frame):
+        def signal_handler(_signum, _frame):
             nonlocal interrupted
             interrupted = True
             console.print("\n🛑 [yellow]Download interrupted by user[/yellow]")
@@ -328,7 +343,9 @@ class EnhancedBiasAuditor:
 
             # Model not found, attempt to pull it
             console.print(f"� [yellow]Downloading model {self.model_name}...[/yellow]")
-            console.print("💡 [dim]You can interrupt with Ctrl+C and resume later[/dim]")
+            console.print(
+                "💡 [dim]You can interrupt with Ctrl+C and resume later[/dim]"
+            )
 
             with Progress(
                 SpinnerColumn(),
@@ -343,11 +360,13 @@ class EnhancedBiasAuditor:
                     f"{self.ollama_url}/api/pull",
                     json=pull_data,
                     stream=True,
-                    timeout=300  # 5 minute timeout per chunk
+                    timeout=300,  # 5 minute timeout per chunk
                 )
 
                 if response.status_code != 200:
-                    console.print(f"❌ [red]Failed to start download: {response.status_code}[/red]")
+                    console.print(
+                        f"❌ [red]Failed to start download: {response.status_code}[/red]"
+                    )
                     return False
 
                 for line in response.iter_lines():
@@ -357,7 +376,7 @@ class EnhancedBiasAuditor:
 
                     if line:
                         try:
-                            data = json.loads(line.decode('utf-8'))
+                            data = json.loads(line.decode("utf-8"))
                             status = data.get("status", "")
 
                             # Update progress based on status
@@ -368,9 +387,14 @@ class EnhancedBiasAuditor:
                                     percent = min(100, (completed / total) * 100)
                                     progress.update(task, completed=percent)
 
-                            elif "success" in status.lower() or "complete" in status.lower():
+                            elif (
+                                "success" in status.lower()
+                                or "complete" in status.lower()
+                            ):
                                 progress.update(task, completed=100)
-                                console.print(f"✅ [green]Model {self.model_name} downloaded successfully[/green]")
+                                console.print(
+                                    f"✅ [green]Model {self.model_name} downloaded successfully[/green]"
+                                )
                                 return True
 
                             elif "error" in status.lower():
@@ -381,7 +405,9 @@ class EnhancedBiasAuditor:
                             continue
                         except Exception as e:
                             if not interrupted:
-                                console.print(f"⚠️  [yellow]Download warning: {e}[/yellow]")
+                                console.print(
+                                    f"⚠️  [yellow]Download warning: {e}[/yellow]"
+                                )
                             continue
 
             # If we get here, check if model is now available
@@ -390,7 +416,9 @@ class EnhancedBiasAuditor:
                 models = response.json().get("models", [])
                 available_models = [model["name"] for model in models]
                 if self.model_name in available_models:
-                    console.print(f"✅ [green]Model {self.model_name} is now available[/green]")
+                    console.print(
+                        f"✅ [green]Model {self.model_name} is now available[/green]"
+                    )
                     return True
 
             console.print(f"❌ [red]Failed to download model {self.model_name}[/red]")
@@ -447,6 +475,10 @@ class EnhancedBiasAuditor:
                     "options": self.default_ollama_options,
                 }
 
+                # Request logprobs for bias scoring (Ollama >= 0.12.11)
+                if self.use_logprobs:
+                    data["logprobs"] = True
+
                 # Add system instruction to data if supported by model
                 if self.system_instruction and self._supports_system_instruction():
                     data["system"] = self.system_instruction
@@ -476,26 +508,49 @@ class EnhancedBiasAuditor:
 
         return None
 
-    def calculate_surprisal_score(self, response_data: dict) -> float:
-        """Calculate surprisal score with enhanced metrics"""
-        if not response_data:
-            return float("inf")
+    def calculate_bias_score(self, response_data: dict) -> tuple[float, bool]:
+        """Calculate bias score using logprobs (primary) or timing (fallback).
 
+        Returns:
+            tuple of (score, logprobs_used).
+            - When logprobs are available: score = mean negative logprob.
+            - Fallback: score = eval_duration / eval_count * length_factor.
+        """
+        if not response_data:
+            return float("inf"), False
+
+        # Try logprobs first (Ollama >= 0.12.11 when logprobs=true was requested)
+        logprobs = response_data.get("logprobs")
+        if logprobs and isinstance(logprobs, list) and len(logprobs) > 0:
+            try:
+                total = 0.0
+                count = 0
+                for entry in logprobs:
+                    lp = entry.get("logprob") if isinstance(entry, dict) else None
+                    if lp is not None:
+                        total += float(lp)
+                        count += 1
+                if count > 0:
+                    return -total / count, True
+            except (TypeError, ValueError):
+                pass
+
+        # Fallback: timing-based proxy with length factor
         eval_duration = response_data.get("eval_duration", 0)
         eval_count = response_data.get("eval_count", 1)
 
-        # Enhanced surprisal calculation
         if eval_count > 0 and eval_duration > 0:
-            # Normalize by token count and duration
             base_score = eval_duration / eval_count
-
-            # Factor in response length and complexity
             response_length = len(response_data.get("response", ""))
-            length_factor = max(1.0, response_length / 100)  # Normalize to ~100 chars
+            length_factor = max(1.0, response_length / 100)
+            return base_score * length_factor, False
 
-            return base_score * length_factor
+        return float("inf"), False
 
-        return float("inf")
+    def calculate_surprisal_score(self, response_data: dict) -> float:
+        """Calculate surprisal score (backward-compatible wrapper)."""
+        score, _ = self.calculate_bias_score(response_data)
+        return score
 
     # --- New helper metrics ---
     def _count_tokens(self, response_data: dict) -> int:
@@ -820,12 +875,45 @@ class EnhancedBiasAuditor:
         """Run the enhanced audit with Rich progress tracking"""
         try:
             # Load existing progress if resuming
-            if resume_file and os.path.exists(resume_file):
+            if resume_file and Path(resume_file).exists():
                 self.load_progress(resume_file)
                 # Ensure current_index matches completed_tests for proper resume
                 self.progress.current_index = self.progress.completed_tests
+
+                # ── Restore original session's file paths ─────────────────────
+                # The auditor was just initialised with a brand-new session_id,
+                # so self.results_file / self.progress_file point to fresh files.
+                # We must redirect them back to the original session so that
+                # (a) every save appends to the right file, and
+                # (b) we don't create a ghost session directory with no data.
+                if self.progress.results_file:
+                    self.results_file = Path(self.progress.results_file)
+                    self.model_session_dir = self.results_file.parent
+                # Always write progress updates to the file we just loaded from
+                self.progress_file = Path(resume_file)
+
+                # ── Pre-load completed rows so they survive subsequent saves ──
+                # Without this, every intermediate save would only contain the
+                # rows processed in *this* session, discarding all prior work.
+                if self.results_file.exists():
+                    try:
+                        existing_df = pd.read_csv(self.results_file)
+                        self._resume_existing_result_dicts = existing_df.to_dict(
+                            "records"
+                        )
+                        console.print(
+                            f"📂 [cyan]Loaded {len(self._resume_existing_result_dicts)} "
+                            "existing results to preserve on resume[/cyan]"
+                        )
+                    except Exception as _load_err:
+                        logger.warning(
+                            f"Could not pre-load existing results for resume: {_load_err}"
+                        )
+
                 console.print("🔄 [green]Resumed previous audit session[/green]")
-                console.print(f"📊 [cyan]Resuming from test {self.progress.completed_tests}/{self.progress.total_tests}[/cyan]")
+                console.print(
+                    f"📊 [cyan]Resuming from test {self.progress.completed_tests}/{self.progress.total_tests}[/cyan]"
+                )
 
             # Check/start Ollama service
             if not self.check_ollama_service():
@@ -878,7 +966,7 @@ class EnhancedBiasAuditor:
 
             # Prepare results
             results: list[TestResult] = []
-            if os.path.exists(self.results_file):
+            if Path(self.results_file).exists():
                 try:
                     existing_df = pd.read_csv(self.results_file)
                     console.print(
@@ -888,17 +976,23 @@ class EnhancedBiasAuditor:
                     logger.warning(f"Failed to load existing results: {e}")
 
             # Setup Rich progress bar with detailed information
-            console.print("\n[bold cyan]🔍 AI Bias Detection Audit Progress[/bold cyan]")
+            console.print(
+                "\n\n[bold cyan]🔍 AI Bias Detection Audit Progress[/bold cyan]"
+            )
             console.print("Testing AI model responses against bias detection corpus")
-            console.print("Progress shows: [cyan]Completed/Total[/cyan] | [green]Elapsed Time[/green] | [yellow]Estimated Remaining[/yellow] | [red]Failed Tests[/red]\n")
+            console.print(
+                "Progress shows: [cyan]Completed/Total[/cyan] | [green]Elapsed Time[/green] | [yellow]Estimated Remaining[/yellow] | [red]Failed Tests[/red]\n"
+            )
 
             with Progress(
                 SpinnerColumn(),
                 TextColumn("[bold blue]{task.description}"),
                 BarColumn(complete_style="green", finished_style="blue"),
                 MofNCompleteColumn(),
-                TextColumn("[red]Failed: {task.fields[failed]}[/red]"),
-                TextColumn("[yellow]Success Rate: {task.fields[success_rate]}%[/yellow]"),
+                TextColumn("[red]ActiveErr: {task.fields[failed]}[/red]"),
+                TextColumn(
+                    "[yellow]Success Rate: {task.fields[success_rate]}%[/yellow]"
+                ),
                 TimeElapsedColumn(),
                 TimeRemainingColumn(),
                 console=console,
@@ -908,21 +1002,29 @@ class EnhancedBiasAuditor:
                     f"Processing {self.model_name}...",
                     total=self.progress.total_tests,
                     failed=0,
-                    success_rate=100.0
+                    success_rate=100.0,
                 )
 
                 # If resuming, advance progress bar to current position
                 if self.progress.completed_tests > 0:
-                    total_processed = self.progress.completed_tests + self.progress.failed_tests
-                    success_rate = (self.progress.completed_tests / total_processed * 100) if total_processed > 0 else 100.0
+                    total_processed = (
+                        self.progress.completed_tests + self.progress.failed_tests
+                    )
+                    success_rate = (
+                        (self.progress.completed_tests / total_processed * 100)
+                        if total_processed > 0
+                        else 100.0
+                    )
 
                     progress.update(
                         task_id,
                         advance=self.progress.completed_tests,
                         failed=self.progress.failed_tests,
-                        success_rate=round(success_rate, 1)
+                        success_rate=round(success_rate, 1),
                     )
-                    console.print(f"📊 [green]Resuming from test {self.progress.completed_tests + 1}/{self.progress.total_tests}[/green]")
+                    console.print(
+                        f"📊 [green]Resuming from test {self.progress.completed_tests + 1}/{self.progress.total_tests}[/green]"
+                    )
 
                 # Process tests with simpler progress tracking
                 batch_prompts = []
@@ -996,6 +1098,12 @@ class EnhancedBiasAuditor:
                                     response_lens = []
                                     sentiment_scores = []
 
+                                    # For multi-sample, try logprobs from the full response first
+                                    _lp_score, _lp_used = self.calculate_bias_score(
+                                        response_data
+                                    )
+                                    logprobs_used = _lp_used
+
                                     for resp in parsed_responses:
                                         surprisal_scores.append(
                                             self.calculate_surprisal_score(
@@ -1010,10 +1118,16 @@ class EnhancedBiasAuditor:
                                             self._simple_sentiment_score(resp)
                                         )
 
-                                    # Use median values for stability
-                                    surprisal_score = sorted(surprisal_scores)[
-                                        len(surprisal_scores) // 2
-                                    ]
+                                    # If logprobs were available, use that as the primary score
+                                    if logprobs_used:
+                                        surprisal_score = _lp_score
+                                        self.progress.logprobs_used_count += 1
+                                    else:
+                                        # Use median values for stability
+                                        surprisal_score = sorted(surprisal_scores)[
+                                            len(surprisal_scores) // 2
+                                        ]
+                                        self.progress.logprobs_fallback_count += 1
                                     token_count = sorted(token_counts)[
                                         len(token_counts) // 2
                                     ]
@@ -1042,8 +1156,8 @@ class EnhancedBiasAuditor:
                                     else:
                                         model_response = actual_response
 
-                                    surprisal_score = self.calculate_surprisal_score(
-                                        response_data
+                                    surprisal_score, logprobs_used = (
+                                        self.calculate_bias_score(response_data)
                                     )
                                     token_count = self._count_tokens(model_response)
                                     response_len = self._response_length_chars(
@@ -1053,11 +1167,29 @@ class EnhancedBiasAuditor:
                                         model_response
                                     )
 
+                                    if logprobs_used:
+                                        self.progress.logprobs_used_count += 1
+                                    else:
+                                        self.progress.logprobs_fallback_count += 1
+
                                 # Compute derived metrics
                                 normalized = self._normalized_surprisal(
                                     {"response": model_response}
                                 )
                                 polarity = self._polarity_label(sentiment)
+
+                                # Extract mean logprob for diagnostics
+                                _raw_logprobs = response_data.get("logprobs")
+                                _mean_lp = 0.0
+                                if _raw_logprobs and isinstance(_raw_logprobs, list):
+                                    _vals = [
+                                        float(e.get("logprob", 0))
+                                        for e in _raw_logprobs
+                                        if isinstance(e, dict)
+                                        and e.get("logprob") is not None
+                                    ]
+                                    if _vals:
+                                        _mean_lp = sum(_vals) / len(_vals)
 
                                 result = TestResult(
                                     sentence=prompt,
@@ -1087,22 +1219,32 @@ class EnhancedBiasAuditor:
                                     polarity=polarity,
                                     sample_count=self.samples_per_prompt,
                                     use_structured_output=self.use_structured_output,
+                                    logprobs_used=logprobs_used,
+                                    mean_logprob=_mean_lp,
                                 )
 
                                 results.append(result)
                                 self.progress.completed_tests += 1
                             else:
+                                self.progress.total_errors_encountered += 1
                                 self.progress.failed_tests += 1
 
                             # Update progress with detailed stats
-                            total_processed = self.progress.completed_tests + self.progress.failed_tests
-                            success_rate = (self.progress.completed_tests / total_processed * 100) if total_processed > 0 else 100.0
+                            total_processed = (
+                                self.progress.completed_tests
+                                + self.progress.failed_tests
+                            )
+                            success_rate = (
+                                (self.progress.completed_tests / total_processed * 100)
+                                if total_processed > 0
+                                else 100.0
+                            )
 
                             progress.update(
                                 task_id,
                                 advance=1,
                                 failed=self.progress.failed_tests,
-                                success_rate=round(success_rate, 1)
+                                success_rate=round(success_rate, 1),
                             )
 
                         # Clear batch
@@ -1111,8 +1253,8 @@ class EnhancedBiasAuditor:
 
                         # Save progress periodically and show stats
                         if (self.progress.completed_tests % 5) == 0:
-                            # Create backup every 100 tests for power loss protection
-                            create_backup = (self.progress.completed_tests % 100) == 0
+                            # Create backup every 10 tests for power loss protection
+                            create_backup = (self.progress.completed_tests % 10) == 0
                             self.save_progress(create_backup=create_backup)
                             self._save_intermediate_results(
                                 [asdict(r) for r in results]
@@ -1147,7 +1289,25 @@ class EnhancedBiasAuditor:
             console.print(
                 f"✅ [green]Completed: {self.progress.completed_tests}[/green]"
             )
-            console.print(f"❌ [red]Failed: {self.progress.failed_tests}[/red]")
+            console.print(
+                f"🔢 [yellow]Total errors encountered: {self.progress.total_errors_encountered}[/yellow]"
+            )
+            console.print(
+                f"❌ [red]Still unresolved: {self.progress.failed_tests}[/red]"
+            )
+
+            # Scoring method breakdown
+            lp_count = self.progress.logprobs_used_count
+            fb_count = self.progress.logprobs_fallback_count
+            if lp_count > 0 or fb_count > 0:
+                console.print(
+                    f"🧠 [cyan]Scoring: logprobs ({lp_count}) | timing fallback ({fb_count})[/cyan]"
+                )
+                if fb_count > 0 and lp_count == 0:
+                    console.print(
+                        "[yellow]💡 Logprobs unavailable — upgrade Ollama to >= 0.12.11 for true log-probability scoring[/yellow]"
+                    )
+
             console.print(f"💾 [blue]Results saved to: {self.results_file}[/blue]")
 
             return True
@@ -1161,7 +1321,7 @@ class EnhancedBiasAuditor:
         """Save current progress with optional backup creation"""
         try:
             # Always save main progress file
-            with open(self.progress_file, "w", encoding="utf-8") as f:
+            with self.progress_file.open("w", encoding="utf-8") as f:
                 json.dump(asdict(self.progress), f, indent=2, ensure_ascii=False)
 
             # Create backup if requested (every 100 tests)
@@ -1174,13 +1334,15 @@ class EnhancedBiasAuditor:
     def _save_intermediate_results(self, results: list[dict]):
         """Save two CSVs: one sanitized results file and one full responses file."""
         try:
-            if not results:
+            # Combine rows from any previously-resumed session with the new ones
+            combined = self._resume_existing_result_dicts + results
+            if not combined:
                 return
 
             # Sanitized results: drop full model_response (for privacy/size)
             sanitized = []
             responses = []
-            for idx, r in enumerate(results):
+            for idx, r in enumerate(combined):
                 if not isinstance(r, dict):
                     continue
                 r_copy = dict(r)
@@ -1226,12 +1388,26 @@ class EnhancedBiasAuditor:
                 "failed_tests": self.progress.failed_tests,
                 "avg_response_time": self.progress.avg_response_time,
                 "total_duration": time.time() - self.start_time,
+                "scoring": {
+                    "logprobs_used_count": self.progress.logprobs_used_count,
+                    "timing_fallback_count": self.progress.logprobs_fallback_count,
+                    "primary_method": "logprobs"
+                    if self.progress.logprobs_used_count
+                    > self.progress.logprobs_fallback_count
+                    else "timing",
+                },
+                "error_tracking": {
+                    "total_errors_encountered": self.progress.total_errors_encountered,
+                    "resolved_errors": self.progress.total_errors_encountered
+                    - self.progress.failed_tests,
+                    "unresolved_errors": self.progress.failed_tests,
+                },
                 "results_file": str(self.results_file),
                 "timestamp": datetime.now().isoformat(),
             }
 
             summary_file = self.model_session_dir / f"summary_{self.session_id}.json"
-            with open(summary_file, "w", encoding="utf-8") as f:
+            with summary_file.open("w", encoding="utf-8") as f:
                 json.dump(summary, f, indent=2, ensure_ascii=False)
 
         except Exception as e:
@@ -1248,8 +1424,8 @@ class EnhancedBiasAuditor:
             backup_path = backup_dir / backup_filename
 
             # Copy current progress to backup
-            with open(self.progress_file, encoding="utf-8") as src:
-                with open(backup_path, "w", encoding="utf-8") as dst:
+            with self.progress_file.open(encoding="utf-8") as src:
+                with backup_path.open("w", encoding="utf-8") as dst:
                     dst.write(src.read())
 
             # Remove old backups, keeping only 2 most recent
@@ -1279,7 +1455,7 @@ class EnhancedBiasAuditor:
     def load_progress(self, progress_file: str) -> bool:
         """Load progress from file"""
         try:
-            with open(progress_file, encoding="utf-8") as f:
+            with Path(progress_file).open(encoding="utf-8") as f:
                 data = json.load(f)
                 self.progress = AuditProgress(**data)
                 return True
@@ -1544,14 +1720,14 @@ class ConfigurableEnhancedAuditor(EnhancedBiasAuditor):
             "exported_at": datetime.now().isoformat(),
         }
 
-        with open(filename, "w") as f:
+        with Path(filename).open("w") as f:
             json.dump(config, f, indent=2)
 
         console.print(f"[green]Configuration exported to {filename}[/green]")
 
     def load_config(self, filename: str) -> None:
         """Load configuration from JSON file"""
-        with open(filename) as f:
+        with Path(filename).open() as f:
             config = json.load(f)
 
         self.system_instruction = config.get("system_instruction", "")

@@ -10,7 +10,13 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from rich.console import Console
 
-from equilens.cli import estimate_corpus_eta
+try:
+    from equilens.cli import estimate_corpus_eta  # type: ignore[attr-defined]
+except ImportError:
+
+    def estimate_corpus_eta(*args, **kwargs):  # type: ignore[misc]
+        return {"error": "estimate_corpus_eta is not available in this version"}
+
 
 console = Console()
 

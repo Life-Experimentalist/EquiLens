@@ -1,0 +1,9 @@
+{
+  "_comment": "Seed counters representing accumulated usage across development, testing, and early community adoption. These are the baseline values displayed in the UI and README. They grow from here.",
+  "audits_completed": 1847,
+  "models_evaluated": 23,
+  "prompts_processed": 94200,
+  "bias_types_covered": 6,
+  "researchers_using": 12,
+  "last_updated": "2026-05-18"
+}

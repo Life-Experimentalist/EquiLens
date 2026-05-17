@@ -31,9 +31,10 @@ Usage: run from `src/Phase1_CorpusGenerator` and it will exit 1 on any error.
 import json
 import sys
 from pathlib import Path
+from typing import NoReturn
 
 
-def fail(msg: str) -> None:
+def fail(msg: str) -> NoReturn:
     print(f"❌ {msg}")
     sys.exit(1)
 

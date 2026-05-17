@@ -2,12 +2,13 @@
 """
 Simple helper to check if Ollama is available at localhost:11434
 """
+
 import sys
+
 import requests
-from typing import Tuple
 
 
-def check_ollama(host: str = "localhost", port: int = 11434) -> Tuple[bool, str]:
+def check_ollama(host: str = "localhost", port: int = 11434) -> tuple[bool, str]:
     """
     Check if Ollama is running and accessible.
 
@@ -29,14 +30,26 @@ def check_ollama(host: str = "localhost", port: int = 11434) -> Tuple[bool, str]
 
             if model_count > 0:
                 model_names = [m.get("name", "unknown") for m in models]
-                return True, f"✅ Ollama is running with {model_count} model(s): {', '.join(model_names)}"
+                return (
+                    True,
+                    f"✅ Ollama is running with {model_count} model(s): {', '.join(model_names)}",
+                )
             else:
-                return True, "⚠️  Ollama is running but no models are installed. Run: ollama pull llama3.2"
+                return (
+                    True,
+                    "⚠️  Ollama is running but no models are installed. Run: ollama pull llama3.2",
+                )
         else:
-            return False, f"❌ Ollama responded with status code: {response.status_code}"
+            return (
+                False,
+                f"❌ Ollama responded with status code: {response.status_code}",
+            )
 
     except requests.exceptions.ConnectionError:
-        return False, f"❌ Cannot connect to Ollama at {host}:{port}. Is Ollama running?"
+        return (
+            False,
+            f"❌ Cannot connect to Ollama at {host}:{port}. Is Ollama running?",
+        )
 
     except requests.exceptions.Timeout:
         return False, f"❌ Connection to Ollama at {host}:{port} timed out"

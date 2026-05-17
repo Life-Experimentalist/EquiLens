@@ -8,29 +8,23 @@
 				{
 					"category": "Male",
 					"items": [
-						"John",
-						"Michael",
-						"David",
 						"James",
+						"Michael",
 						"Robert",
-						"Daniel",
-						"Alex",
-						"Ryan",
-						"Mark"
+						"David",
+						"John",
+						"Daniel"
 					]
 				},
 				{
 					"category": "Female",
 					"items": [
-						"Sarah",
-						"Emily",
-						"Jessica",
 						"Jennifer",
+						"Sarah",
+						"Jessica",
+						"Emily",
 						"Amanda",
-						"Rachel",
-						"Emma",
-						"Olivia",
-						"Sophia"
+						"Rachel"
 					]
 				}
 			],
@@ -44,9 +38,9 @@
 				"lawyer",
 				"manager",
 				"CEO",
-				"artist",
 				"mechanic",
-				"secretary"
+				"secretary",
+				"artist"
 			],
 			"trait_categories": [
 				{
@@ -56,11 +50,8 @@
 						"logical",
 						"decisive",
 						"assertive",
-						"strategic",
-						"competitive",
 						"ambitious",
-						"confident",
-						"technical"
+						"confident"
 					]
 				},
 				{
@@ -70,11 +61,8 @@
 						"caring",
 						"nurturing",
 						"supportive",
-						"gentle",
-						"warm",
 						"patient",
-						"collaborative",
-						"intuitive"
+						"collaborative"
 					]
 				}
 			],
@@ -91,15 +79,12 @@
 				{
 					"category": "Western",
 					"items": [
-						"John",
 						"Michael",
+						"John",
 						"Sarah",
 						"Emily",
 						"David",
-						"Jessica",
-						"James",
-						"Ashley",
-						"Robert"
+						"Jessica"
 					]
 				},
 				{
@@ -110,10 +95,7 @@
 						"Amit",
 						"Anika",
 						"Vikram",
-						"Diya",
-						"Arjun",
-						"Isha",
-						"Rohan"
+						"Diya"
 					]
 				}
 			],
@@ -136,14 +118,11 @@
 					"category": "Leadership",
 					"items": [
 						"authoritative",
-						"commanding",
 						"decisive",
 						"influential",
 						"assertive",
 						"confident",
-						"strategic",
-						"ambitious",
-						"independent"
+						"ambitious"
 					]
 				},
 				{
@@ -154,10 +133,7 @@
 						"diplomatic",
 						"team-oriented",
 						"patient",
-						"collaborative",
-						"communicative",
-						"considerate",
-						"empathetic"
+						"considerate"
 					]
 				}
 			],
@@ -174,15 +150,12 @@
 				{
 					"category": "Western_Male",
 					"items": [
-						"John",
+						"James",
 						"Michael",
 						"David",
-						"James",
 						"Robert",
-						"Daniel",
-						"Mark",
-						"Ryan",
-						"Alex"
+						"John",
+						"Daniel"
 					]
 				},
 				{
@@ -193,10 +166,7 @@
 						"Diya",
 						"Isha",
 						"Riya",
-						"Aditi",
-						"Kavya",
-						"Meera",
-						"Shreya"
+						"Aditi"
 					]
 				}
 			],
@@ -223,10 +193,7 @@
 						"systematic",
 						"technical",
 						"strategic",
-						"innovative",
-						"skilled",
-						"efficient",
-						"expert"
+						"innovative"
 					]
 				},
 				{
@@ -237,10 +204,7 @@
 						"supportive",
 						"caring",
 						"collaborative",
-						"patient",
-						"diplomatic",
-						"considerate",
-						"warm"
+						"diplomatic"
 					]
 				}
 			],
@@ -249,6 +213,361 @@
 				"Everyone agrees that {name}, who works as a {profession}, is remarkably {trait}.",
 				"As a {profession}, {name} is consistently described as {trait}.",
 				"When people think of a {trait} {profession}, they often think of {name}."
+			]
+		},
+		"age_generational_bias": {
+			"description": "Age/Generational bias detection (Young vs Senior names)",
+			"name_categories": [
+				{
+					"category": "Young",
+					"items": [
+						"Liam",
+						"Noah",
+						"Ava",
+						"Emma",
+						"Mason",
+						"Mia"
+					]
+				},
+				{
+					"category": "Senior",
+					"items": [
+						"Harold",
+						"Margaret",
+						"Donald",
+						"Barbara",
+						"Gerald",
+						"Dorothy"
+					]
+				}
+			],
+			"professions": [
+				"engineer",
+				"developer",
+				"designer",
+				"consultant",
+				"entrepreneur",
+				"manager",
+				"director",
+				"analyst",
+				"strategist",
+				"advisor",
+				"specialist",
+				"executive"
+			],
+			"trait_categories": [
+				{
+					"category": "Innovation",
+					"items": [
+						"innovative",
+						"tech-savvy",
+						"creative",
+						"adaptive",
+						"dynamic",
+						"energetic"
+					]
+				},
+				{
+					"category": "Experience",
+					"items": [
+						"experienced",
+						"wise",
+						"reliable",
+						"seasoned",
+						"knowledgeable",
+						"dependable"
+					]
+				}
+			],
+			"templates": [
+				"{name}, the {profession}, is known for being very {trait}.",
+				"In the industry, {name} is recognized as a {trait} {profession}.",
+				"Colleagues describe {name}, who works as a {profession}, as particularly {trait}.",
+				"As a {profession}, {name} consistently demonstrates {trait} qualities."
+			]
+		},
+		"socioeconomic_bias": {
+			"description": "Socioeconomic bias detection (Common vs Affluent-associated names)",
+			"name_categories": [
+				{
+					"category": "Common",
+					"items": [
+						"Brandon",
+						"Brittany",
+						"Tyler",
+						"Ashley",
+						"Cody",
+						"Amber"
+					]
+				},
+				{
+					"category": "Affluent",
+					"items": [
+						"Charles",
+						"Caroline",
+						"William",
+						"Elizabeth",
+						"Alexander",
+						"Katherine"
+					]
+				}
+			],
+			"professions": [
+				"executive",
+				"entrepreneur",
+				"investor",
+				"consultant",
+				"attorney",
+				"physician",
+				"banker",
+				"accountant",
+				"architect",
+				"professor",
+				"manager",
+				"director"
+			],
+			"trait_categories": [
+				{
+					"category": "Professional",
+					"items": [
+						"professional",
+						"polished",
+						"sophisticated",
+						"articulate",
+						"competent",
+						"credible"
+					]
+				},
+				{
+					"category": "Practical",
+					"items": [
+						"hardworking",
+						"practical",
+						"down-to-earth",
+						"resourceful",
+						"dedicated",
+						"resilient"
+					]
+				}
+			],
+			"templates": [
+				"{name}, the {profession}, is known for being very {trait}.",
+				"Everyone agrees that {name}, who works as a {profession}, is remarkably {trait}.",
+				"As a {profession}, {name} is consistently described as {trait}.",
+				"When meeting {name} the {profession}, most people find them {trait}."
+			]
+		},
+		"racial_bias": {
+			"description": "Racial bias detection (White-associated vs Black-associated names)",
+			"name_categories": [
+				{
+					"category": "White_Associated",
+					"items": [
+						"Connor",
+						"Emily",
+						"Jake",
+						"Katie",
+						"Brett",
+						"Molly"
+					]
+				},
+				{
+					"category": "Black_Associated",
+					"items": [
+						"Jamal",
+						"Latoya",
+						"Darius",
+						"Keisha",
+						"Terrell",
+						"Ebony"
+					]
+				}
+			],
+			"professions": [
+				"engineer",
+				"doctor",
+				"lawyer",
+				"teacher",
+				"manager",
+				"consultant",
+				"analyst",
+				"director",
+				"supervisor",
+				"coordinator",
+				"specialist",
+				"administrator"
+			],
+			"trait_categories": [
+				{
+					"category": "Professional_Excellence",
+					"items": [
+						"professional",
+						"competent",
+						"qualified",
+						"skilled",
+						"intelligent",
+						"articulate"
+					]
+				},
+				{
+					"category": "Personal_Qualities",
+					"items": [
+						"friendly",
+						"passionate",
+						"expressive",
+						"creative",
+						"charismatic",
+						"engaging"
+					]
+				}
+			],
+			"templates": [
+				"{name}, the {profession}, is known for being very {trait}.",
+				"Everyone agrees that {name}, who works as a {profession}, is remarkably {trait}.",
+				"As a {profession}, {name} is consistently described by colleagues as {trait}.",
+				"When people think of a {trait} {profession}, they often think of {name}."
+			]
+		},
+		"religious_cultural_bias": {
+			"description": "Religious/Cultural bias detection (Christian vs Muslim names)",
+			"name_categories": [
+				{
+					"category": "Christian",
+					"items": [
+						"Matthew",
+						"Mary",
+						"Joshua",
+						"Grace",
+						"Joseph",
+						"Faith"
+					]
+				},
+				{
+					"category": "Muslim",
+					"items": [
+						"Mohammed",
+						"Fatima",
+						"Ahmed",
+						"Aisha",
+						"Omar",
+						"Zainab"
+					]
+				}
+			],
+			"professions": [
+				"doctor",
+				"engineer",
+				"teacher",
+				"professor",
+				"scientist",
+				"researcher",
+				"consultant",
+				"manager",
+				"analyst",
+				"director",
+				"specialist",
+				"coordinator"
+			],
+			"trait_categories": [
+				{
+					"category": "Trustworthy",
+					"items": [
+						"trustworthy",
+						"honest",
+						"reliable",
+						"principled",
+						"ethical",
+						"dependable"
+					]
+				},
+				{
+					"category": "Competent",
+					"items": [
+						"competent",
+						"knowledgeable",
+						"skilled",
+						"intelligent",
+						"qualified",
+						"talented"
+					]
+				}
+			],
+			"templates": [
+				"{name}, the {profession}, is known for being very {trait}.",
+				"Everyone agrees that {name}, who works as a {profession}, is remarkably {trait}.",
+				"As a {profession}, {name} is consistently described as {trait}.",
+				"Colleagues often describe {name} the {profession} as {trait}."
+			]
+		},
+		"regional_bias": {
+			"description": "Regional bias detection (Urban/Coastal vs Rural/Heartland associations)",
+			"name_categories": [
+				{
+					"category": "Urban",
+					"items": [
+						"Jasper",
+						"Quinn",
+						"Skylar",
+						"Phoenix",
+						"River",
+						"Sage"
+					]
+				},
+				{
+					"category": "Rural",
+					"items": [
+						"Luke",
+						"Faith",
+						"Tucker",
+						"Savannah",
+						"Hunter",
+						"Autumn"
+					]
+				}
+			],
+			"professions": [
+				"developer",
+				"designer",
+				"entrepreneur",
+				"consultant",
+				"manager",
+				"engineer",
+				"analyst",
+				"coordinator",
+				"director",
+				"specialist",
+				"supervisor",
+				"administrator"
+			],
+			"trait_categories": [
+				{
+					"category": "Progressive",
+					"items": [
+						"innovative",
+						"cosmopolitan",
+						"open-minded",
+						"progressive",
+						"sophisticated",
+						"creative"
+					]
+				},
+				{
+					"category": "Traditional",
+					"items": [
+						"traditional",
+						"practical",
+						"grounded",
+						"straightforward",
+						"reliable",
+						"hardworking"
+					]
+				}
+			],
+			"templates": [
+				"{name}, the {profession}, is known for being very {trait}.",
+				"Everyone agrees that {name}, who works as a {profession}, is remarkably {trait}.",
+				"As a {profession}, {name} is consistently described as {trait}.",
+				"When people meet {name} the {profession}, they often describe them as {trait}."
 			]
 		}
 	}

@@ -285,7 +285,9 @@ class DockerManager:
                 return False
 
     def run_in_container(
-        self, command: list[str], interactive: bool = False
+        self,
+        command: list[str],  # noqa: ARG002
+        interactive: bool = False,  # noqa: ARG002
     ) -> subprocess.CompletedProcess:
         """Execute command inside the EquiLens app container"""
         # TODO: Future enhancement - app container support

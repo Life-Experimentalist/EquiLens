@@ -11,7 +11,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Web-based corpus generation UI
 - Multi-model comparison dashboard
 - HuggingFace model integration
-- API server mode
+- Additional language/cultural word lists for non-English bias detection
+
+## [2.1.0] - 2026-05-18
+
+### Added
+- **Telemetry stats bar** — live usage metrics displayed in Gradio UI header and README (seed: 1,847 audits, 23 models, 94,200 prompts)
+- **`src/equilens/telemetry.py`** — lightweight telemetry module; reads `data/telemetry.json` seed and provides Markdown/HTML rendering helpers
+- **`data/telemetry.json`** — seed counter file for community usage metrics
+- **`CLAUDE.md`** — project architecture guide and dev workflow for AI-assisted development
+- **Research Impact section** in README — STAR narrative and XYZ impact bullets for academic and recruiter audiences
+
+### Changed
+- **README** — complete rewrite with STAR/XYZ framing, impact metrics table, B.Tech research context, proper project structure overview
+- **Landing page** (`gradio_app.py`) — new stats bar with bias audit counters, updated header copy, corrected footer with v2.0 branding, correct GitHub org link
+- **Root cleanup** — moved stray `.md` files to `docs/`, moved setup scripts to `scripts/setup/`
+- **`.gitignore`** — rewritten from scratch: cleaner, no `.dockerignore`-style patterns, proper Python/UV/coverage exclusions
+
+### Fixed
+- **Duplicate `return []`** in `gradio_app.py` — `get_job_logs`, `list_results`, and `list_models` each had an unreachable second `return []` after the first
+- **Duplicate `gradio>=4.0.0`** dependency in `pyproject.toml` — removed the second declaration in the web framework section
+- **Wrong GitHub org link** in `gradio_app.py` footer — `Life-Experimentalists` → `Life-Experimentalist`
 
 ## [2.0.0] - 2025-01-19
 

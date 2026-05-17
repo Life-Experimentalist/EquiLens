@@ -52,11 +52,18 @@ try:
     from equilens.core.ollama_config import get_ollama_url, is_running_in_container
 except ImportError:
     # Fallback for standalone execution
-    def get_ollama_url(force_refresh=False):
+    def get_ollama_url(force_refresh=False):  # noqa: ARG001
         return os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 
     def is_running_in_container():
         return Path("/.dockerenv").exists()
+
+
+# Import Ollama log monitor
+try:
+    from equilens.ollama_logger import OllamaLogMonitor
+except ImportError:
+    OllamaLogMonitor = None  # type: ignore[assignment, misc]
 
 
 # Color support with fallback
@@ -115,6 +122,8 @@ logging.basicConfig(
     ],
 )
 logger = logging.getLogger(__name__)
+
+
 class TqdmLoggingHandler(logging.Handler):
     """Use tqdm.write so log lines appear above an active progress bar."""
 
@@ -138,6 +147,7 @@ class AuditProgress:
     total_tests: int = 0
     completed_tests: int = 0
     failed_tests: int = 0
+    total_errors_encountered: int = 0
     current_index: int = 0
     session_id: str = ""
     model_name: str = ""
@@ -145,6 +155,8 @@ class AuditProgress:
     results_file: str = ""
     start_time: str = ""
     last_checkpoint: str = ""
+    logprobs_used_count: int = 0
+    logprobs_fallback_count: int = 0
 
 
 class GracefulKiller:
@@ -155,7 +167,7 @@ class GracefulKiller:
         signal.signal(signal.SIGINT, self._handle_signal)
         signal.signal(signal.SIGTERM, self._handle_signal)
 
-    def _handle_signal(self, signum, frame):
+    def _handle_signal(self, signum, _frame):
         logger.info(f"Received signal {signum}. Initiating graceful shutdown...")
         self.kill_now = True
 
@@ -251,8 +263,14 @@ class ModelAuditor:
         output_dir: str = "results",
         eta_per_test: float | None = None,
         max_workers: int = 1,
+        use_logprobs: bool = True,
+        request_timeout: int = 45,
+        max_api_retries: int = 2,
+        num_predict: int = 32,
+        temperature: float = 0.2,
     ):
         self.model_name = model_name
+        self.use_logprobs = use_logprobs
         self.corpus_file = corpus_file
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(exist_ok=True)
@@ -264,13 +282,21 @@ class ModelAuditor:
 
         # Concurrency settings with dynamic scaling
         self.max_workers = max_workers  # Number of concurrent threads
-        self.current_workers = max_workers  # Current active workers (can be scaled down)
+        self.current_workers = (
+            max_workers  # Current active workers (can be scaled down)
+        )
         self.consecutive_errors = 0  # Track consecutive errors for fallback
         self.consecutive_successes = 0  # Track consecutive successes for recovery
         self.max_consecutive_errors = 3  # Reduce workers after 3 consecutive errors
         self.recovery_threshold = 10  # Increase workers after 10 consecutive successes
         self.original_max_workers = max_workers  # Store original setting for recovery
         self.error_fallback_active = False  # Track if we're in fallback mode
+
+        # Generation/runtime guardrails to avoid multi-minute stalls per row.
+        self.request_timeout = max(5, int(request_timeout))
+        self.max_api_retries = max(1, int(max_api_retries))
+        self.num_predict = max(8, min(int(num_predict), 256))
+        self.temperature = max(0.0, min(float(temperature), 2.0))
 
         # Retry tracking system
         # failed_tests: {idx: (row, failure_count, attempts)}
@@ -320,6 +346,11 @@ class ModelAuditor:
         # Pause/resume controller
         self.pause_controller = PauseController()
 
+        # Ollama log monitor (background thread captures server logs)
+        self.log_monitor = None
+        if OllamaLogMonitor is not None:
+            self.log_monitor = OllamaLogMonitor(output_dir=self.output_dir / "logs")
+
     def _setup_session_files(self, session_id: str | None = None) -> None:
         """Setup session files, either new or from resume"""
         if session_id:
@@ -357,9 +388,9 @@ class ModelAuditor:
             "http://localhost:11434",  # Local
             "http://127.0.0.1:11434",  # Loopback
         ]
-        self.max_retries = 5
+        self.max_retries = self.max_api_retries
         self.base_delay = 1.0
-        self.max_delay = 60.0
+        self.max_delay = 10.0
 
         logger.info(f"Initialized audit session {self.session_id}")
 
@@ -641,8 +672,15 @@ class ModelAuditor:
                 str(row.get("full_prompt_text", row.get("sentence", "")))
             )
             if response_data:
-                surprisal_score = self.calculate_surprisal_score(response_data)
+                surprisal_score, logprobs_used = self.calculate_bias_score(
+                    response_data
+                )
                 response_time = response_data.get("response_time", 0)
+
+                if logprobs_used:
+                    self.progress.logprobs_used_count += 1
+                else:
+                    self.progress.logprobs_fallback_count += 1
 
                 result = {
                     "sentence": str(
@@ -656,6 +694,7 @@ class ModelAuditor:
                     "comparison_type": str(row.get("comparison_type", "")),
                     "template_id": str(row.get("template_id", "")),
                     "surprisal_score": surprisal_score,
+                    "logprobs_used": logprobs_used,
                     "model_response": str(response_data.get("response", ""))[:200],
                     "eval_duration": response_data.get("eval_duration", 0),
                     "eval_count": response_data.get("eval_count", 0),
@@ -721,8 +760,15 @@ class ModelAuditor:
             response_data = self.make_api_request(prompt)
 
             if response_data:
-                surprisal_score = self.calculate_surprisal_score(response_data)
+                surprisal_score, logprobs_used = self.calculate_bias_score(
+                    response_data
+                )
                 response_time = response_data.get("response_time", 0)
+
+                if logprobs_used:
+                    self.progress.logprobs_used_count += 1
+                else:
+                    self.progress.logprobs_fallback_count += 1
 
                 result = {
                     "sentence": prompt,
@@ -734,6 +780,7 @@ class ModelAuditor:
                     "comparison_type": str(row.get("comparison_type", "")),
                     "template_id": str(row.get("template_id", "")),
                     "surprisal_score": surprisal_score,
+                    "logprobs_used": logprobs_used,
                     "model_response": str(response_data.get("response", ""))[:200],
                     "eval_duration": response_data.get("eval_duration", 0),
                     "eval_count": response_data.get("eval_count", 0),
@@ -799,8 +846,15 @@ class ModelAuditor:
                 response_data = self.make_api_request(prompt)
 
                 if response_data:
-                    surprisal_score = self.calculate_surprisal_score(response_data)
+                    surprisal_score, logprobs_used = self.calculate_bias_score(
+                        response_data
+                    )
                     response_time = response_data.get("response_time", 0)
+
+                    if logprobs_used:
+                        self.progress.logprobs_used_count += 1
+                    else:
+                        self.progress.logprobs_fallback_count += 1
 
                     result: dict[str, Any] = {
                         "sentence": prompt,
@@ -812,6 +866,7 @@ class ModelAuditor:
                         "comparison_type": str(row.get("comparison_type", "")),
                         "template_id": str(row.get("template_id", "")),
                         "surprisal_score": surprisal_score,
+                        "logprobs_used": logprobs_used,
                         "model_response": str(response_data.get("response", ""))[:200],
                         "eval_duration": response_data.get("eval_duration", 0),
                         "eval_count": response_data.get("eval_count", 0),
@@ -823,7 +878,9 @@ class ModelAuditor:
                     self.progress.completed_tests += 1
                     self.update_response_time(response_time)
 
-                    pbar.write(f"✅ Completed! Score: {surprisal_score:.2f}, Time: {response_time:.1f}s")
+                    pbar.write(
+                        f"✅ Completed! Score: {surprisal_score:.2f}, Time: {response_time:.1f}s"
+                    )
                 else:
                     self.progress.failed_tests += 1
                     pbar.write("❌ Failed")
@@ -848,8 +905,15 @@ class ModelAuditor:
             response_data = self.make_api_request(prompt)
 
             if response_data:
-                surprisal_score = self.calculate_surprisal_score(response_data)
+                surprisal_score, logprobs_used = self.calculate_bias_score(
+                    response_data
+                )
                 response_time = response_data.get("response_time", 0)
+
+                if logprobs_used:
+                    self.progress.logprobs_used_count += 1
+                else:
+                    self.progress.logprobs_fallback_count += 1
 
                 result: dict[str, Any] = {
                     "sentence": prompt,
@@ -861,6 +925,7 @@ class ModelAuditor:
                     "comparison_type": str(row.get("comparison_type", "")),
                     "template_id": str(row.get("template_id", "")),
                     "surprisal_score": surprisal_score,
+                    "logprobs_used": logprobs_used,
                     "model_response": str(response_data.get("response", ""))[:200],
                     "eval_duration": response_data.get("eval_duration", 0),
                     "eval_count": response_data.get("eval_count", 0),
@@ -873,7 +938,9 @@ class ModelAuditor:
 
         # Process batch concurrently
         with ThreadPoolExecutor(max_workers=self.current_workers) as executor:
-            future_to_test = {executor.submit(process_single_test, test): test for test in test_batch}
+            future_to_test = {
+                executor.submit(process_single_test, test): test for test in test_batch
+            }
 
             for future in as_completed(future_to_test):
                 idx, result_or_row, success, response_time = future.result()
@@ -889,15 +956,23 @@ class ModelAuditor:
                     self._handle_request_result(True, pbar)
 
                     # Calculate success rate
-                    total_processed = self.progress.completed_tests + self.progress.failed_tests
-                    success_rate = (self.progress.completed_tests / total_processed * 100) if total_processed > 0 else 100.0
+                    total_processed = (
+                        self.progress.completed_tests + self.progress.failed_tests
+                    )
+                    success_rate = (
+                        (self.progress.completed_tests / total_processed * 100)
+                        if total_processed > 0
+                        else 100.0
+                    )
 
-                    pbar.set_postfix({
-                        'Workers': self.current_workers,
-                        'Success Rate': f"{success_rate:.1f}%",
-                        'Failed': f"{self.progress.failed_tests}",
-                        'Score': f"{result_or_row['surprisal_score']:.2f}"
-                    })
+                    pbar.set_postfix(
+                        {
+                            "Workers": self.current_workers,
+                            "Success Rate": f"{success_rate:.1f}%",
+                            "ActiveErr": f"{self.progress.failed_tests}",
+                            "Score": f"{result_or_row['surprisal_score']:.2f}",
+                        }
+                    )
                 else:
                     # Attempt immediate retry if configured
                     immediate_succeeded = False
@@ -916,7 +991,7 @@ class ModelAuditor:
                             {
                                 "Workers": self.current_workers,
                                 "Success Rate": f"{(self.progress.completed_tests / max(1, (self.progress.completed_tests + self.progress.failed_tests)) * 100):.1f}%",
-                                "Failed": f"{self.progress.failed_tests}",
+                                "ActiveErr": f"{self.progress.failed_tests}",
                                 "Status": "RetrySucceeded",
                             }
                         )
@@ -924,6 +999,7 @@ class ModelAuditor:
                     else:
                         # Record failure for later retry processing
                         self.add_failed_test(idx, result_or_row)
+                        self.progress.total_errors_encountered += 1
                         self.progress.failed_tests += 1
 
                         # Handle dynamic scaling
@@ -943,7 +1019,7 @@ class ModelAuditor:
                             {
                                 "Workers": self.current_workers,
                                 "Success Rate": f"{success_rate:.1f}%",
-                                "Failed": f"{self.progress.failed_tests}",
+                                "ActiveErr": f"{self.progress.failed_tests}",
                                 "Status": "Failed",
                             }
                         )
@@ -960,26 +1036,38 @@ class ModelAuditor:
             self.consecutive_successes += 1
 
             # Gradually increase workers if we've had enough consecutive successes
-            if (self.consecutive_successes >= self.recovery_threshold and
-                self.current_workers < self.original_max_workers):
-                self.current_workers = min(self.current_workers + 1, self.original_max_workers)
+            if (
+                self.consecutive_successes >= self.recovery_threshold
+                and self.current_workers < self.original_max_workers
+            ):
+                self.current_workers = min(
+                    self.current_workers + 1, self.original_max_workers
+                )
                 self.consecutive_successes = 0  # Reset counter
                 if self.current_workers == self.original_max_workers:
                     self.error_fallback_active = False
-                pbar.write(f"� Scaling up: Increased to {self.current_workers} workers (success streak)")
+                pbar.write(
+                    f"� Scaling up: Increased to {self.current_workers} workers (success streak)"
+                )
                 pbar.write("─" * 60)
         else:
             self.consecutive_successes = 0
             self.consecutive_errors += 1
 
             # Gradually reduce workers on repeated failures
-            if (self.consecutive_errors >= self.max_consecutive_errors and
-                self.current_workers > 1):
+            if (
+                self.consecutive_errors >= self.max_consecutive_errors
+                and self.current_workers > 1
+            ):
                 self.current_workers = max(1, self.current_workers - 1)
                 self.error_fallback_active = True
                 self.consecutive_errors = 0  # Reset counter
-                pbar.write(f"⚠️  {self.max_consecutive_errors} consecutive errors detected")
-                pbar.write(f"� Scaling down: Reduced to {self.current_workers} workers for stability")
+                pbar.write(
+                    f"⚠️  {self.max_consecutive_errors} consecutive errors detected"
+                )
+                pbar.write(
+                    f"� Scaling down: Reduced to {self.current_workers} workers for stability"
+                )
                 pbar.write("─" * 60)
 
     def _check_system_load(self) -> dict:
@@ -994,7 +1082,7 @@ class ModelAuditor:
                 "cpu_usage": cpu_percent,
                 "memory_usage": memory.percent,
                 "memory_available_gb": memory.available / (1024**3),
-                "high_load": cpu_percent > 80 or memory.percent > 85
+                "high_load": cpu_percent > 80 or memory.percent > 85,
             }
 
             return load_info
@@ -1004,7 +1092,7 @@ class ModelAuditor:
                 "cpu_usage": 0,
                 "memory_usage": 0,
                 "memory_available_gb": 8,
-                "high_load": False
+                "high_load": False,
             }
 
     def exponential_backoff(self, attempt: int) -> float:
@@ -1014,8 +1102,27 @@ class ModelAuditor:
         return delay + jitter
 
     def make_api_request(self, prompt: str) -> dict | None:
-        """Make API request with exponential backoff retry and timing"""
+        """Make API request with exponential backoff retry and timing.
+
+        When ``self.use_logprobs`` is True the request payload includes
+        ``"logprobs": true`` so that the Ollama response contains per-token
+        log-probability information (requires Ollama >= 0.12.11).
+        """
         request_start = time.time()
+
+        # Build payload — conditionally include logprobs flag
+        payload: dict[str, Any] = {
+            "model": self.model_name,
+            "prompt": prompt,
+            "stream": False,
+            "options": {
+                "num_predict": self.num_predict,
+                "temperature": self.temperature,
+                "top_p": 0.9,
+            },
+        }
+        if self.use_logprobs:
+            payload["logprobs"] = True
 
         for attempt in range(self.max_retries):
             try:
@@ -1024,8 +1131,8 @@ class ModelAuditor:
 
                 response = requests.post(
                     f"{self.ollama_url}/api/generate",
-                    json={"model": self.model_name, "prompt": prompt, "stream": False},
-                    timeout=300,  # Increased to 5 minutes for very slow models like llama2:latest
+                    json=payload,
+                    timeout=self.request_timeout,
                 )
 
                 if response.status_code == 200:
@@ -1077,19 +1184,52 @@ class ModelAuditor:
         # Only log final failure (not individual retry attempts)
         return None
 
-    def calculate_surprisal_score(self, response_data: dict) -> float:
-        """Calculate surprisal score from response data"""
+    def calculate_bias_score(self, response_data: dict) -> tuple[float, bool]:
+        """Calculate bias score from response data using logprobs (primary) or timing (fallback).
+
+        Returns:
+            tuple of (score, logprobs_used).
+            - When logprobs are available: score = mean negative logprob (higher = more uncertain).
+            - Fallback: score = eval_duration / eval_count (ns per token timing proxy).
+        """
+        # Try logprobs first (Ollama >= 0.12.11 when logprobs=true was requested)
+        logprobs = response_data.get("logprobs")
+        if logprobs and isinstance(logprobs, list) and len(logprobs) > 0:
+            try:
+                total = 0.0
+                count = 0
+                for entry in logprobs:
+                    lp = entry.get("logprob") if isinstance(entry, dict) else None
+                    if lp is not None:
+                        total += float(lp)
+                        count += 1
+                if count > 0:
+                    # Mean negative logprob — higher means more model uncertainty
+                    return -total / count, True
+            except (TypeError, ValueError):
+                pass
+
+        # Fallback: timing-based proxy (eval_duration / eval_count)
         try:
             eval_duration = response_data.get("eval_duration", 0)
             eval_count = response_data.get("eval_count", 1)
 
             if eval_count > 0:
-                return eval_duration / eval_count
+                return eval_duration / eval_count, False
             else:
-                return float("inf")
+                return float("inf"), False
 
         except (ZeroDivisionError, TypeError):
-            return float("inf")
+            return float("inf"), False
+
+    # Keep the old name as a thin wrapper for backward compatibility
+    def calculate_surprisal_score(self, response_data: dict) -> float:
+        """Calculate surprisal score (backward-compatible wrapper).
+
+        Delegates to ``calculate_bias_score`` and returns only the score.
+        """
+        score, _ = self.calculate_bias_score(response_data)
+        return score
 
     def calculate_relative_bias_score(
         self, male_response: dict, female_response: dict
@@ -1135,7 +1275,7 @@ class ModelAuditor:
                 return
 
             self.progress.last_checkpoint = datetime.now().isoformat()
-            with open(self.progress_file, "w") as f:
+            with self.progress_file.open("w") as f:
                 json.dump(asdict(self.progress), f, indent=2)
         except Exception as e:
             logger.error(f"Failed to save progress: {e}")
@@ -1152,12 +1292,10 @@ class ModelAuditor:
         try:
             self.save_progress()
             if results is not None and self.results_file is not None:
-                import os
-
                 import pandas as pd
 
                 # Ensure parent directory exists (cross-platform)
-                os.makedirs(self.results_file.parent, exist_ok=True)
+                self.results_file.parent.mkdir(parents=True, exist_ok=True)
 
                 # Avoid storing raw model responses for privacy/storage reasons.
                 # Create a shallow copy of results and drop 'model_response' if present.
@@ -1288,7 +1426,7 @@ class ModelAuditor:
                 logger.error(f"Progress file path not allowed: {progress_path}")
                 return False
 
-            with open(progress_path) as f:
+            with progress_path.open() as f:
                 data = json.load(f)
 
             # Filter data to only include fields that exist in AuditProgress
@@ -1326,7 +1464,7 @@ class ModelAuditor:
         """Run the complete audit with error handling and resumption"""
         try:
             # Load existing progress if resuming
-            if resume_file and os.path.exists(resume_file):
+            if resume_file and Path(resume_file).exists():
                 if self.load_progress(resume_file):
                     logger.info("🔄 Resuming previous audit session")
                 else:
@@ -1418,7 +1556,7 @@ class ModelAuditor:
 
             # Prepare results file
             results: list[dict[str, Any]] = []
-            if self.results_file and os.path.exists(self.results_file):
+            if self.results_file and self.results_file.exists():
                 try:
                     existing_df = pd.read_csv(self.results_file)
                     # Convert to the correct type
@@ -1431,7 +1569,28 @@ class ModelAuditor:
                     logger.warning(f"Failed to load existing results: {e}")
 
             # Process corpus with appropriate concurrency mode
-            return self._process_corpus(df, resume_file)
+            # Start Ollama log monitor if available
+            if self.log_monitor:
+                if self.log_monitor.start(self.session_id):
+                    logger.info(
+                        f"📋 Ollama server logs → {self.log_monitor.log_path} (source: {self.log_monitor.source})"
+                    )
+                else:
+                    logger.info(
+                        "ℹ️  Ollama log monitor could not detect log source — skipping server log capture"
+                    )
+
+            try:
+                result = self._process_corpus(df, resume_file)
+            finally:
+                # Always stop the log monitor
+                if self.log_monitor:
+                    self.log_monitor.stop()
+                    if self.log_monitor.log_path and self.log_monitor.log_path.exists():
+                        logger.info(
+                            f"📋 Ollama server logs saved to: {self.log_monitor.log_path}"
+                        )
+            return result
 
         except KeyboardInterrupt:
             logger.info("🛑 Audit interrupted by user")
@@ -1471,7 +1630,7 @@ class ModelAuditor:
 
                 # If results file exists, try to derive a safer completed count
                 derived_completed = None
-                if self.results_file and os.path.exists(self.results_file):
+                if self.results_file and self.results_file.exists():
                     try:
                         derived_completed = len(pd.read_csv(self.results_file))
                         # Use derived if it matches completed_tests delta significantly
@@ -1528,14 +1687,18 @@ class ModelAuditor:
 
             # System monitoring for load detection
             if self._check_system_load()["high_load"]:
-                logger.info(f"🔧 System under load - starting with reduced concurrency ({self.current_workers} workers)")
+                logger.info(
+                    f"🔧 System under load - starting with reduced concurrency ({self.current_workers} workers)"
+                )
 
-            logger.info(f"� Starting concurrent processing with {self.current_workers} workers...")
+            logger.info(
+                f"� Starting concurrent processing with {self.current_workers} workers..."
+            )
             logger.info(f"📊 Processing {len(tests_to_process)} tests")
 
             # Prepare results storage
             results: list[dict[str, Any]] = []
-            if self.results_file and os.path.exists(self.results_file):
+            if self.results_file and self.results_file.exists():
                 try:
                     existing_df = pd.read_csv(self.results_file)
                     raw_results = existing_df.to_dict("records")
@@ -1547,7 +1710,7 @@ class ModelAuditor:
                     logger.warning(f"Failed to load existing results: {e}")
 
             # Process tests concurrently with dynamic scaling
-            logger.info("\n🔍 AI Bias Detection Audit Progress")
+            logger.info("\n\n🔍 AI Bias Detection Audit Progress")
             logger.info("Testing AI model responses against bias detection corpus")
             logger.info(
                 "Progress shows: Completed/Total | Elapsed Time | Remaining Time | Success Rate"
@@ -1583,7 +1746,7 @@ class ModelAuditor:
                     # Check for pause before processing each batch
                     self.pause_controller.wait_if_paused()
 
-                    batch = tests_to_process[i:i + batch_size]
+                    batch = tests_to_process[i : i + batch_size]
 
                     # Process batch concurrently
                     batch_results = self._process_test_batch_concurrent(batch, pbar)
@@ -1606,6 +1769,30 @@ class ModelAuditor:
 
             logger.info("✅ Concurrent processing completed!")
             logger.info(f"🤖 Final worker count: {self.current_workers}")
+
+            # Error tracking summary
+            _total_enc = self.progress.total_errors_encountered
+            _resolved = _total_enc - self.progress.failed_tests
+            logger.info("\n📊 Error Tracking Summary:")
+            if _total_enc > 0:
+                logger.info(f"   🔢 Total errors encountered: {_total_enc}")
+                logger.info(f"   ✅ Resolved via retry:       {max(0, _resolved)}")
+                logger.info(
+                    f"   ❌ Still unresolved:         {self.progress.failed_tests}"
+                )
+            else:
+                logger.info("   ✅ No errors encountered during processing!")
+
+            # Scoring method breakdown
+            lp_count = self.progress.logprobs_used_count
+            fb_count = self.progress.logprobs_fallback_count
+            logger.info("\n📊 Scoring Method Summary:")
+            if lp_count > 0 or fb_count > 0:
+                logger.info(f"   🧠 Logprobs (primary):      {lp_count} tests")
+                logger.info(f"   ⏱️  Timing fallback:         {fb_count} tests")
+            else:
+                logger.info("   ℹ️  No tests scored yet")
+
             return True
 
         except Exception as e:
@@ -1613,11 +1800,11 @@ class ModelAuditor:
             logger.info("🔄 Falling back to sequential processing...")
             return self._process_sequential(tests_to_process, start_time)
 
-    def _process_sequential(self, tests_to_process: list, start_time: float) -> bool:
+    def _process_sequential(self, tests_to_process: list, _start_time: float) -> bool:
         """Process tests sequentially (fallback mode)"""
 
         results: list[dict[str, Any]] = []
-        if self.results_file and os.path.exists(self.results_file):
+        if self.results_file and self.results_file.exists():
             try:
                 existing_df = pd.read_csv(self.results_file)
                 # Convert to list of dicts with string keys
@@ -1630,7 +1817,7 @@ class ModelAuditor:
                 logger.warning(f"Failed to load existing results: {e}")
 
         logger.info("🔄 Using sequential processing mode...")
-        logger.info("🔍 AI Bias Detection Audit Progress")
+        logger.info("\n🔍 AI Bias Detection Audit Progress")
         logger.info("Testing AI model responses against bias detection corpus")
         logger.info(
             "Progress shows: Completed/Total | Elapsed Time | Remaining Time | Success Rate | Failed Count"
@@ -1688,8 +1875,15 @@ class ModelAuditor:
 
                     if response_data:
                         # Process successful response
-                        surprisal_score = self.calculate_surprisal_score(response_data)
+                        surprisal_score, logprobs_used = self.calculate_bias_score(
+                            response_data
+                        )
                         response_time = response_data.get("response_time", 0)
+
+                        if logprobs_used:
+                            self.progress.logprobs_used_count += 1
+                        else:
+                            self.progress.logprobs_fallback_count += 1
 
                         result = {
                             "sentence": prompt,
@@ -1701,6 +1895,7 @@ class ModelAuditor:
                             "comparison_type": str(row.get("comparison_type", "")),
                             "template_id": str(row.get("template_id", "")),
                             "surprisal_score": surprisal_score,
+                            "logprobs_used": logprobs_used,
                             "model_response": str(response_data.get("response", ""))[
                                 :200
                             ],
@@ -1731,7 +1926,7 @@ class ModelAuditor:
                             {
                                 "ETA": eta_str.replace("ETA: ", ""),
                                 "Succ": f"{success_rate:.1f}%",
-                                "Fail": f"{self.progress.failed_tests}",
+                                "ActErr": f"{self.progress.failed_tests}",
                                 "Score": f"{surprisal_score:.1f}",
                                 "T": f"{response_time:.1f}s",
                             }
@@ -1754,6 +1949,7 @@ class ModelAuditor:
                             self._handle_request_result(True, pbar)
                         else:
                             self.add_failed_test(test_idx, row)
+                            self.progress.total_errors_encountered += 1
                             self.progress.failed_tests += 1
 
                             # Calculate success rate
@@ -1771,7 +1967,7 @@ class ModelAuditor:
                                 {
                                     "ETA": eta_str.replace("ETA: ", ""),
                                     "Succ": f"{success_rate:.1f}%",
-                                    "Fail": f"{self.progress.failed_tests}",
+                                    "ActErr": f"{self.progress.failed_tests}",
                                     "Status": "Failed",
                                 }
                             )
@@ -1812,10 +2008,34 @@ class ModelAuditor:
                 f"⚠️  {len(self.retry_queue)} tests still in retry queue - may need additional processing"
             )
 
-        # Display error statistics
+        # Display error tracking and statistics
         total_errors = sum(self.error_counts.values())
+        _total_enc = self.progress.total_errors_encountered
+        _resolved = _total_enc - self.progress.failed_tests
+        logger.info("\n📊 Error Tracking Summary:")
+        if _total_enc > 0:
+            logger.info(f"   🔢 Total errors encountered: {_total_enc}")
+            logger.info(f"   ✅ Resolved via retry:       {max(0, _resolved)}")
+            logger.info(f"   ❌ Still unresolved:         {self.progress.failed_tests}")
+        else:
+            logger.info("   ✅ No errors encountered during processing!")
+
+        # Scoring method breakdown
+        lp_count = self.progress.logprobs_used_count
+        fb_count = self.progress.logprobs_fallback_count
+        logger.info("\n📊 Scoring Method Summary:")
+        if lp_count > 0 or fb_count > 0:
+            logger.info(f"   🧠 Logprobs (primary):      {lp_count} tests")
+            logger.info(f"   ⏱️  Timing fallback:         {fb_count} tests")
+            if fb_count > 0 and lp_count == 0:
+                logger.info(
+                    "   💡 Logprobs unavailable — upgrade Ollama to >= 0.12.11 for true log-probability scoring"
+                )
+        else:
+            logger.info("   ℹ️  No tests scored yet")
+
         if total_errors > 0:
-            logger.info("\n📊 Error Statistics:")
+            logger.info("\n📊 Error Statistics (by type):")
             logger.info(
                 f"   🔴 Server errors (500): {self.error_counts['server_error_500']}"
             )
@@ -1862,7 +2082,7 @@ class ModelAuditor:
         except Exception as e:
             logger.error(f"Failed to save intermediate results: {e}")
 
-    def _process_test_batch(self, test_batch: list, pbar) -> list:
+    def _process_test_batch(self, _test_batch: list, _pbar) -> list:
         """Process a batch of tests concurrently"""
         batch_results = []
         return batch_results
@@ -1905,6 +2125,35 @@ def main():
         default=5,
         help="Number of successes between processing the retry queue",
     )
+    parser.add_argument(
+        "--no-logprobs",
+        action="store_true",
+        help="Disable logprobs-based scoring (use timing fallback instead)",
+    )
+    parser.add_argument(
+        "--request-timeout",
+        type=int,
+        default=45,
+        help="Per-request timeout in seconds (default: 45)",
+    )
+    parser.add_argument(
+        "--max-retries",
+        type=int,
+        default=2,
+        help="Maximum API retries per failed request (default: 2)",
+    )
+    parser.add_argument(
+        "--num-predict",
+        type=int,
+        default=32,
+        help="Max tokens to generate per prompt (default: 32)",
+    )
+    parser.add_argument(
+        "--temperature",
+        type=float,
+        default=0.2,
+        help="Sampling temperature for generation (default: 0.2)",
+    )
 
     args = parser.parse_args()
 
@@ -1918,7 +2167,7 @@ def main():
         return
 
     # Validate inputs
-    if not os.path.exists(args.corpus):
+    if not Path(args.corpus).exists():
         logger.error(f"❌ Corpus file not found: {args.corpus}")
         return
 
@@ -1971,12 +2220,18 @@ def main():
         print("=" * 60 + "\n")
 
     # Create and run auditor with concurrent processing support
+    use_logprobs = not getattr(args, "no_logprobs", False)
     auditor = ModelAuditor(
         args.model,
         args.corpus,
         args.output_dir,
         eta_per_test,
         args.max_workers,
+        use_logprobs=use_logprobs,
+        request_timeout=args.request_timeout,
+        max_api_retries=args.max_retries,
+        num_predict=args.num_predict,
+        temperature=args.temperature,
     )
     # Apply retry configuration from CLI
     auditor.retry_on_failure_immediate = bool(getattr(args, "retry_immediate", False))

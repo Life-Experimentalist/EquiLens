@@ -5244,3 +5244,170 @@
 2025-10-19 00:43:53,163 - INFO - 📁 Next steps:
 2025-10-19 00:43:53,163 - INFO -    1. Review results: results\llama2_latest_20251018_235756\results_llama2_latest_20251018_235756.csv
 2025-10-19 00:43:53,164 - INFO -    2. Run analysis: uv run equilens analyze --results results\llama2_latest_20251018_235756\results_llama2_latest_20251018_235756.csv
+2026-02-24 17:43:46,288 - INFO - Initialized audit session 20260224_174344
+2026-02-24 17:43:48,355 - INFO - ✅ Ollama service confirmed at http://localhost:11434
+2026-02-24 17:43:50,393 - INFO - Available models: ['llama2:latest', 'glm-5:cloud']
+2026-02-24 17:43:50,394 - INFO - ✅ Model llama2:latest is already available
+2026-02-24 17:43:50,395 - INFO - 📂 Loading corpus from V:\Code\ProjectCode\EquiLens\src\Phase1_CorpusGenerator\corpus\audit_corpus_age_generational_bias.csv
+2026-02-24 17:43:50,430 - INFO - 🎯 Starting audit: 6912 total tests
+2026-02-24 17:43:50,430 - INFO - 📊 Model: llama2:latest
+2026-02-24 17:43:50,431 - INFO - 💾 Results will be saved to: C:\Users\krish\results\llama2_latest_20260224_174344\results_llama2_latest_20260224_174344.csv
+2026-02-24 17:43:50,431 - INFO - ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+2026-02-24 17:43:50,431 - INFO - │ Session: 20260224_174344                                                                                        │
+2026-02-24 17:43:50,432 - INFO - │ Model:   llama2:latest                                                                                          │
+2026-02-24 17:43:50,432 - INFO - │ Corpus:  V:\Code\ProjectCode\EquiLens\src\Phase1_CorpusGenerator\corpus\audit_corpus_age_generational_bias.csv  │
+2026-02-24 17:43:50,432 - INFO - │ Progress:0/6912 (0.0%)                                                                                          │
+2026-02-24 17:43:50,433 - INFO - │ Output:  C:\Users\krish\results\llama2_latest_20260224_174344\results_llama2_latest_20260224_174344.csv         │
+2026-02-24 17:43:50,433 - INFO - │ ETA Mode:Dynamic                                                                                                │
+2026-02-24 17:43:50,433 - INFO - └─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+2026-02-24 17:43:50,434 - INFO - 📈 ETA will be calculated dynamically based on actual performance
+2026-02-24 17:43:50,635 - INFO - 🚀 Starting fresh audit with 6912 tests
+2026-02-24 17:43:51,657 - INFO - � Starting concurrent processing with 2 workers...
+2026-02-24 17:43:51,658 - INFO - 📊 Processing 6912 tests
+2026-02-24 17:43:51,658 - INFO - 
+🔍 AI Bias Detection Audit Progress
+2026-02-24 17:43:51,659 - INFO - Testing AI model responses against bias detection corpus
+2026-02-24 17:43:51,659 - INFO - Progress shows: Completed/Total | Elapsed Time | Remaining Time | Success Rate
+2026-02-24 17:43:51,659 - INFO - 💡 Press 'p' at any time to pause/resume the audit
+
+2026-02-24 18:30:18,110 - INFO - 💾 Results saved to C:\Users\krish\results\llama2_latest_20260224_174344\results_llama2_latest_20260224_174344.csv
+2026-02-24 18:30:18,145 - INFO - 💾 Full responses saved to C:\Users\krish\results\llama2_latest_20260224_174344\results_llama2_latest_20260224_174344_responses.csv
+2026-02-25 11:57:53,600 - INFO - Received signal 2. Initiating graceful shutdown...
+2026-02-25 12:02:56,609 - INFO - 🛑 Audit interrupted by user
+2026-02-25 12:02:56,621 - INFO - 💾 Results saved to C:\Users\krish\results\llama2_latest_20260224_174344\results_llama2_latest_20260224_174344.csv
+2026-02-25 12:02:56,632 - INFO - 💾 Full responses saved to C:\Users\krish\results\llama2_latest_20260224_174344\results_llama2_latest_20260224_174344_responses.csv
+2026-02-25 12:02:56,699 - INFO - ✅ Concurrent processing completed!
+2026-02-25 12:02:56,700 - INFO - 🤖 Final worker count: 1
+2026-02-25 12:02:56,705 - INFO - 🎉 Audit completed successfully!
+2026-02-25 12:02:56,706 - INFO - 📁 Next steps:
+2026-02-25 12:02:56,706 - INFO -    1. Review results: C:\Users\krish\results\llama2_latest_20260224_174344\results_llama2_latest_20260224_174344.csv
+2026-02-25 12:02:56,706 - INFO -    2. Run analysis: uv run equilens analyze --results C:\Users\krish\results\llama2_latest_20260224_174344\results_llama2_latest_20260224_174344.csv
+2026-03-06 00:26:03,418 - INFO - Initialized audit session 20260306_002601
+2026-03-06 00:26:05,549 - INFO - ✅ Ollama service confirmed at http://localhost:11434
+2026-03-06 00:26:07,625 - INFO - Available models: ['llama2:latest', 'glm-5:cloud']
+2026-03-06 00:26:07,626 - INFO - ✅ Model llama2:latest is already available
+2026-03-06 00:26:07,626 - INFO - 📂 Loading corpus from V:\Code\ProjectCode\EquiLens\src\Phase1_CorpusGenerator\corpus\audit_corpus_age_generational_bias.csv
+2026-03-06 00:26:07,687 - INFO - 🎯 Starting audit: 6912 total tests
+2026-03-06 00:26:07,687 - INFO - 📊 Model: llama2:latest
+2026-03-06 00:26:07,688 - INFO - 💾 Results will be saved to: C:\Users\krish\results\llama2_latest_20260306_002601\results_llama2_latest_20260306_002601.csv
+2026-03-06 00:26:07,688 - INFO - ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+2026-03-06 00:26:07,688 - INFO - │ Session: 20260306_002601                                                                                        │
+2026-03-06 00:26:07,689 - INFO - │ Model:   llama2:latest                                                                                          │
+2026-03-06 00:26:07,689 - INFO - │ Corpus:  V:\Code\ProjectCode\EquiLens\src\Phase1_CorpusGenerator\corpus\audit_corpus_age_generational_bias.csv  │
+2026-03-06 00:26:07,689 - INFO - │ Progress:0/6912 (0.0%)                                                                                          │
+2026-03-06 00:26:07,689 - INFO - │ Output:  C:\Users\krish\results\llama2_latest_20260306_002601\results_llama2_latest_20260306_002601.csv         │
+2026-03-06 00:26:07,689 - INFO - │ ETA Mode:Dynamic                                                                                                │
+2026-03-06 00:26:07,690 - INFO - └─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+2026-03-06 00:26:07,690 - INFO - 📈 ETA will be calculated dynamically based on actual performance
+2026-03-06 00:26:08,171 - WARNING - Could not detect Ollama log source (Docker container or Windows app). Log collection will be skipped.
+2026-03-06 00:26:08,172 - INFO - ℹ️  Ollama log monitor could not detect log source — skipping server log capture
+2026-03-06 00:26:08,172 - WARNING - ⚠️ Inconsistent progress detected: current_index=0 completed_tests=0. Adjusting resume point.
+2026-03-06 00:26:08,333 - INFO - 📂 Resuming at test 0/6912 (0-based index)
+2026-03-06 00:26:08,334 - INFO - 🔄 Using sequential processing mode...
+2026-03-06 00:26:08,334 - INFO - 
+🔍 AI Bias Detection Audit Progress
+2026-03-06 00:26:08,335 - INFO - Testing AI model responses against bias detection corpus
+2026-03-06 00:26:08,335 - INFO - Progress shows: Completed/Total | Elapsed Time | Remaining Time | Success Rate | Failed Count
+2026-03-06 00:26:08,335 - INFO - 💡 Press 'p' at any time to pause/resume the audit
+
+2026-03-06 00:28:55,179 - INFO - Received signal 2. Initiating graceful shutdown...
+2026-03-06 00:28:55,184 - INFO - 🛑 Audit interrupted by user
+2026-03-06 00:28:55,206 - INFO - 💾 Results saved to C:\Users\krish\results\llama2_latest_20260306_002601\results_llama2_latest_20260306_002601.csv
+2026-03-06 00:28:55,213 - INFO - 💾 Full responses saved to C:\Users\krish\results\llama2_latest_20260306_002601\results_llama2_latest_20260306_002601_responses.csv
+2026-03-06 00:28:55,225 - INFO - ✅ Sequential processing completed!
+2026-03-06 00:28:55,226 - INFO - 
+📊 Error Tracking Summary:
+2026-03-06 00:28:55,227 - INFO -    ✅ No errors encountered during processing!
+2026-03-06 00:28:55,228 - INFO - 
+📊 Scoring Method Summary:
+2026-03-06 00:28:55,229 - INFO -    🧠 Logprobs (primary):      5 tests
+2026-03-06 00:28:55,229 - INFO -    ⏱️  Timing fallback:         0 tests
+2026-03-06 00:28:55,239 - INFO - 🎉 Audit completed successfully!
+2026-03-06 00:28:55,240 - INFO - 📁 Next steps:
+2026-03-06 00:28:55,241 - INFO -    1. Review results: C:\Users\krish\results\llama2_latest_20260306_002601\results_llama2_latest_20260306_002601.csv
+2026-03-06 00:28:55,241 - INFO -    2. Run analysis: uv run equilens analyze --results C:\Users\krish\results\llama2_latest_20260306_002601\results_llama2_latest_20260306_002601.csv
+2026-03-06 00:29:39,198 - INFO - Initialized audit session 20260306_002937
+2026-03-06 00:29:41,258 - INFO - ✅ Ollama service confirmed at http://localhost:11434
+2026-03-06 00:29:43,310 - INFO - Available models: ['llama2:latest', 'glm-5:cloud']
+2026-03-06 00:29:43,311 - INFO - ✅ Model llama2:latest is already available
+2026-03-06 00:29:43,312 - INFO - 📂 Loading corpus from V:\Code\ProjectCode\EquiLens\src\Phase1_CorpusGenerator\corpus\audit_corpus_age_generational_bias.csv
+2026-03-06 00:29:43,342 - INFO - 🎯 Starting audit: 6912 total tests
+2026-03-06 00:29:43,342 - INFO - 📊 Model: llama2:latest
+2026-03-06 00:29:43,343 - INFO - 💾 Results will be saved to: C:\Users\krish\results\llama2_latest_20260306_002937\results_llama2_latest_20260306_002937.csv
+2026-03-06 00:29:43,343 - INFO - ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+2026-03-06 00:29:43,343 - INFO - │ Session: 20260306_002937                                                                                        │
+2026-03-06 00:29:43,344 - INFO - │ Model:   llama2:latest                                                                                          │
+2026-03-06 00:29:43,344 - INFO - │ Corpus:  V:\Code\ProjectCode\EquiLens\src\Phase1_CorpusGenerator\corpus\audit_corpus_age_generational_bias.csv  │
+2026-03-06 00:29:43,345 - INFO - │ Progress:0/6912 (0.0%)                                                                                          │
+2026-03-06 00:29:43,345 - INFO - │ Output:  C:\Users\krish\results\llama2_latest_20260306_002937\results_llama2_latest_20260306_002937.csv         │
+2026-03-06 00:29:43,345 - INFO - │ ETA Mode:Dynamic                                                                                                │
+2026-03-06 00:29:43,346 - INFO - └─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+2026-03-06 00:29:43,346 - INFO - 📈 ETA will be calculated dynamically based on actual performance
+2026-03-06 00:29:43,676 - WARNING - Could not detect Ollama log source (Docker container or Windows app). Log collection will be skipped.
+2026-03-06 00:29:43,676 - INFO - ℹ️  Ollama log monitor could not detect log source — skipping server log capture
+2026-03-06 00:29:43,825 - INFO - 🚀 Starting fresh audit with 6912 tests
+2026-03-06 00:29:43,826 - INFO - 🔄 Using sequential processing mode...
+2026-03-06 00:29:43,826 - INFO - 
+🔍 AI Bias Detection Audit Progress
+2026-03-06 00:29:43,826 - INFO - Testing AI model responses against bias detection corpus
+2026-03-06 00:29:43,827 - INFO - Progress shows: Completed/Total | Elapsed Time | Remaining Time | Success Rate | Failed Count
+2026-03-06 00:29:43,827 - INFO - 💡 Press 'p' at any time to pause/resume the audit
+
+2026-03-06 00:33:01,673 - INFO - Initialized audit session 20260306_003259
+2026-03-06 00:33:03,730 - INFO - ✅ Ollama service confirmed at http://localhost:11434
+2026-03-06 00:33:05,798 - INFO - Available models: ['llama2:latest', 'glm-5:cloud']
+2026-03-06 00:33:05,799 - INFO - ✅ Model llama2:latest is already available
+2026-03-06 00:33:05,800 - INFO - 📂 Loading corpus from V:\Code\ProjectCode\EquiLens\src\Phase1_CorpusGenerator\corpus\audit_corpus_age_generational_bias.csv
+2026-03-06 00:33:05,835 - INFO - 🎯 Starting audit: 6912 total tests
+2026-03-06 00:33:05,836 - INFO - 📊 Model: llama2:latest
+2026-03-06 00:33:05,836 - INFO - 💾 Results will be saved to: V:\Code\ProjectCode\EquiLens\results\llama2_latest_20260306_003259\results_llama2_latest_20260306_003259.csv
+2026-03-06 00:33:05,837 - INFO - ┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+2026-03-06 00:33:05,838 - INFO - │ Session: 20260306_003259                                                                                               │
+2026-03-06 00:33:05,839 - INFO - │ Model:   llama2:latest                                                                                                 │
+2026-03-06 00:33:05,839 - INFO - │ Corpus:  V:\Code\ProjectCode\EquiLens\src\Phase1_CorpusGenerator\corpus\audit_corpus_age_generational_bias.csv         │
+2026-03-06 00:33:05,840 - INFO - │ Progress:0/6912 (0.0%)                                                                                                 │
+2026-03-06 00:33:05,841 - INFO - │ Output:  V:\Code\ProjectCode\EquiLens\results\llama2_latest_20260306_003259\results_llama2_latest_20260306_003259.csv  │
+2026-03-06 00:33:05,842 - INFO - │ ETA Mode:Dynamic                                                                                                       │
+2026-03-06 00:33:05,842 - INFO - └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+2026-03-06 00:33:05,843 - INFO - 📈 ETA will be calculated dynamically based on actual performance
+2026-03-06 00:33:06,190 - WARNING - Could not detect Ollama log source (Docker container or Windows app). Log collection will be skipped.
+2026-03-06 00:33:06,191 - INFO - ℹ️  Ollama log monitor could not detect log source — skipping server log capture
+2026-03-06 00:33:06,329 - INFO - 🚀 Starting fresh audit with 6912 tests
+2026-03-06 00:33:06,330 - INFO - 🔄 Using sequential processing mode...
+2026-03-06 00:33:06,330 - INFO - 
+🔍 AI Bias Detection Audit Progress
+2026-03-06 00:33:06,331 - INFO - Testing AI model responses against bias detection corpus
+2026-03-06 00:33:06,331 - INFO - Progress shows: Completed/Total | Elapsed Time | Remaining Time | Success Rate | Failed Count
+2026-03-06 00:33:06,331 - INFO - 💡 Press 'p' at any time to pause/resume the audit
+
+2026-03-06 00:40:07,355 - INFO - 💾 Results saved to V:\Code\ProjectCode\EquiLens\results\llama2_latest_20260306_003259\results_llama2_latest_20260306_003259.csv
+2026-03-06 00:40:07,363 - INFO - 💾 Full responses saved to V:\Code\ProjectCode\EquiLens\results\llama2_latest_20260306_003259\results_llama2_latest_20260306_003259_responses.csv
+2026-03-06 01:13:37,764 - INFO - 💾 Results saved to V:\Code\ProjectCode\EquiLens\results\llama2_latest_20260306_003259\results_llama2_latest_20260306_003259.csv
+2026-03-06 01:13:37,769 - INFO - 💾 Full responses saved to V:\Code\ProjectCode\EquiLens\results\llama2_latest_20260306_003259\results_llama2_latest_20260306_003259_responses.csv
+2026-03-06 05:27:50,501 - INFO - 💾 Results saved to V:\Code\ProjectCode\EquiLens\results\llama2_latest_20260306_003259\results_llama2_latest_20260306_003259.csv
+2026-03-06 05:27:50,505 - INFO - 💾 Full responses saved to V:\Code\ProjectCode\EquiLens\results\llama2_latest_20260306_003259\results_llama2_latest_20260306_003259_responses.csv
+2026-03-06 08:51:11,783 - INFO - Received signal 2. Initiating graceful shutdown...
+2026-03-06 08:51:11,789 - INFO - 🛑 Audit interrupted by user
+2026-03-06 08:51:11,812 - INFO - 💾 Results saved to V:\Code\ProjectCode\EquiLens\results\llama2_latest_20260306_003259\results_llama2_latest_20260306_003259.csv
+2026-03-06 08:51:11,819 - INFO - 💾 Full responses saved to V:\Code\ProjectCode\EquiLens\results\llama2_latest_20260306_003259\results_llama2_latest_20260306_003259_responses.csv
+2026-03-06 08:51:11,899 - INFO - ✅ Sequential processing completed!
+2026-03-06 08:51:11,902 - INFO - 
+📊 Error Tracking Summary:
+2026-03-06 08:51:11,903 - INFO -    🔢 Total errors encountered: 19
+2026-03-06 08:51:11,904 - INFO -    ✅ Resolved via retry:       0
+2026-03-06 08:51:11,904 - INFO -    ❌ Still unresolved:         19
+2026-03-06 08:51:11,905 - INFO - 
+📊 Scoring Method Summary:
+2026-03-06 08:51:11,906 - INFO -    🧠 Logprobs (primary):      19 tests
+2026-03-06 08:51:11,907 - INFO -    ⏱️  Timing fallback:         0 tests
+2026-03-06 08:51:11,907 - INFO - 
+📊 Error Statistics (by type):
+2026-03-06 08:51:11,908 - INFO -    🔴 Server errors (500): 1
+2026-03-06 08:51:11,909 - INFO -    ⏰ Timeouts: 94
+2026-03-06 08:51:11,910 - INFO -    🔌 Connection errors: 0
+2026-03-06 08:51:11,912 - INFO -    ❓ Other errors: 0
+2026-03-06 08:51:11,912 - INFO -    📈 Total error attempts: 95
+2026-03-06 08:51:11,915 - INFO - 🎉 Audit completed successfully!
+2026-03-06 08:51:11,915 - INFO - 📁 Next steps:
+2026-03-06 08:51:11,916 - INFO -    1. Review results: V:\Code\ProjectCode\EquiLens\results\llama2_latest_20260306_003259\results_llama2_latest_20260306_003259.csv
+2026-03-06 08:51:11,916 - INFO -    2. Run analysis: uv run equilens analyze --results V:\Code\ProjectCode\EquiLens\results\llama2_latest_20260306_003259\results_llama2_latest_20260306_003259.csv

@@ -1,41 +1,4 @@
-# EquiLens Docker ignore file
-# Exclude large files and directories that don't need to be in the container
-
-logs/*
-results/*
-.venv/
-.vscode/
-logs/audit_session.log
-.github/instructions
-
-# Docker build context optimization - reduce from 846MB to ~50MB
-
-# Git and version control
-.git/
-.gitignore
-.gitattributes
-
-# Keep essential docs in container but exclude temp files
-!README.md
-
-!ONE_CLICK_SETUP.md
-!SETUP_COMPLETE.md
-!RECOVERY_NOTES.md
-CONSOLIDATION_*.md
-OPTIMIZATION_*.md
-*_PLAN.md
-*_COMPLETE.md
-
-# Development and IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-Thumbs.db
-.container-welcome
-.devcontainer/
+# EquiLens .gitignore
 
 # Python bytecode and cache
 __pycache__/
@@ -43,6 +6,9 @@ __pycache__/
 *$py.class
 *.so
 .Python
+.ruff_cache/
+
+# Build artifacts
 build/
 develop-eggs/
 dist/
@@ -67,65 +33,61 @@ env.bak/
 venv.bak/
 .env
 .venv/
+.venv-*/
 
-# Results and logs (these are generated at runtime)
+# UV cache
+.uv-cache/
+
+# Runtime outputs (generated at runtime, not committed)
 results/
 logs/
-corpus/
 *.log
-*.csv
-*.json.bak
 
-# Docker and compose files (not needed in container)
-docker-compose*.yml
-Dockerfile*
-.dockerignore
+# Corpus data (large generated datasets)
+src/Phase1_CorpusGenerator/corpus/
 
-# Windows and PowerShell
-*.bat
-*.cmd
-!setup.bat
-
-# Large test data
-test_data/
-samples/
-examples/
-
-# Temporary files
-tmp/
-temp/
-*.tmp
-*.temp
-
-# IDE and editor files
-.pytest_cache/
-.coverage
-.nyc_output
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
-
-# Backup files
+# Backup and temp files
 *.bak
 *.backup
 *.old
+*.tmp
+*.temp
+tmp/
+temp/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+.devcontainer/
+.claude/
+
+# Test/coverage artifacts
+.pytest_cache/
+.coverage
+coverage.xml
+*.cover
+.hypothesis/
+htmlcov/
 
 # Node modules (if any)
 node_modules/
-
-# UV cache directory
-.uv-cache/
 
 # Archives
 *.tar
 *.tar.gz
 *.zip
 *.rar
-logs/audit_session.log
+
+# Misc stale patterns
+audit_llm/
+.container-welcome
+
+# Graphify
+graphify-out/cache/*

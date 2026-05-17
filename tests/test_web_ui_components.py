@@ -73,7 +73,7 @@ def test_cli_integration():
         if app is not None:
             print("✅ CLI app imported successfully")
             # Check if gui function is available
-            from equilens.cli import gui
+            from equilens.cli import gui  # noqa: F401
 
             print("✅ GUI command function found")
             return True

@@ -1,4 +1,21 @@
 ﻿services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
   equilens:
     image: ghcr.io/life-experimentalist/equilens:latest
     container_name: equilens-app
@@ -12,10 +29,9 @@
       - ./public:/workspace/public:ro
     environment:
       # Ollama Configuration
-      # When EquiLens is in container: use host.docker.internal (works for both container and host Ollama)
-      # When EquiLens is local: use localhost (works for both container and host Ollama)
-      - OLLAMA_BASE_URL=http://host.docker.internal:11434
-      - OLLAMA_API_BASE=http://host.docker.internal:11434/api
+      # Use the ollama service name within the docker compose network
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_API_BASE=http://ollama:11434/api
       - OLLAMA_PORT=11434
       # EquiLens Configuration
       - EQUILENS_DATA_DIR=/workspace/data
@@ -30,6 +46,9 @@
     restart: unless-stopped
     stdin_open: true
     tty: true
+    depends_on:
+      ollama:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:7860/ || exit 1"]
       interval: 30s
@@ -38,6 +57,8 @@
       start_period: 30s
 
 volumes:
+  ollama_data:
+    external: true
   equilens_data:
     driver: local
     name: equilens-data

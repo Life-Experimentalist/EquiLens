@@ -3,9 +3,9 @@
 Test script to verify the interactive ETA functionality in audit_model.py
 """
 
-import tempfile
 import csv
-from pathlib import Path
+import tempfile
+
 
 # Create a minimal test corpus for testing
 def create_test_corpus():
@@ -19,7 +19,7 @@ def create_test_corpus():
             "name": "Dr. Smith",
             "trait": "professional",
             "comparison_type": "neutral",
-            "template_id": "1"
+            "template_id": "1",
         },
         {
             "sentence": "The nurse was caring.",
@@ -29,14 +29,23 @@ def create_test_corpus():
             "name": "Nurse Johnson",
             "trait": "caring",
             "comparison_type": "neutral",
-            "template_id": "2"
-        }
+            "template_id": "2",
+        },
     ]
 
     # Create temporary CSV file
-    temp_file = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.csv')
+    temp_file = tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".csv")
 
-    fieldnames = ["sentence", "name_category", "trait_category", "profession", "name", "trait", "comparison_type", "template_id"]
+    fieldnames = [
+        "sentence",
+        "name_category",
+        "trait_category",
+        "profession",
+        "name",
+        "trait",
+        "comparison_type",
+        "template_id",
+    ]
     writer = csv.DictWriter(temp_file, fieldnames=fieldnames)
     writer.writeheader()
     writer.writerows(test_data)
@@ -44,10 +53,15 @@ def create_test_corpus():
 
     return temp_file.name
 
+
 if __name__ == "__main__":
     corpus_file = create_test_corpus()
     print(f"✅ Created test corpus: {corpus_file}")
     print("\n🧪 Test the interactive ETA prompt with:")
-    print(f"python src/Phase2_ModelAuditor/audit_model.py --model test_model --corpus {corpus_file}")
-    print("\nNote: This will fail when trying to connect to Ollama, but you can test the ETA prompt interaction.")
+    print(
+        f"python src/Phase2_ModelAuditor/audit_model.py --model test_model --corpus {corpus_file}"
+    )
+    print(
+        "\nNote: This will fail when trying to connect to Ollama, but you can test the ETA prompt interaction."
+    )
     print(f"\n🗑️  Remember to clean up: rm {corpus_file}")
