@@ -34,9 +34,10 @@ services:
       - EQUILENS_DATA_DIR=/workspace/data
       - EQUILENS_RESULTS_DIR=/workspace/data/results
       - EQUILENS_LOGS_DIR=/workspace/data/logs
-      - EQUILENS_CORPUS_DIR=/workspace/src/Phase1_CorpusGenerator/corpus
+      - EQUILENS_CORPUS_DIR=/workspace/data/corpus
       - EQUILENS_BACKUP_INTERVAL_MINUTES=30
       - EQUILENS_BACKUP_RETENTION=10
+      - EQUILENS_BACKUP_DIR=/workspace/backups
     restart: unless-stopped
     depends_on:
       ollama:
@@ -50,7 +51,8 @@ services:
 
 volumes:
   ollama_data:
-    external: true
+    driver: local
+    name: equilens-ollama-data
   equilens_data:
     driver: local
     name: equilens-data

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # FastAPI Backend
   backend:
@@ -7,7 +5,7 @@ services:
       context: ..
       dockerfile: infra/Dockerfile
     container_name: equilens-backend
-    command: .venv/bin/python -m equilens.backend_server
+    command: /workspace/.venv/bin/python -m equilens.backend_server
     ports:
       - "8000:8000"
     environment:
@@ -21,7 +19,8 @@ services:
     networks:
       - equilens-network
     depends_on:
-      - ollama
+      ollama:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
@@ -36,7 +35,7 @@ services:
       context: ..
       dockerfile: infra/Dockerfile
     container_name: equilens-frontend
-    command: .venv/bin/python -m equilens.gradio_app
+    command: /workspace/.venv/bin/python -m equilens.gradio_app
     ports:
       - "7860:7860"
     environment:
@@ -64,6 +63,13 @@ services:
     networks:
       - equilens-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    # Requires NVIDIA GPU + nvidia-container-toolkit on host
     deploy:
       resources:
         reservations:
