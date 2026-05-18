@@ -82,10 +82,11 @@ Phase 3: Statistical Analysis
 
 ### Developer Experience
 - **One command** via UV: `uv run equilens web`
-- **One command** via Docker: `docker compose up`
-- Dual interface — rich Terminal CLI + Gradio web UI
-- Background job system with real-time progress tracking
+- **One command** via Docker: `docker compose -f infra/docker-compose.yml up`
+- Dual interface — rich Terminal CLI + built-in web dashboard (Alpine.js, no build step)
+- Background job system with real-time SSE log streaming
 - Automatic port management, Docker detection, GPU detection
+- Periodic automated backups with configurable retention
 
 ---
 
@@ -100,8 +101,8 @@ uv tool install git+https://github.com/Life-Experimentalist/EquiLens.git
 # Start Ollama
 ollama serve && ollama pull llama3.2:latest
 
-# Run immediately
-equilens web          # → http://localhost:7860
+# Launch dashboard
+equilens web          # → http://localhost:8000
 equilens --help       # see all commands
 ```
 
@@ -122,10 +123,10 @@ uv sync
 ollama serve
 ollama pull llama3.2:latest
 
-# Launch full stack
+# Launch dashboard — single command, single server
 uv run equilens web
-# → Web UI: http://localhost:7860
-# → API:    http://localhost:8000
+# → Dashboard: http://localhost:8000
+# → API docs:  http://localhost:8000/docs
 ```
 
 ### Option 3 — Docker (One Command)
@@ -133,13 +134,13 @@ uv run equilens web
 ```bash
 git clone https://github.com/Life-Experimentalist/EquiLens.git
 cd EquiLens
-docker compose up
-# → Web UI:     http://localhost:7860
-# → API docs:   http://localhost:8000/docs
-# → Ollama:     http://localhost:11434
+docker compose -f infra/docker-compose.yml up
+# → Dashboard: http://localhost:8000
+# → API docs:  http://localhost:8000/docs
+# → Ollama:    http://localhost:11434
 ```
 
-### Option 3 — CLI Pipeline
+### Option 4 — CLI Pipeline (No Web UI)
 
 ```bash
 uv sync
@@ -160,12 +161,14 @@ uv run equilens analyze results/audit_*.csv
 
 | Command | Description |
 |---------|-------------|
-| `equilens web` | Launch backend + Gradio web UI |
-| `equilens backend` | Launch FastAPI backend only |
+| `equilens web` | Launch dashboard + API server at http://localhost:8000 |
+| `equilens backend` | Launch FastAPI backend only (API-only mode) |
 | `equilens audit --model <name>` | Run bias audit against a model |
 | `equilens analyze <results.csv>` | Run statistical analysis |
 | `equilens generate-corpus` | Generate a new prompt corpus |
 | `equilens status` | System health check (Ollama, Docker, GPU) |
+
+Full dashboard documentation: [docs/DASHBOARD.md](docs/DASHBOARD.md)
 
 ---
 
@@ -173,10 +176,11 @@ uv run equilens analyze results/audit_*.csv
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│                        EquiLens v2.0                           │
+│                        EquiLens v2.2                           │
 ├──────────────────────────┬─────────────────────────────────────┤
-│   Web UI (Gradio)        │   CLI (Typer + Rich)                │
-│   + FastAPI Backend      │   No backend required               │
+│   Dashboard (Alpine.js)  │   CLI (Typer + Rich)                │
+│   FastAPI + Jinja2       │   No backend required               │
+│   http://localhost:8000  │                                     │
 ├──────────────────────────┴─────────────────────────────────────┤
 │                     Core Pipeline                              │
 │   Phase 1: Corpus Gen → Phase 2: Audit → Phase 3: Analyze     │

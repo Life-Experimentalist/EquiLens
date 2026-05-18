@@ -27,9 +27,13 @@ Phase 3 — Analytics (src/Phase3_Analysis/)
 
 equilens package (src/equilens/)
   cli.py                   Typer CLI — `equilens` command
-  gradio_app.py            Gradio web UI (connects to backend)
-  web_ui.py                Legacy standalone Gradio UI (no backend needed)
-  backend/api.py           FastAPI REST backend with job queue
+  backend_server.py        uvicorn launcher (used by `equilens web`)
+  backup.py                APScheduler-based periodic backup + retention
+  dashboard/
+    routes.py              Jinja2 HTML page routes (6 pages)
+    templates/             base.html + 6 page templates (Alpine.js + Chart.js CDN)
+    static/                style.css (CSS design system) + app.js (Alpine utils)
+  backend/api.py           FastAPI REST backend + dashboard router + SSE endpoint
   backend/jobs.py          Background job runners
   backend/database.py      SQLite job tracking
   telemetry.py             Stats counters (seed from data/telemetry.json)
@@ -39,14 +43,16 @@ equilens package (src/equilens/)
     ports.py               Dynamic port management
     docker.py              Docker service management
     gpu.py                 GPU/CUDA detection
+
+infra/                     Docker/infrastructure files (Dockerfile, docker-compose.yml, etc.)
 ```
 
 ## Key entry points
 
 | Command | What it does |
 |---------|-------------|
-| `uv run equilens web` | Launches full-stack (backend + Gradio frontend) |
-| `uv run equilens backend` | Launches FastAPI backend only (port 8000) |
+| `uv run equilens web` | Launches single FastAPI server with built-in dashboard at :8000 |
+| `uv run equilens backend` | Launches FastAPI backend only (API-only, same server) |
 | `uv run equilens audit --model llama3.2` | CLI bias audit |
 | `uv run equilens analyze <results.csv>` | CLI analysis |
 | `uv run equilens status` | System health check |
@@ -64,9 +70,11 @@ uv run ruff format src/  # format
 ## Critical constraints
 
 - **Never** break the three-phase pipeline independence — Phase 1 output (CSV) must work as Phase 2 input without modification.
-- `web_ui.py` is the **legacy standalone** UI (no backend needed). `gradio_app.py` is the **new** UI that requires the FastAPI backend. Do not merge them.
+- The dashboard is served by the same FastAPI process as the REST API. No separate server. No Gradio. `gradio_app.py`, `web_ui.py`, and `start_all.py` have been deleted — do not recreate them.
 - Ollama URL detection is environment-aware: local gets `localhost:11434`, Docker gets `host.docker.internal:11434`. Don't hardcode URLs.
 - The `data/telemetry.json` seed counters are intentional — they represent the "baseline" for the stats bar. Don't reset them to 0.
+- Backup paths in `backup.py` are anchored to `_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent` — not CWD. This is required for APScheduler which runs in a background thread with an unpredictable CWD. Do not change to relative paths.
+- Docker files live in `infra/` only. Docker commands use `docker compose -f infra/docker-compose.yml`.
 
 ## Bias categories covered
 
