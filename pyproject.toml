@@ -38,7 +38,7 @@ dependencies = [
     # Web UI + REST backend
     "fastapi>=0.104.0",
     "uvicorn>=0.24.0",
-    "python-multipart>=0.0.6",
+    "python-multipart>=0.0.27",
     # Analytics + visualisation
     "matplotlib>=3.6.0",
     "seaborn>=0.13.2",
