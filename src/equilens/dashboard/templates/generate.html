@@ -1,1 +1,142 @@
-<!DOCTYPE html><html><head><title>EquiLens</title></head><body><h1>EquiLens</h1></body></html>
+{% extends "base.html" %}
+{% block title %}Generate{% endblock %}
+
+{% block content %}
+<div x-data="generatePage()" x-init="init()">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <h1 class="page-title">Generate Corpus</h1>
+    <p class="page-subtitle">Create a test corpus for bias auditing</p>
+  </div>
+
+  <!-- Form card -->
+  <div class="card" style="margin-bottom:1.5rem">
+    <h2 class="card-title">Configure Generation</h2>
+
+    <div class="form-group">
+      <label class="form-label" for="config-file">Config File Path</label>
+      <input
+        id="config-file"
+        type="text"
+        class="form-input"
+        x-model="form.config_file"
+        placeholder="Leave empty to use defaults"
+        :disabled="submitting"
+      />
+    </div>
+
+    <div style="margin-top:1rem">
+      <button
+        type="button"
+        class="btn btn-primary"
+        @click="submitGenerate()"
+        :disabled="submitting"
+      >
+        <span x-show="!submitting">Generate Corpus</span>
+        <span x-show="submitting">Running&hellip;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Live log viewer (shown after a job starts) -->
+  <div x-show="jobId !== null" class="card">
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem">
+      <h2 class="card-title" style="margin:0">Live Log</h2>
+
+      <!-- Status badge -->
+      <span x-show="jobStatus === 'running'"   class="badge badge-running">Running</span>
+      <span x-show="jobStatus === 'completed'" class="badge badge-completed">Completed</span>
+      <span x-show="jobStatus === 'failed'"    class="badge badge-failed">Failed</span>
+
+      <!-- Job ID -->
+      <span x-show="jobId" style="font-size:0.75rem;color:var(--color-text-muted,#888)" x-text="'Job: ' + jobId"></span>
+    </div>
+
+    <!-- Completion / failure alerts -->
+    <div x-show="jobStatus === 'completed'" class="alert alert-info" style="margin-bottom:0.75rem">
+      Corpus generation complete. Check the Audit page to use it.
+    </div>
+    <div x-show="jobStatus === 'failed'" class="alert alert-error" style="margin-bottom:0.75rem">
+      Generation failed. Review the log below for details.
+    </div>
+
+    <!-- Log panel -->
+    <div class="log-panel" x-ref="logPanel">
+      <template x-for="(line, idx) in logs" :key="idx">
+        <div
+          class="log-line"
+          :class="{
+            'log-error':   line.level === 'error',
+            'log-warning': line.level === 'warning',
+            'log-info':    line.level === 'info'
+          }"
+          x-text="line.message"
+        ></div>
+      </template>
+      <div x-show="logs.length === 0" style="color:var(--color-text-muted,#888);font-style:italic">
+        Waiting for log output&hellip;
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function generatePage() {
+  return {
+    form: { config_file: '' },
+    jobId: null,
+    jobStatus: null,
+    logs: [],
+    submitting: false,
+
+    init() {
+      // nothing to pre-load
+    },
+
+    async submitGenerate() {
+      this.submitting = true;
+      this.jobId      = null;
+      this.logs       = [];
+      this.jobStatus  = 'running';
+
+      const config = {};
+      if (this.form.config_file.trim()) {
+        config.config_file = this.form.config_file.trim();
+      }
+
+      try {
+        const res = await apiPost('/api/jobs', {
+          job_type: 'corpus_generation',
+          config,
+        });
+
+        this.jobId = res.job_id;
+        this.startStream(res.job_id);
+      } catch (e) {
+        this.jobStatus  = 'failed';
+        this.submitting = false;
+      }
+    },
+
+    startStream(jobId) {
+      streamJobLogs(
+        jobId,
+        (logEntry) => {
+          this.logs.push(logEntry);
+          this.$nextTick(() => scrollBottom(this.$refs.logPanel));
+        },
+        (finalStatus) => {
+          this.jobStatus  = finalStatus;
+          this.submitting = false;
+          this.$nextTick(() => scrollBottom(this.$refs.logPanel));
+        }
+      );
+    },
+  };
+}
+</script>
+{% endblock %}
