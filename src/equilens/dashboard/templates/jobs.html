@@ -1,1 +1,199 @@
-<!DOCTYPE html><html><head><title>EquiLens</title></head><body><h1>EquiLens</h1></body></html>
+{% extends "base.html" %}
+{% block title %}Jobs{% endblock %}
+
+{% block content %}
+<div x-data="jobsPage()" x-init="init()">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <h1 class="page-title">Jobs</h1>
+    <p class="page-subtitle">Manage background tasks</p>
+  </div>
+
+  <!-- Filter tabs -->
+  <div style="display:flex;gap:0.5rem;margin-bottom:1.25rem;flex-wrap:wrap">
+    <template x-for="tab in ['all','running','completed','failed','cancelled']" :key="tab">
+      <button
+        type="button"
+        class="btn btn-sm"
+        :class="filter === tab ? 'btn-primary' : 'btn-secondary'"
+        @click="filter = tab; fetchJobs()"
+        x-text="tab.charAt(0).toUpperCase() + tab.slice(1)"
+      ></button>
+    </template>
+  </div>
+
+  <!-- Loading skeleton -->
+  <div x-show="loading" class="card" style="padding:2rem;text-align:center">
+    <span>Loading jobs&hellip;</span>
+  </div>
+
+  <!-- Empty state -->
+  <div x-show="!loading && jobs.length === 0" class="card" style="padding:2rem;text-align:center">
+    <p style="color:var(--color-text-muted,#888)">No jobs found</p>
+  </div>
+
+  <!-- Jobs table -->
+  <div x-show="!loading && jobs.length > 0" class="card" style="padding:0;overflow:hidden">
+    <div class="table-wrap" style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:0.875rem">
+        <thead>
+          <tr style="text-align:left;border-bottom:1px solid var(--color-border,#e5e7eb)">
+            <th style="padding:0.75rem 1rem">Job ID</th>
+            <th style="padding:0.75rem 1rem">Type</th>
+            <th style="padding:0.75rem 1rem">Status</th>
+            <th style="padding:0.75rem 1rem;min-width:120px">Progress</th>
+            <th style="padding:0.75rem 1rem">Created</th>
+            <th style="padding:0.75rem 1rem">Duration</th>
+            <th style="padding:0.75rem 1rem">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="job in jobs" :key="job.job_id">
+            <!-- Main row -->
+            <tr style="border-bottom:1px solid var(--color-border,#e5e7eb)">
+              <td style="padding:0.625rem 1rem;font-family:monospace;font-size:0.8rem"
+                  x-text="job.job_id.slice(0, 20)"
+                  :title="job.job_id"></td>
+              <td style="padding:0.625rem 1rem" x-text="job.job_type"></td>
+              <td style="padding:0.625rem 1rem">
+                <span class="badge" :class="badgeClass(job.status)" x-text="job.status"></span>
+              </td>
+              <td style="padding:0.625rem 1rem">
+                <div x-show="job.total > 0">
+                  <div class="progress-bar" style="margin-bottom:0.25rem">
+                    <div
+                      class="progress-fill"
+                      :style="'width:' + Math.round((job.progress / job.total) * 100) + '%'"
+                    ></div>
+                  </div>
+                  <span style="font-size:0.75rem;color:var(--color-text-muted,#888)"
+                        x-text="Math.round((job.progress / job.total) * 100) + '%'"></span>
+                </div>
+                <span x-show="!(job.total > 0)" style="color:var(--color-text-muted,#888);font-size:0.8rem">—</span>
+              </td>
+              <td style="padding:0.625rem 1rem;white-space:nowrap" x-text="fmtDate(job.created_at)"></td>
+              <td style="padding:0.625rem 1rem;white-space:nowrap" x-text="fmtDuration(job.created_at, job.completed_at)"></td>
+              <td style="padding:0.625rem 1rem">
+                <div style="display:flex;gap:0.375rem;flex-wrap:wrap">
+                  <!-- Logs toggle -->
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-secondary"
+                    @click="toggleLogs(job.job_id)"
+                    x-text="expandedJob === job.job_id ? 'Hide' : 'Logs'"
+                  ></button>
+
+                  <!-- Cancel: running or queued -->
+                  <button
+                    x-show="job.status === 'running' || job.status === 'queued'"
+                    type="button"
+                    class="btn btn-sm btn-secondary"
+                    @click="cancelJob(job.job_id)"
+                  >Cancel</button>
+
+                  <!-- Retry: failed or cancelled -->
+                  <button
+                    x-show="job.status === 'failed' || job.status === 'cancelled'"
+                    type="button"
+                    class="btn btn-sm btn-secondary"
+                    @click="retryJob(job.job_id)"
+                  >Retry</button>
+
+                  <!-- Delete: not running -->
+                  <button
+                    x-show="job.status !== 'running'"
+                    type="button"
+                    class="btn btn-sm btn-danger"
+                    @click="deleteJob(job.job_id)"
+                  >Delete</button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Expanded log panel row -->
+            <tr x-show="expandedJob === job.job_id" class="row-expand">
+              <td colspan="7" style="padding:0;background:var(--color-bg-alt,#f9fafb)">
+                <div style="padding:0.75rem 1rem">
+                  <div class="log-panel">
+                    <template x-if="expandedLogs[job.job_id] && expandedLogs[job.job_id].length > 0">
+                      <div>
+                        <template x-for="(line, idx) in expandedLogs[job.job_id]" :key="idx">
+                          <div
+                            class="log-line"
+                            :class="{
+                              'log-error':   line.level === 'error',
+                              'log-warning': line.level === 'warning',
+                              'log-info':    line.level === 'info'
+                            }"
+                            x-text="line.message"
+                          ></div>
+                        </template>
+                      </div>
+                    </template>
+                    <template x-if="!expandedLogs[job.job_id] || expandedLogs[job.job_id].length === 0">
+                      <div style="color:var(--color-text-muted,#888);font-style:italic">No logs yet</div>
+                    </template>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function jobsPage() {
+  return {
+    jobs: [],
+    filter: 'all',
+    expandedJob: null,
+    expandedLogs: {},
+    loading: true,
+
+    async init() {
+      await this.fetchJobs();
+      setInterval(() => this.fetchJobs(), 5000);
+    },
+
+    async fetchJobs() {
+      const params = this.filter !== 'all' ? '?status=' + this.filter : '';
+      const data = await apiGet('/api/jobs' + params);
+      this.jobs = data;
+      this.loading = false;
+    },
+
+    async toggleLogs(jobId) {
+      if (this.expandedJob === jobId) { this.expandedJob = null; return; }
+      this.expandedJob = jobId;
+      if (!this.expandedLogs[jobId]) {
+        const data = await apiGet('/api/jobs/' + jobId + '/logs?limit=100');
+        this.expandedLogs[jobId] = data.logs;
+      }
+    },
+
+    async cancelJob(jobId) {
+      await apiPost('/api/jobs/' + jobId + '/cancel');
+      await this.fetchJobs();
+    },
+
+    async retryJob(jobId) {
+      await apiPost('/api/jobs/' + jobId + '/retry');
+      await this.fetchJobs();
+    },
+
+    async deleteJob(jobId) {
+      await apiDelete('/api/jobs/' + jobId);
+      if (this.expandedJob === jobId) this.expandedJob = null;
+      await this.fetchJobs();
+    },
+  };
+}
+</script>
+{% endblock %}
