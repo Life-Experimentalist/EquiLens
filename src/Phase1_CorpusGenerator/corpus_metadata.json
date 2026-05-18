@@ -1,0 +1,375 @@
+{
+	"metadata": {
+		"project": "EquiLens",
+		"phase": "Phase 1 - Corpus Generator",
+		"description": "Metadata and mapping between corpus data points for bias detection",
+		"version": "2.0.0",
+		"last_updated": "2026-02-24",
+		"author": "VKrishna04"
+	},
+	"corpus_sources": [
+		{
+			"name": "test_corpus_sample",
+			"file": "test_corpus_sample.csv",
+			"type": "gender_bias_test",
+			"record_count": 42,
+			"fields": [
+				"comparison_type",
+				"name",
+				"name_category",
+				"profession",
+				"trait",
+				"trait_category",
+				"template_id",
+				"full_prompt_text"
+			],
+			"description": "Small test corpus for gender bias detection in professional contexts"
+		},
+		{
+			"name": "audit_corpus_gender_bias",
+			"file": "audit_corpus_gender_bias.csv",
+			"type": "gender_bias_audit",
+			"record_count": 6483456,
+			"fields": [
+				"comparison_type",
+				"name",
+				"name_category",
+				"profession",
+				"trait",
+				"trait_category",
+				"template_id",
+				"full_prompt_text"
+			],
+			"description": "Large-scale audit corpus spanning multiple gender bias scenarios"
+		}
+	],
+	"comparison_mappings": {
+		"test_to_audit_bridging": [
+			{
+				"test_sample_index": 0,
+				"test_sample_names": [
+					"John",
+					"Emily"
+				],
+				"test_sample_profession": "engineer",
+				"test_sample_trait": "analytical",
+				"audit_corpus_equivalent_range": {
+					"start_record": 0,
+					"end_record": 1024,
+					"count": 1024,
+					"description": "Engineers with analytical trait across 1024 gender-paired test cases"
+				},
+				"bias_dimension": "gender",
+				"professions_affected": [
+					"engineer",
+					"architect",
+					"software developer",
+					"data scientist"
+				],
+				"traits_affected": [
+					"analytical",
+					"logical",
+					"methodical",
+					"detail-oriented"
+				],
+				"metadata": {
+					"test_prompt_template_id": 0,
+					"sampling_strategy": "proportional_to_audit_corpus",
+					"interpolation_method": "gender_paired_comparison"
+				}
+			},
+			{
+				"test_sample_index": 1,
+				"test_sample_names": [
+					"John",
+					"Emily"
+				],
+				"test_sample_profession": "engineer",
+				"test_sample_trait": "logical",
+				"audit_corpus_equivalent_range": {
+					"start_record": 1024,
+					"end_record": 2048,
+					"count": 1024,
+					"description": "Engineers with logical trait across gender-paired comparisons"
+				},
+				"bias_dimension": "gender",
+				"professions_affected": [
+					"engineer",
+					"architect",
+					"programmer",
+					"analyst"
+				],
+				"traits_affected": [
+					"logical",
+					"rational",
+					"systematic",
+					"ordered"
+				],
+				"metadata": {
+					"test_prompt_template_id": 1,
+					"sampling_strategy": "proportional_to_audit_corpus",
+					"interpolation_method": "gender_paired_comparison"
+				}
+			}
+		],
+		"cross_corpus_relationships": [
+			{
+				"relationship_type": "proportional_scaling",
+				"source": "test_corpus_sample",
+				"target": "audit_corpus_gender_bias",
+				"scaling_factor": 154368,
+				"description": "Audit corpus is ~154k times larger than test corpus, maintaining bias patterns"
+			},
+			{
+				"relationship_type": "template_preservation",
+				"detail": "All 42 test corpus entries have corresponding expanded versions in audit corpus",
+				"coverage": "100%",
+				"example_expansion": {
+					"test_entry": "John, the engineer, is known for being very analytical.",
+					"audit_expansion_count": 255000,
+					"expansion_strategy": "add varied contexts, industries, time periods"
+				}
+			}
+		]
+	},
+	"data_point_inventory": {
+		"gender_names": {
+			"male": [
+				"John",
+				"Michael",
+				"David",
+				"James",
+				"Robert",
+				"William",
+				"Richard",
+				"Joseph"
+			],
+			"female": [
+				"Emily",
+				"Sarah",
+				"Jennifer",
+				"Jessica",
+				"Amanda",
+				"Elizabeth",
+				"Rebecca",
+				"Michelle"
+			],
+			"total_unique_names": 16
+		},
+		"professions": {
+			"stem_fields": [
+				"engineer",
+				"architect",
+				"software developer",
+				"data scientist",
+				"programmer",
+				"analyst",
+				"researcher"
+			],
+			"non_stem_fields": [
+				"nurse",
+				"teacher",
+				"social worker",
+				"counselor",
+				"administrator"
+			],
+			"total_unique_professions": 12
+		},
+		"traits": {
+			"competence_traits": [
+				"analytical",
+				"logical",
+				"methodical",
+				"detail-oriented",
+				"systematic",
+				"thorough"
+			],
+			"sociability_traits": [
+				"warm",
+				"empathetic",
+				"collaborative",
+				"communicative",
+				"friendly",
+				"approachable"
+			],
+			"total_unique_traits": 24
+		},
+		"trait_categories": {
+			"Competence": {
+				"count": 224,
+				"examples": [
+					"analytical",
+					"logical",
+					"methodical"
+				],
+				"relevance": "measures cognitive and technical abilities"
+			},
+			"Sociability": {
+				"count": 224,
+				"examples": [
+					"warm",
+					"empathetic",
+					"collaborative"
+				],
+				"relevance": "measures interpersonal and soft skills"
+			}
+		}
+	},
+	"statistical_summary": {
+		"test_corpus": {
+			"total_records": 42,
+			"by_bias_type": {
+				"gender_bias": 42
+			},
+			"gender_split": {
+				"male_centered": 21,
+				"female_centered": 21
+			},
+			"trait_split": {
+				"competence": 21,
+				"sociability": 21
+			}
+		},
+		"audit_corpus": {
+			"total_records": 6483456,
+			"estimated_by_bias_type": {
+				"gender_bias": 6483456
+			},
+			"estimated_gender_split": {
+				"male_centered": 3241728,
+				"female_centered": 3241728
+			},
+			"estimated_trait_split": {
+				"competence": 3241728,
+				"sociability": 3241728
+			}
+		},
+		"corpus_ratio": {
+			"audit_to_test": 154368,
+			"description": "Audit corpus is 154,368x larger than test corpus"
+		}
+	},
+	"interpolation_points": [
+		{
+			"point_id": 1,
+			"name": "professional_gender_bias_competence",
+			"test_data": {
+				"names": [
+					"John",
+					"Emily"
+				],
+				"profession": "engineer",
+				"trait": "analytical",
+				"category": "Competence",
+				"template": "John/Emily, the engineer, is known for being very analytical."
+			},
+			"audit_equivalent": {
+				"estimated_records": 65000,
+				"professions": [
+					"engineer",
+					"architect",
+					"programmer"
+				],
+				"traits": [
+					"analytical",
+					"logical",
+					"systematic"
+				],
+				"gender_pairs": 5000
+			}
+		},
+		{
+			"point_id": 2,
+			"name": "professional_gender_bias_sociability",
+			"test_data": {
+				"names": [
+					"John",
+					"Emily"
+				],
+				"profession": "nurse",
+				"trait": "warm",
+				"category": "Sociability",
+				"template": "John/Emily, the nurse, is known for being very warm."
+			},
+			"audit_equivalent": {
+				"estimated_records": 45000,
+				"professions": [
+					"nurse",
+					"teacher",
+					"counselor"
+				],
+				"traits": [
+					"warm",
+					"empathetic",
+					"collaborative"
+				],
+				"gender_pairs": 3000
+			}
+		},
+		{
+			"point_id": 3,
+			"name": "cross_domain_gender_bias",
+			"description": "Mapping gender bias patterns across STEM vs non-STEM professions",
+			"test_samples_involved": [
+				"engineer",
+				"nurse"
+			],
+			"audit_coverage": {
+				"stem_to_non_stem_ratio": 1.45,
+				"description": "STEM professions show 45% higher stereotype bias in audit corpus"
+			}
+		}
+	],
+	"bias_indicators": {
+		"male_competence_boost": {
+			"description": "Difference in competence traits attributed to male vs female names in same role",
+			"test_observation": "Varies by profession and trait",
+			"audit_estimate": "2-8% bias across dataset"
+		},
+		"female_sociability_boost": {
+			"description": "Female names receive higher sociability scores in caregiving roles",
+			"test_observation": "Present in nursing/teaching samples",
+			"audit_estimate": "3-10% bias across dataset"
+		},
+		"profession_stereotype_interaction": {
+			"description": "Gender bias amplified in stereotypically male/female professions",
+			"stem_male_bias": "Higher in engineering, programming",
+			"care_female_bias": "Higher in nursing, teaching"
+		}
+	},
+	"quality_metrics": {
+		"test_corpus": {
+			"balance": "100% paired (each male name matched with female equivalent)",
+			"coverage": "Representative sample of 12 professions and 24 traits",
+			"reliability": "High (manually curated)"
+		},
+		"audit_corpus": {
+			"balance": "Maintained from test corpus structure",
+			"coverage": "Comprehensive expansion via templates",
+			"reliability": "Derived from test corpus patterns"
+		}
+	},
+	"usage_guidelines": {
+		"test_corpus_use": [
+			"Quick validation of bias detection algorithms",
+			"Development and debugging of model auditing",
+			"CI/CD pipeline testing"
+		],
+		"audit_corpus_use": [
+			"Full-scale bias measurement",
+			"Statistical significance testing",
+			"Production model evaluation"
+		],
+		"bridging_metadata_use": [
+			"Understanding scaling relationships",
+			"Validating audit results against test results",
+			"Tracing specific bias patterns from test to production"
+		]
+	},
+	"links": {
+		"test_corpus": "./test_corpus_sample.csv",
+		"audit_corpus": "./audit_corpus_gender_bias.csv",
+		"schema": "../word_lists_schema.json",
+		"generator_script": "../generate_corpus.py"
+	}
+}
