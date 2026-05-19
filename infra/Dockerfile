@@ -7,9 +7,8 @@ LABEL org.opencontainers.image.licenses="Apache-2.0"
 LABEL org.opencontainers.image.version="2.2.0"
 
 RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
-    curl git ca-certificates && \
-    rm -rf /var/lib/apt/lists/* && \
-    apt-get clean && apt-get autoremove -y
+    curl ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
     pip install --no-cache-dir uv
@@ -21,31 +20,30 @@ RUN useradd -m -u 1000 -s /bin/bash equilens && \
 USER equilens
 WORKDIR /workspace
 
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONIOENCODING=utf-8 \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    PYTHONPATH=/workspace/src:/workspace \
+    PATH="/workspace/.venv/bin:$PATH" \
+    OLLAMA_BASE_URL=http://host.docker.internal:11434 \
+    EQUILENS_BACKUP_INTERVAL_MINUTES=30 \
+    EQUILENS_BACKUP_RETENTION=10
+
 COPY --chown=equilens:equilens pyproject.toml README.md ./
 COPY --chown=equilens:equilens uv.lock* ./
 
 RUN --mount=type=cache,target=/home/equilens/.cache/uv,uid=1000,gid=1000 \
-    uv sync --frozen --no-dev || uv sync --no-dev
+    uv sync --frozen --no-dev
 
 COPY --chown=equilens:equilens . .
 
 RUN mkdir -p data/results data/logs data/corpus src/Phase1_CorpusGenerator/corpus public backups && \
-    chmod -R 755 data backups && \
-    find . -name "*.pyc" -delete && \
-    find . -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
+    chmod -R 755 data backups
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD curl -f http://localhost:8000/api/health || exit 1
 
 EXPOSE 8000
 
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONIOENCODING=utf-8 \
-    LANG=C.UTF-8 \
-    LC_ALL=C.UTF-8 \
-    PYTHONPATH=/workspace/src:/workspace \
-    OLLAMA_BASE_URL=http://localhost:11434 \
-    EQUILENS_BACKUP_INTERVAL_MINUTES=30 \
-    EQUILENS_BACKUP_RETENTION=10
-
-CMD [".venv/bin/equilens", "web"]
+CMD ["/workspace/.venv/bin/equilens", "web"]
