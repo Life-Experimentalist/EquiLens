@@ -50,7 +50,7 @@ equilens package (src/equilens/)
 | `uv run equilens audit --model llama3.2` | CLI bias audit |
 | `uv run equilens analyze <results.csv>` | CLI analysis |
 | `uv run equilens status` | System health check |
-| `docker compose up` | Full Docker stack |
+| `docker compose -f infra/docker-compose.yml up` | Full Docker stack |
 
 ## Dev workflow
 
