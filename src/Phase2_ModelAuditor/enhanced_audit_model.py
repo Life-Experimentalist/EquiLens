@@ -66,23 +66,21 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Custom stream handler that handles Unicode properly
-console_handler = logging.StreamHandler(sys.stdout)
-console_handler.setLevel(logging.INFO)
 
-# Set encoding to UTF-8 with error handling for Windows compatibility
-try:
-    if sys.platform == "win32":
-        import io
+def _configure_utf8_stdio() -> None:
+    """Reconfigure stdout/stderr for UTF-8 on Windows (call from main only)."""
+    try:
+        if sys.platform == "win32":
+            import io
 
-        sys.stdout = io.TextIOWrapper(
-            sys.stdout.buffer, encoding="utf-8", errors="replace"
-        )
-        sys.stderr = io.TextIOWrapper(
-            sys.stderr.buffer, encoding="utf-8", errors="replace"
-        )
-except Exception:
-    pass  # Fallback to default encoding
+            sys.stdout = io.TextIOWrapper(
+                sys.stdout.buffer, encoding="utf-8", errors="replace"
+            )
+            sys.stderr = io.TextIOWrapper(
+                sys.stderr.buffer, encoding="utf-8", errors="replace"
+            )
+    except Exception:
+        pass
 
 
 @dataclass
@@ -1744,6 +1742,7 @@ class ConfigurableEnhancedAuditor(EnhancedBiasAuditor):
 
 def main():
     """Enhanced main function with Rich CLI"""
+    _configure_utf8_stdio()
     parser = argparse.ArgumentParser(
         description="🎯 EquiLens Enhanced Bias Auditor with Rich Progress Tracking"
     )

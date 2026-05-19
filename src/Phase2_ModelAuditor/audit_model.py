@@ -70,7 +70,7 @@ except ImportError:
 try:
     import colorama
 
-    colorama.init(autoreset=True)  # Initialize colorama for Windows compatibility
+    # colorama.init() is called lazily in main() to avoid wrapping sys.stdout at import
     COLORS_AVAILABLE = True
     # Color constants
     COLOR_CYAN = colorama.Fore.CYAN
@@ -93,35 +93,43 @@ except ImportError:
 log_dir = Path("./logs")
 log_dir.mkdir(exist_ok=True)
 
-# Create a custom stream handler that handles Unicode properly
-console_handler = logging.StreamHandler(sys.stdout)
-console_handler.setLevel(logging.INFO)
-
-# Set encoding to UTF-8 with error handling for Windows compatibility
-try:
-    # Try to reconfigure stdout for UTF-8 on Windows
-    if sys.platform == "win32":
-        import io
-
-        sys.stdout = io.TextIOWrapper(
-            sys.stdout.buffer, encoding="utf-8", errors="replace"
-        )
-        sys.stderr = io.TextIOWrapper(
-            sys.stderr.buffer, encoding="utf-8", errors="replace"
-        )
-except Exception:
-    # If reconfiguration fails, the handler will still work with error replacement
-    pass
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.FileHandler("./logs/audit_session.log", encoding="utf-8"),
-        console_handler,
-    ],
-)
 logger = logging.getLogger(__name__)
+console_handler: logging.Handler = logging.NullHandler()
+
+
+def _configure_utf8_stdio() -> None:
+    """Configure terminal output for Windows (call from main only)."""
+    try:
+        if sys.platform == "win32":
+            sys.stdout = io.TextIOWrapper(
+                sys.stdout.buffer, encoding="utf-8", errors="replace"
+            )
+            sys.stderr = io.TextIOWrapper(
+                sys.stderr.buffer, encoding="utf-8", errors="replace"
+            )
+    except Exception:
+        pass
+    if COLORS_AVAILABLE:
+        import colorama as _colorama
+
+        _colorama.init(autoreset=True)
+
+
+def _setup_logging() -> None:
+    """Configure root logger with file + console handlers (call from main only)."""
+    global console_handler
+    log_dir = Path("./logs")
+    log_dir.mkdir(exist_ok=True)
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(logging.INFO)
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        handlers=[
+            logging.FileHandler(log_dir / "audit_session.log", encoding="utf-8"),
+            console_handler,
+        ],
+    )
 
 
 class TqdmLoggingHandler(logging.Handler):
@@ -2089,6 +2097,8 @@ class ModelAuditor:
 
 
 def main():
+    _configure_utf8_stdio()
+    _setup_logging()
     parser = argparse.ArgumentParser(
         description="Enhanced EquiLens Model Auditor",
         epilog="Example: uv run equilens audit --model llama2:latest --corpus data.csv --eta-per-test 5.0 --max-workers 3",
