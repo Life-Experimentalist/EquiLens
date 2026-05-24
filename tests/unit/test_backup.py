@@ -9,11 +9,12 @@ import pytest
 
 @pytest.fixture()
 def work_dir(tmp_path, monkeypatch):
-    """Switch cwd to tmp_path and patch BACKUP_DIR."""
+    """Switch cwd to tmp_path and patch BACKUP_DIR and _PROJECT_ROOT."""
     monkeypatch.chdir(tmp_path)
     import equilens.backup as bk
 
     monkeypatch.setattr(bk, "BACKUP_DIR", tmp_path / "backups")
+    monkeypatch.setattr(bk, "_PROJECT_ROOT", tmp_path)
     return tmp_path
 
 

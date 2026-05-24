@@ -7,7 +7,10 @@ from pathlib import Path
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
-BACKUP_DIR = Path(os.getenv("EQUILENS_BACKUP_DIR", "backups"))
+# Project root = three levels up from this file (src/equilens/backup.py)
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+
+BACKUP_DIR = Path(os.getenv("EQUILENS_BACKUP_DIR", str(_PROJECT_ROOT / "backups")))
 DEFAULT_INTERVAL_MINUTES: int = int(os.getenv("EQUILENS_BACKUP_INTERVAL_MINUTES", "30"))
 DEFAULT_RETENTION: int = int(os.getenv("EQUILENS_BACKUP_RETENTION", "10"))
 
@@ -18,15 +21,16 @@ def create_backup() -> Path:
     """Zip results/ and data/jobs/equilens_jobs.db into BACKUP_DIR.
 
     Returns the path to the created zip file.
-    Raises RuntimeError if zipping fails (partial file is cleaned up).
+    Raises RuntimeError if zipping fails; the partial zip file is removed on exception
+    (not guaranteed on SIGKILL or power loss).
     """
     BACKUP_DIR.mkdir(parents=True, exist_ok=True)
     name = f"backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
     zip_path = BACKUP_DIR / name
 
     targets = [
-        Path("results"),
-        Path("data/jobs/equilens_jobs.db"),
+        _PROJECT_ROOT / "results",
+        _PROJECT_ROOT / "data" / "jobs" / "equilens_jobs.db",
     ]
 
     try:
