@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}EquiLens{% endblock %} — EquiLens Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <!-- Chart.js (no defer — must be ready before Alpine components use it) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <!-- Alpine.js (defer, loaded before app.js) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <!-- App utilities (defer) -->
+  <script defer src="/static/app.js"></script>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <div class="layout">
+
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">🔭 EquiLens</div>
+
+      <nav class="sidebar-nav">
+        <a href="/" class="nav-item {% if request.url.path == '/' %}active{% endif %}">
+          <span class="nav-icon">🏠</span> Dashboard
+        </a>
+        <a href="/audit" class="nav-item {% if request.url.path == '/audit' %}active{% endif %}">
+          <span class="nav-icon">🔍</span> Audit
+        </a>
+        <a href="/generate" class="nav-item {% if request.url.path == '/generate' %}active{% endif %}">
+          <span class="nav-icon">⚙️</span> Generate
+        </a>
+        <a href="/analyze" class="nav-item {% if request.url.path == '/analyze' %}active{% endif %}">
+          <span class="nav-icon">📊</span> Analyze
+        </a>
+        <a href="/jobs" class="nav-item {% if request.url.path == '/jobs' %}active{% endif %}">
+          <span class="nav-icon">🗂️</span> Jobs
+        </a>
+        <a href="/results" class="nav-item {% if request.url.path == '/results' %}active{% endif %}">
+          <span class="nav-icon">📁</span> Results
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="dot dot-green"></span>
+        v2.2.0
+      </div>
+    </aside>
+
+    <!-- ── Main ── -->
+    <main class="main">
+
+      <!-- Error banner (Alpine.js driven) -->
+      <div x-data x-show="$store.globalStore.errorVisible" class="error-banner" style="display:none">
+        <span x-text="$store.globalStore.errorMessage"></span>
+        <button class="btn btn-sm" @click="$store.globalStore.clearError()">✕</button>
+      </div>
+
+      <!-- Page content -->
+      <div class="page">
+        {% block content %}{% endblock %}
+      </div>
+
+    </main>
+  </div>
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>
