@@ -1,1 +1,201 @@
-<!DOCTYPE html><html><head><title>EquiLens</title></head><body><h1>EquiLens</h1></body></html>
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div
+  x-data="{
+    data: null,
+    loading: true,
+    backingUp: false,
+    _refreshTimer: null,
+
+    get ollamaOk() {
+      return this.data?.ollama_available ?? false;
+    },
+
+    async init() {
+      await this.fetchData();
+      this._refreshTimer = setInterval(() => this.fetchData(), 5000);
+    },
+
+    async fetchData() {
+      try {
+        this.data = await apiGet('/api/dashboard');
+      } catch (err) {
+        $store.globalStore.showError('Failed to load dashboard: ' + err.message);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async backupNow() {
+      this.backingUp = true;
+      try {
+        await apiPost('/api/backups', {});
+        await this.fetchData();
+      } catch (err) {
+        $store.globalStore.showError('Backup failed: ' + err.message);
+      } finally {
+        this.backingUp = false;
+      }
+    }
+  }"
+>
+
+  <!-- Page header -->
+  <div class="page-header">
+    <h1 class="page-title">Dashboard</h1>
+    <p class="text-muted">System overview</p>
+  </div>
+
+  <!-- Loading state -->
+  <template x-if="loading">
+    <p class="text-muted">Loading&hellip;</p>
+  </template>
+
+  <!-- Main content (once data is loaded) -->
+  <template x-if="!loading && data !== null">
+    <div>
+
+      <!-- Row 1: status cards -->
+      <div class="grid-4">
+
+        <!-- Ollama status -->
+        <div class="card">
+          <div class="card-label text-muted">Ollama</div>
+          <div class="card-value">
+            <span :class="dotClass(ollamaOk)"></span>
+            <span x-text="ollamaOk ? 'Connected' : 'Offline'"></span>
+          </div>
+          <div class="text-muted" x-text="data.ollama_url"></div>
+        </div>
+
+        <!-- Docker mode -->
+        <div class="card">
+          <div class="card-label text-muted">Docker Mode</div>
+          <div class="card-value" x-text="data.docker_detected ? 'Yes' : 'No'"></div>
+        </div>
+
+        <!-- Active jobs -->
+        <div class="card">
+          <div class="card-label text-muted">Active Jobs</div>
+          <div class="card-value">
+            <a href="/jobs" x-text="data.active_jobs_count"></a>
+          </div>
+        </div>
+
+        <!-- Backup count -->
+        <div class="card">
+          <div class="card-label text-muted">Backups</div>
+          <div class="card-value" x-text="data.backup_count"></div>
+        </div>
+
+      </div>
+
+      <!-- Row 2: backup + scheduler cards -->
+      <div class="grid-2">
+
+        <!-- Last backup -->
+        <div class="card">
+          <div class="card-label text-muted">Last Backup</div>
+
+          <template x-if="data.last_backup">
+            <div>
+              <div x-text="data.last_backup.name"></div>
+              <div class="text-muted">
+                <span x-text="fmtBytes(data.last_backup.size)"></span>
+                &mdash;
+                <span x-text="fmtDate(data.last_backup.created_at)"></span>
+              </div>
+            </div>
+          </template>
+
+          <template x-if="!data.last_backup">
+            <div class="text-muted">No backups yet</div>
+          </template>
+
+          <div class="card-actions">
+            <button
+              class="btn btn-primary btn-sm"
+              :disabled="backingUp"
+              @click="backupNow()"
+              x-text="backingUp ? 'Backing up…' : 'Backup Now'"
+            ></button>
+          </div>
+        </div>
+
+        <!-- Next backup / scheduler -->
+        <div class="card">
+          <div class="card-label text-muted">Scheduled Backup</div>
+
+          <template x-if="data.scheduler">
+            <div>
+              <div>
+                <span :class="dotClass(data.scheduler.running)"></span>
+                <span x-text="data.scheduler.running ? 'Scheduler running' : 'Scheduler stopped'"></span>
+              </div>
+              <div class="text-muted">
+                Next run: <span x-text="fmtDate(data.scheduler.next_run)"></span>
+              </div>
+            </div>
+          </template>
+
+          <template x-if="!data.scheduler">
+            <div class="text-muted">No scheduler configured</div>
+          </template>
+        </div>
+
+      </div>
+
+      <!-- Recent jobs (full width) -->
+      <div class="card">
+        <div class="card-label text-muted">Recent Jobs</div>
+
+        <template x-if="data.recent_jobs && data.recent_jobs.length > 0">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Job ID</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Progress</th>
+                  <th>Created</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-for="job in data.recent_jobs" :key="job.job_id">
+                  <tr>
+                    <td x-text="job.job_id"></td>
+                    <td x-text="job.job_type"></td>
+                    <td>
+                      <span :class="badgeClass(job.status)" x-text="job.status"></span>
+                    </td>
+                    <td>
+                      <div class="progress-bar">
+                        <div class="progress-fill" :style="'width:' + (job.progress ?? 0) + '%'"></div>
+                      </div>
+                      <span class="text-muted" x-text="(job.progress ?? 0) + '%'"></span>
+                    </td>
+                    <td x-text="fmtDate(job.created_at)"></td>
+                    <td>
+                      <a href="/jobs" class="btn btn-sm">View</a>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </template>
+
+        <template x-if="!data.recent_jobs || data.recent_jobs.length === 0">
+          <p class="text-muted">No jobs yet</p>
+        </template>
+      </div>
+
+    </div>
+  </template>
+
+</div>
+{% endblock %}
