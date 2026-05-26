@@ -1,1 +1,322 @@
-<!DOCTYPE html><html><head><title>EquiLens</title></head><body><h1>EquiLens</h1></body></html>
+{% extends "base.html" %}
+{% block title %}Audit{% endblock %}
+
+{% block content %}
+<div x-data="auditPage()" x-init="init()">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <h1 class="page-title">Audit</h1>
+    <p class="page-subtitle">Run a bias audit against a model using a corpus file.</p>
+  </div>
+
+  <!-- Loading skeleton -->
+  <div x-show="loading" class="card" style="padding:2rem;text-align:center">
+    <span>Loading models and corpus&hellip;</span>
+  </div>
+
+  <!-- Main form card -->
+  <div x-show="!loading" class="card" style="margin-bottom:1.5rem">
+    <h2 class="card-title">Configure Audit</h2>
+
+    <!-- Model selector -->
+    <div class="form-group">
+      <label class="form-label" for="model-select">Model</label>
+
+      <!-- No models warning -->
+      <div x-show="models.length === 0" class="alert alert-error" style="margin-bottom:0.5rem">
+        No models available — start Ollama first
+      </div>
+
+      <select
+        id="model-select"
+        class="form-select"
+        x-model="form.model"
+        :disabled="models.length === 0 || submitting"
+        x-show="models.length > 0"
+      >
+        <template x-for="m in models" :key="m.name">
+          <option :value="m.name" x-text="m.name"></option>
+        </template>
+      </select>
+    </div>
+
+    <!-- Corpus picker -->
+    <div class="form-group">
+      <label class="form-label" for="corpus-select">Corpus</label>
+
+      <div x-show="corpus.length === 0" class="alert alert-info" style="margin-bottom:0.5rem">
+        No corpus files found — generate a corpus first.
+      </div>
+
+      <select
+        id="corpus-select"
+        class="form-select"
+        x-model="form.corpus"
+        :disabled="corpus.length === 0 || submitting"
+        x-show="corpus.length > 0"
+      >
+        <template x-for="c in corpus" :key="c.path">
+          <option :value="c.path" x-text="c.name + ' (' + c.rows + ' rows)'"></option>
+        </template>
+      </select>
+    </div>
+
+    <!-- Advanced options (collapsible) -->
+    <div class="form-group">
+      <button
+        type="button"
+        class="collapsible-header"
+        @click="showAdvanced = !showAdvanced"
+        :aria-expanded="showAdvanced"
+      >
+        <span>Advanced options</span>
+        <span x-text="showAdvanced ? '▲' : '▼'" style="font-size:0.75rem"></span>
+      </button>
+
+      <div class="collapsible-body" x-show="showAdvanced" x-transition>
+        <div class="form-group" style="margin-top:0.75rem">
+          <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
+            <input
+              type="checkbox"
+              x-model="form.enhanced"
+              :disabled="submitting"
+            />
+            <span class="form-label" style="margin:0">Enhanced mode</span>
+          </label>
+          <p style="margin:0.25rem 0 0 1.5rem;font-size:0.8rem;color:var(--color-text-muted,#888)">
+            Enables retry/resume and GPU acceleration.
+          </p>
+        </div>
+
+        <div class="form-group" style="margin-top:0.75rem">
+          <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
+            <input
+              type="checkbox"
+              x-model="form.silent"
+              :disabled="submitting"
+            />
+            <span class="form-label" style="margin:0">Silent mode</span>
+          </label>
+          <p style="margin:0.25rem 0 0 1.5rem;font-size:0.8rem;color:var(--color-text-muted,#888)">
+            Suppress verbose prompt/response output in logs.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit button -->
+    <div style="margin-top:1rem">
+      <button
+        type="button"
+        class="btn btn-primary"
+        @click="submitAudit()"
+        :disabled="submitting || models.length === 0 || corpus.length === 0"
+      >
+        <span x-show="!submitting">Start Audit</span>
+        <span x-show="submitting">Running&hellip;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Live log viewer (shown after a job starts) -->
+  <div x-show="jobId !== null" class="card" style="margin-bottom:1.5rem">
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem">
+      <h2 class="card-title" style="margin:0">Live Log</h2>
+
+      <!-- Status badge -->
+      <span
+        x-show="jobStatus === 'running'"
+        class="badge badge-running"
+      >Running</span>
+      <span
+        x-show="jobStatus === 'completed'"
+        class="badge badge-completed"
+      >Completed</span>
+      <span
+        x-show="jobStatus === 'failed'"
+        class="badge badge-failed"
+      >Failed</span>
+
+      <!-- Job ID -->
+      <span x-show="jobId" style="font-size:0.75rem;color:var(--color-text-muted,#888)" x-text="'Job: ' + jobId"></span>
+    </div>
+
+    <!-- Completion message -->
+    <div x-show="jobStatus === 'completed'" class="alert alert-info" style="margin-bottom:0.75rem">
+      Audit complete. Check the Results page for the full report.
+    </div>
+    <div x-show="jobStatus === 'failed'" class="alert alert-error" style="margin-bottom:0.75rem">
+      Audit failed. Review the log below for details.
+    </div>
+
+    <!-- Log panel -->
+    <div class="log-panel" x-ref="logPanel">
+      <template x-for="(line, idx) in logs" :key="idx">
+        <div
+          class="log-line"
+          :class="{
+            'log-error':   line.level === 'error',
+            'log-warning': line.level === 'warning',
+            'log-info':    line.level === 'info'
+          }"
+          x-text="line.message"
+        ></div>
+      </template>
+      <div x-show="logs.length === 0" style="color:var(--color-text-muted,#888);font-style:italic">
+        Waiting for log output&hellip;
+      </div>
+    </div>
+  </div>
+
+  <!-- Interrupted sessions panel -->
+  <div x-show="!loading && sessions.length > 0" class="card">
+    <h2 class="card-title">Resume Interrupted Sessions</h2>
+    <p style="font-size:0.875rem;color:var(--color-text-muted,#888);margin-bottom:1rem">
+      These audits were started but not finished. Click Resume to continue from where they left off.
+    </p>
+
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:0.875rem">
+        <thead>
+          <tr style="text-align:left;border-bottom:1px solid var(--color-border,#e5e7eb)">
+            <th style="padding:0.5rem 0.75rem">Model</th>
+            <th style="padding:0.5rem 0.75rem">Progress</th>
+            <th style="padding:0.5rem 0.75rem">Started</th>
+            <th style="padding:0.5rem 0.75rem">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="s in sessions" :key="s.progress_file">
+            <tr style="border-bottom:1px solid var(--color-border,#e5e7eb)">
+              <td style="padding:0.5rem 0.75rem" x-text="s.model_name"></td>
+              <td style="padding:0.5rem 0.75rem">
+                <span x-text="s.completed_tests + '/' + s.total_tests + ' tests'"></span>
+                <span style="margin-left:0.4rem;color:var(--color-text-muted,#888)" x-text="'(' + s.completion_pct + '%)'"></span>
+              </td>
+              <td style="padding:0.5rem 0.75rem" x-text="fmtDate(s.started_at)"></td>
+              <td style="padding:0.5rem 0.75rem">
+                <button
+                  type="button"
+                  class="btn btn-secondary btn-sm"
+                  @click="resumeSession(s)"
+                  :disabled="submitting"
+                >
+                  Resume
+                </button>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function auditPage() {
+  return {
+    models: [],
+    corpus: [],
+    sessions: [],
+    form: { model: '', corpus: '', enhanced: false, silent: true },
+    showAdvanced: false,
+    jobId: null,
+    jobStatus: null,
+    logs: [],
+    loading: true,
+    submitting: false,
+
+    async init() {
+      try {
+        const [modelsRes, corpusRes, sessionsRes] = await Promise.all([
+          apiGet('/api/models'),
+          apiGet('/api/corpus'),
+          apiGet('/api/sessions'),
+        ]);
+
+        this.models   = (modelsRes.models        || []);
+        this.corpus   = (corpusRes.corpus_files  || []);
+        this.sessions = (sessionsRes.sessions    || []);
+
+        if (this.models.length > 0)  this.form.model  = this.models[0].name;
+        if (this.corpus.length > 0)  this.form.corpus = this.corpus[0].path;
+      } catch (e) {
+        // globalStore error banner fires via apiGet on failure
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async submitAudit() {
+      if (!this.form.model || !this.form.corpus) return;
+
+      this.submitting = true;
+      this.jobId      = null;
+      this.logs       = [];
+      this.jobStatus  = 'running';
+
+      try {
+        const res = await apiPost('/api/jobs', {
+          job_type: 'audit',
+          config: {
+            model:    this.form.model,
+            corpus:   this.form.corpus,
+            enhanced: this.form.enhanced,
+            silent:   this.form.silent,
+          },
+        });
+
+        this.jobId = res.job_id;
+        this.startStream(res.job_id);
+      } catch (e) {
+        this.jobStatus  = 'failed';
+        this.submitting = false;
+      }
+    },
+
+    async resumeSession(session) {
+      this.submitting = true;
+      this.jobId      = null;
+      this.logs       = [];
+      this.jobStatus  = 'running';
+
+      try {
+        const res = await apiPost('/api/jobs', {
+          job_type: 'audit',
+          config: {
+            model:       session.model_name,
+            resume_from: session.progress_file,
+            silent:      true,
+          },
+        });
+
+        this.jobId = res.job_id;
+        this.startStream(res.job_id);
+      } catch (e) {
+        this.jobStatus  = 'failed';
+        this.submitting = false;
+      }
+    },
+
+    startStream(jobId) {
+      streamJobLogs(
+        jobId,
+        (logEntry) => {
+          this.logs.push(logEntry);
+          this.$nextTick(() => scrollBottom(this.$refs.logPanel));
+        },
+        (finalStatus) => {
+          this.jobStatus  = finalStatus;
+          this.submitting = false;
+          this.$nextTick(() => scrollBottom(this.$refs.logPanel));
+        }
+      );
+    },
+  };
+}
+</script>
+{% endblock %}
