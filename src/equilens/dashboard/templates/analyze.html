@@ -1,1 +1,224 @@
-<!DOCTYPE html><html><head><title>EquiLens</title></head><body><h1>EquiLens</h1></body></html>
+{% extends "base.html" %}
+{% block title %}Analyze{% endblock %}
+
+{% block content %}
+<div x-data="analyzePage()" x-init="init()">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <h1 class="page-title">Analyze Results</h1>
+    <p class="page-subtitle">Run statistical analysis and generate bias report</p>
+  </div>
+
+  <!-- Loading skeleton -->
+  <div x-show="loading" class="card" style="padding:2rem;text-align:center">
+    <span>Loading results&hellip;</span>
+  </div>
+
+  <!-- Form card -->
+  <div x-show="!loading" class="card" style="margin-bottom:1.5rem">
+    <h2 class="card-title">Configure Analysis</h2>
+
+    <!-- Results dropdown -->
+    <div class="form-group">
+      <label class="form-label" for="result-select">Results</label>
+
+      <div x-show="results.length === 0" class="alert alert-info" style="margin-bottom:0.5rem">
+        No results available — run an audit first.
+      </div>
+
+      <select
+        id="result-select"
+        class="form-select"
+        x-model="form.result_name"
+        :disabled="results.length === 0 || submitting"
+        x-show="results.length > 0"
+      >
+        <template x-for="r in results" :key="r.name">
+          <option :value="r.name" x-text="r.name + ' (' + fmtDate(r.created) + ')'"></option>
+        </template>
+      </select>
+    </div>
+
+    <!-- No-AI checkbox -->
+    <div class="form-group">
+      <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
+        <input
+          type="checkbox"
+          x-model="form.no_ai"
+          :disabled="submitting"
+        />
+        <span class="form-label" style="margin:0">Skip AI insights</span>
+      </label>
+    </div>
+
+    <!-- Advanced checkbox -->
+    <div class="form-group">
+      <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
+        <input
+          type="checkbox"
+          x-model="form.advanced"
+          :disabled="submitting"
+        />
+        <span class="form-label" style="margin:0">Advanced statistical tests</span>
+      </label>
+    </div>
+
+    <!-- Submit button -->
+    <div style="margin-top:1rem">
+      <button
+        type="button"
+        class="btn btn-primary"
+        @click="submitAnalysis()"
+        :disabled="submitting || results.length === 0"
+      >
+        <span x-show="!submitting">Run Analysis</span>
+        <span x-show="submitting">Running&hellip;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Live log viewer (shown after a job starts) -->
+  <div x-show="jobId !== null" class="card" style="margin-bottom:1.5rem">
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem">
+      <h2 class="card-title" style="margin:0">Live Log</h2>
+
+      <!-- Status badge -->
+      <span x-show="jobStatus === 'running'"   class="badge badge-running">Running</span>
+      <span x-show="jobStatus === 'completed'" class="badge badge-completed">Completed</span>
+      <span x-show="jobStatus === 'failed'"    class="badge badge-failed">Failed</span>
+
+      <!-- Job ID -->
+      <span x-show="jobId" style="font-size:0.75rem;color:var(--color-text-muted,#888)" x-text="'Job: ' + jobId"></span>
+    </div>
+
+    <!-- Completion / failure alerts -->
+    <div x-show="jobStatus === 'completed'" class="alert alert-info" style="margin-bottom:0.75rem">
+      Analysis complete. View the report below.
+    </div>
+    <div x-show="jobStatus === 'failed'" class="alert alert-error" style="margin-bottom:0.75rem">
+      Analysis failed. Review the log below for details.
+    </div>
+
+    <!-- Log panel -->
+    <div class="log-panel" x-ref="logPanel">
+      <template x-for="(line, idx) in logs" :key="idx">
+        <div
+          class="log-line"
+          :class="{
+            'log-error':   line.level === 'error',
+            'log-warning': line.level === 'warning',
+            'log-info':    line.level === 'info'
+          }"
+          x-text="line.message"
+        ></div>
+      </template>
+      <div x-show="logs.length === 0" style="color:var(--color-text-muted,#888);font-style:italic">
+        Waiting for log output&hellip;
+      </div>
+    </div>
+  </div>
+
+  <!-- Report viewer (shown after completion) -->
+  <div x-show="reportUrl !== null" class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+      <h2 class="card-title" style="margin:0">View Report</h2>
+      <a
+        :href="exportUrl"
+        target="_blank"
+        class="btn btn-secondary btn-sm"
+      >Download Report</a>
+    </div>
+
+    <iframe
+      class="result-frame"
+      :src="reportUrl"
+      style="width:100%;min-height:600px;border:none"
+    ></iframe>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function analyzePage() {
+  return {
+    results: [],
+    loading: true,
+    form: { result_name: '', no_ai: false, advanced: false },
+    reportUrl: null,
+    exportUrl: null,
+    jobId: null,
+    jobStatus: null,
+    logs: [],
+    submitting: false,
+
+    async init() {
+      try {
+        const res = await apiGet('/api/results');
+        this.results = res.results || [];
+        if (this.results.length > 0) {
+          this.form.result_name = this.results[0].name;
+        }
+      } catch (e) {
+        // globalStore error banner fires via apiGet on failure
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async submitAnalysis() {
+      if (!this.form.result_name) return;
+
+      const selected = this.results.find(r => r.name === this.form.result_name);
+      if (!selected) return;
+
+      this.submitting = true;
+      this.jobId      = null;
+      this.logs       = [];
+      this.jobStatus  = 'running';
+      this.reportUrl  = null;
+      this.exportUrl  = null;
+
+      try {
+        const res = await apiPost('/api/jobs', {
+          job_type: 'analysis',
+          config: {
+            results_file: selected.path,
+            no_ai:        this.form.no_ai,
+            advanced:     this.form.advanced,
+          },
+        });
+
+        this.jobId = res.job_id;
+        this.startStream(res.job_id, selected.name);
+      } catch (e) {
+        this.jobStatus  = 'failed';
+        this.submitting = false;
+      }
+    },
+
+    startStream(jobId, resultName) {
+      streamJobLogs(
+        jobId,
+        (logEntry) => {
+          this.logs.push(logEntry);
+          this.$nextTick(() => scrollBottom(this.$refs.logPanel));
+        },
+        (finalStatus) => {
+          this.jobStatus  = finalStatus;
+          this.submitting = false;
+          this.$nextTick(() => scrollBottom(this.$refs.logPanel));
+
+          if (finalStatus === 'completed') {
+            this.reportUrl = '/api/results/' + resultName + '/html';
+            this.exportUrl = '/api/results/' + resultName + '/export';
+          }
+        }
+      );
+    },
+  };
+}
+</script>
+{% endblock %}
