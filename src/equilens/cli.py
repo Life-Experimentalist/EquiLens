@@ -1953,28 +1953,18 @@ def analyze(
 
 @app.command()
 def gui():
-    """
-    🖥️ Launch legacy web-based Gradio GUI
-
-    [LEGACY] This launches the original EquiLens web interface.
-    For the latest Gradio web interface, use the [bold cyan]web[/bold cyan] command instead.
-    """
-    try:
-        from equilens.web_ui import main as web_ui_main
-
-        console.print("🚀 [green]Starting EquiLens Legacy Web Interface...[/green]")
-        console.print("🌐 Opening legacy web interface in your browser...")
-        console.print(
-            "[yellow][LEGACY][/yellow] For the latest Gradio web interface, use [bold cyan]uv run equilens web[/bold cyan]."
+    """[REMOVED] Gradio GUI has been replaced by the built-in web dashboard."""
+    console.print(
+        Panel(
+            "[yellow]The Gradio GUI has been removed.[/yellow]\n\n"
+            "Use the built-in dashboard instead:\n"
+            "  [bold cyan]uv run equilens web[/bold cyan]\n\n"
+            "The dashboard is available at [cyan]http://localhost:8000[/cyan]",
+            title="[yellow]⚠ Command Removed[/yellow]",
+            border_style="yellow",
         )
-        web_ui_main()
-    except ImportError:
-        console.print("[red]❌ Gradio dependencies not available[/red]")
-        console.print("Install with: [cyan]uv add gradio[/cyan]")
-        raise typer.Exit(1) from None
-    except Exception as e:
-        console.print(f"[red]❌ Failed to start Web GUI: {e}[/red]")
-        raise typer.Exit(1) from e
+    )
+    raise typer.Exit(0)
 
 
 @app.command()
@@ -1999,41 +1989,44 @@ def backend():
 
 @app.command()
 def web():
-    """🌐 Launch the new Gradio web interface (connects to backend)"""
+    """🌐 Start the EquiLens dashboard (FastAPI + built-in web UI)"""
     try:
-        from equilens.gradio_app import main as gradio_main
+        from equilens.backend_server import main as backend_main
 
-        console.print("🚀 [green]Starting EquiLens Gradio Interface...[/green]")
         console.print(
-            "📡 Make sure the backend is running at: [cyan]http://localhost:8000[/cyan]"
+            Panel(
+                "🚀 [green]Starting EquiLens Dashboard[/green]\n\n"
+                "  Dashboard: [cyan]http://localhost:8000[/cyan]\n"
+                "  API docs:  [cyan]http://localhost:8000/docs[/cyan]\n\n"
+                "[dim]Press Ctrl+C to stop[/dim]",
+                title="EquiLens v2.2.0",
+                border_style="blue",
+            )
         )
-        console.print("🌐 Web interface will open in your browser...")
-        gradio_main()
+        backend_main()
     except ImportError as e:
-        console.print("[red]❌ Gradio dependencies not available[/red]")
+        console.print("[red]❌ Backend dependencies not available[/red]")
         console.print(f"[dim]Error: {e}[/dim]")
-        console.print("Install with: [cyan]uv add gradio requests[/cyan]")
+        console.print("Install with: [cyan]uv sync[/cyan]")
         raise typer.Exit(1) from None
     except Exception as e:
-        console.print(f"[red]❌ Failed to start Gradio interface: {e}[/red]")
+        console.print(f"[red]❌ Failed to start dashboard: {e}[/red]")
         raise typer.Exit(1) from e
 
 
 @app.command()
 def serve():
-    """🚀 Start both backend API and Gradio frontend together"""
-    try:
-        from equilens.start_all import main as start_all_main
-
-        console.print("🚀 [green]Starting EquiLens Full Stack...[/green]")
-        start_all_main()
-    except ImportError as e:
-        console.print("[red]❌ Required dependencies not available[/red]")
-        console.print(f"[dim]Error: {e}[/dim]")
-        raise typer.Exit(1) from None
-    except Exception as e:
-        console.print(f"[red]❌ Failed to start services: {e}[/red]")
-        raise typer.Exit(1) from e
+    """[REMOVED] Use 'web' instead — single server now serves everything."""
+    console.print(
+        Panel(
+            "[yellow]The 'serve' command has been removed.[/yellow]\n\n"
+            "The dashboard now runs as a single server:\n"
+            "  [bold cyan]uv run equilens web[/bold cyan]",
+            title="[yellow]⚠ Command Removed[/yellow]",
+            border_style="yellow",
+        )
+    )
+    raise typer.Exit(0)
 
 
 @audit_app.command("list")
