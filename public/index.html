@@ -70,8 +70,8 @@
 				"url": "https://github.com/Life-Experimentalist"
 			},
 			"license": "https://opensource.org/licenses/Apache-2.0",
-			"version": "2.0.0",
-			"releaseNotes": "Phase 1: Corpus Generator released with comprehensive bias detection dataset generation",
+			"version": "2.2.0",
+			"releaseNotes": "v2.2.0: Built-in HTML dashboard replaces Gradio UI. FastAPI + Jinja2 + Alpine.js web interface with SSE real-time logs, periodic backup scheduler, and full OpenAPI 3.1 contract.",
 			"keywords": "AI bias detection, language model auditing, LLM bias, machine learning ethics, AI fairness",
 			"offers": {
 				"@type": "Offer",
@@ -964,7 +964,7 @@
 				<div class="hero-content">
 					<div class="hero-badge">
 						<i class="fas fa-star"></i>
-						Open-Source Research Project | Apache 2.0 Licensed
+						v2.2.0 Released | Open-Source Research Project | Apache 2.0 Licensed
 					</div>
 
 					<h1>EquiLens: AI Bias Detection Platform</h1>
@@ -1126,6 +1126,20 @@
 							review and ensure reproducible research results.
 						</p>
 					</div>
+
+					<div class="feature-card">
+						<div class="feature-icon">
+							<i class="fas fa-desktop"></i>
+						</div>
+						<h3 class="feature-title">Built-In Web Dashboard</h3>
+						<p class="feature-description">
+							FastAPI + Jinja2 + Alpine.js dashboard served at
+							<strong>http://localhost:8000</strong> — no Gradio,
+							no separate process. SSE real-time job logs, inline
+							result viewing, periodic automated backups, and a
+							full OpenAPI 3.1 contract.
+						</p>
+					</div>
 				</div>
 			</div>
 		</section>
@@ -1247,17 +1261,20 @@
 
 					<div class="step-card">
 						<div class="step-number">4</div>
-						<h3>Run Your First Audit</h3>
+						<h3>Launch Dashboard &amp; Run Audit</h3>
 						<p>
-							Execute the interactive CLI to start bias detection
+							Open the built-in web dashboard or run a bias audit from the CLI
 						</p>
 						<div class="code-block">
 							<button class="copy-btn" onclick="copyCode(this)">
 								<i class="fas fa-copy"></i>
 							</button>
 							<code
-								># Windows .\scripts\equilens.bat #
-								Unix/Linux/macOS ./scripts/equilens.sh</code
+								># Launch dashboard + API server at http://localhost:8000
+uv run equilens web
+
+# Or run a CLI audit directly
+uv run equilens audit --model llama3.2</code
 							>
 						</div>
 					</div>
@@ -1658,7 +1675,7 @@
 			<div class="container">
 				<div class="section-header">
 					<h2 class="section-title">
-						🔍 Phase 2: Model Auditing 🚧 In Development
+						🔍 Phase 2: Model Auditing ✅ Released
 					</h2>
 					<p class="section-subtitle">
 						Execute comprehensive bias tests against Small and Large Language Models with real-time monitoring
@@ -1716,11 +1733,11 @@
 				</div>
 
 				<div style="margin-top: 3rem; text-align: center; padding: 2rem; background: var(--bg-secondary); border-radius: 1rem; border: 1px solid var(--border-color);">
-					<h3 style="margin-bottom: 1rem; color: var(--accent-color);">Coming Soon</h3>
-					<p style="margin-bottom: 2rem; color: var(--text-secondary);">Model Auditor will be available in the next release with comprehensive LLM/SLM testing capabilities</p>
-					<a href="https://github.com/Life-Experimentalist/EquiLens/issues" class="btn btn-outline" target="_blank">
-						<i class="fas fa-bell"></i>
-						Get Notified
+					<h3 style="margin-bottom: 1rem; color: var(--primary-color);">Now with Built-In Dashboard</h3>
+					<p style="margin-bottom: 2rem; color: var(--text-secondary);">v2.2.0 ships a full HTML dashboard (FastAPI + Jinja2 + Alpine.js) with SSE real-time job logs, periodic automated backups, and an OpenAPI 3.1 contract — accessible at <strong>http://localhost:8000</strong> via <code style="background: var(--bg-tertiary); padding: 0.2rem 0.4rem; border-radius: 0.25rem;">uv run equilens web</code></p>
+					<a href="https://github.com/Life-Experimentalist/EquiLens/releases" class="btn btn-primary" target="_blank">
+						<i class="fas fa-tag"></i>
+						View v2.2.0 Release
 					</a>
 				</div>
 			</div>
@@ -1731,7 +1748,7 @@
 			<div class="container">
 				<div class="section-header">
 					<h2 class="section-title">
-						📊 Phase 3: Analysis & Reporting 📋 Planned
+						📊 Phase 3: Analysis & Reporting ✅ Released
 					</h2>
 					<p class="section-subtitle">
 						Comprehensive statistical analysis and visualization of bias detection results
@@ -1773,11 +1790,11 @@
 				</div>
 
 				<div style="margin-top: 3rem; text-align: center; padding: 2rem; background: var(--bg-secondary); border-radius: 1rem; border: 1px solid var(--border-color);">
-					<h3 style="margin-bottom: 1rem; color: var(--text-secondary);">Future Release</h3>
-					<p style="margin-bottom: 2rem; color: var(--text-secondary);">Analysis framework will complete the EquiLens pipeline, providing comprehensive bias insights</p>
-					<a href="https://github.com/Life-Experimentalist/EquiLens/projects" class="btn btn-outline" target="_blank">
-						<i class="fas fa-road"></i>
-						View Roadmap
+					<h3 style="margin-bottom: 1rem; color: var(--primary-color);">Three-Phase Pipeline Complete</h3>
+					<p style="margin-bottom: 2rem; color: var(--text-secondary);">All three phases are now released. The analysis engine generates HTML and Markdown reports, performs statistical significance testing, and produces AI-assisted insights via the <code style="background: var(--bg-tertiary); padding: 0.2rem 0.4rem; border-radius: 0.25rem;">equilens analyze</code> CLI command.</p>
+					<a href="https://github.com/Life-Experimentalist/EquiLens/releases" class="btn btn-primary" target="_blank">
+						<i class="fas fa-tag"></i>
+						View v2.2.0 Release
 					</a>
 				</div>
 			</div>
