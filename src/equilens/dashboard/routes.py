@@ -14,29 +14,29 @@ router = APIRouter(include_in_schema=False)
 
 @router.get("/", response_class=HTMLResponse)
 async def page_dashboard(request: Request):
-    return templates.TemplateResponse("dashboard.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="dashboard.html")
 
 
 @router.get("/audit", response_class=HTMLResponse)
 async def page_audit(request: Request):
-    return templates.TemplateResponse("audit.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="audit.html")
 
 
 @router.get("/generate", response_class=HTMLResponse)
 async def page_generate(request: Request):
-    return templates.TemplateResponse("generate.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="generate.html")
 
 
 @router.get("/analyze", response_class=HTMLResponse)
 async def page_analyze(request: Request):
-    return templates.TemplateResponse("analyze.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="analyze.html")
 
 
 @router.get("/jobs", response_class=HTMLResponse)
 async def page_jobs(request: Request):
-    return templates.TemplateResponse("jobs.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="jobs.html")
 
 
 @router.get("/results", response_class=HTMLResponse)
 async def page_results(request: Request):
-    return templates.TemplateResponse("results.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="results.html")
