@@ -1,0 +1,51 @@
+{
+	"$schema": "https://vkrishna04.me/schemas/project-manifest.schema.json",
+	"manifestVersion": 2,
+	"tagline": "Black-box bias detection for local language models.",
+	"summary": "A bias-auditing framework that probes any Ollama-compatible language model purely through its input/output interface, with no access to weights. It generates demographically paired prompts, runs them concurrently against a local model, and reports statistically analysed differences in the responses.",
+	"status": "active",
+	"icon": "SiPython",
+	"technologies": [
+		"Python",
+		"FastAPI",
+		"Ollama",
+		"Gradio",
+		"SQLite",
+		"Docker"
+	],
+	"tags": [
+		"ai-fairness",
+		"bias-detection",
+		"llm",
+		"research",
+		"local-first"
+	],
+	"highlights": [
+		"Audits models through prompts alone, so it works on any Ollama-compatible model without weight access or a cloud API.",
+		"Uses a prompt-pair method in which only the demographic variable changes between two otherwise identical prompts.",
+		"Runs the whole pipeline locally, so neither the prompts nor the model's responses leave the machine.",
+		"Resumable concurrent auditing with checkpointing, so a long run survives an interruption instead of restarting.",
+		"Published on Zenodo with a citable DOI and a one-command Docker deployment for reproducibility."
+	],
+	"links": {
+		"repo": "https://github.com/Life-Experimentalist/EquiLens",
+		"live": "https://equilens.vkrishna04.me",
+		"paper": "https://doi.org/10.5281/zenodo.17014103"
+	},
+	"sections": [
+		{
+			"type": "prose",
+			"heading": "Why black-box",
+			"body": "Most bias tooling assumes either model weights or a cloud API, and small local models give you neither in practice — the weights are available but the tooling around them is not, and sending evaluation prompts to a third party defeats the point of running locally. Probing through the same interface an application uses means the audit measures what a deployment would actually see."
+		},
+		{
+			"type": "list",
+			"heading": "The three phases",
+			"items": [
+				"Corpus generation — a JSON specification of names, professions and trait templates expands into demographically balanced prompt pairs.",
+				"Model auditing — the corpus is run concurrently against an Ollama-hosted model, with retry and checkpoint resume.",
+				"Statistical analysis — paired responses are scored and tested, rather than eyeballed."
+			]
+		}
+	]
+}
