@@ -14,7 +14,6 @@ _DEFAULTS = {
     "models_evaluated": 23,
     "prompts_processed": 94200,
     "bias_types_covered": 6,
-    "researchers_using": 12,
 }
 
 
@@ -42,8 +41,7 @@ def stats_markdown() -> str:
         f"**{fmt(d['audits_completed'])}** bias audits completed · "
         f"**{fmt(d['models_evaluated'])}** models evaluated · "
         f"**{fmt(d['prompts_processed'])}** prompts processed · "
-        f"**{d['bias_types_covered']}** bias categories · "
-        f"**{d['researchers_using']}** researchers"
+        f"**{d['bias_types_covered']}** bias categories"
     )
 
 
@@ -55,7 +53,6 @@ def stats_html() -> str:
         (fmt(d["models_evaluated"]), "Models Tested"),
         (fmt(d["prompts_processed"]), "Prompts Run"),
         (str(d["bias_types_covered"]), "Bias Types"),
-        (str(d["researchers_using"]), "Researchers"),
     ]
     cells = "".join(
         f'<div style="text-align:center;padding:0 1.5rem">'
