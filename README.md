@@ -15,13 +15,15 @@
 
 <br/>
 
-| 🔬 Bias Audits | 🤖 Models Tested | 📝 Prompts Run | 🏷️ Bias Types | 👩‍🔬 Researchers |
-|:-:|:-:|:-:|:-:|:-:|
-| **1,847+** | **23+** | **94,200+** | **6** | **12+** |
+| 🔬 Bias Audits | 🤖 Models Tested | 📝 Prompts Run | 🏷️ Bias Types |
+|:-:|:-:|:-:|:-:|
+| **1,847+** | **23+** | **94,200+** | **6** |
 
 <br/>
 
 [🌐 Website](https://equilens.vkrishna04.me) · [📖 Docs](docs/README.md) · [🐛 Issues](https://github.com/Life-Experimentalist/EquiLens/issues) · [💬 Discussions](https://github.com/Life-Experimentalist/EquiLens/discussions) · [📄 DOI](https://doi.org/10.5281/zenodo.17014103)
+
+**Status: work in progress** — this is an active final-year research project, still under construction.
 
 </div>
 
