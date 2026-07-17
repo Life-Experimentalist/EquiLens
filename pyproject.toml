@@ -63,7 +63,7 @@ dev = [
 ]
 ml = [
     "sentence-transformers>=2.2.0",
-    "torch>=2.0.0",
+    "torch>=2.13.0",
     "transformers>=4.21.0",
 ]
 viz = [
