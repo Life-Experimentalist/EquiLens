@@ -1,0 +1,37 @@
+{
+  "$schema": "https://devprune.vkrishna04.me/schemas/v1/devprune.schema.json",
+  "prunable": {
+    "directories": [
+      {
+        "path": ".venv",
+        "rebuild": "uv sync --extra dev",
+        "why": "Project virtualenv. Rebuilt exactly from the committed uv.lock, so nothing in it is unique to this machine."
+      },
+      {
+        "path": ".uv-cache",
+        "rebuild": "uv sync --extra dev",
+        "why": "uv's package cache (cache-dir is set to .uv-cache in pyproject.toml). Pure download cache; re-fills on the next sync."
+      },
+      {
+        "path": "__pycache__",
+        "rebuild": "python -c \"pass\"",
+        "why": "CPython bytecode caches. Regenerated automatically the next time a module is imported."
+      },
+      {
+        "path": ".ruff_cache",
+        "rebuild": "uv run --extra dev ruff check .",
+        "why": "Ruff's incremental lint cache. Only affects lint speed; ruff rewrites it on the next run."
+      },
+      {
+        "path": ".pytest_cache",
+        "rebuild": "uv run --extra dev pytest --collect-only",
+        "why": "Pytest's last-failed / node-id cache. Holds no results, only run bookkeeping."
+      },
+      {
+        "path": "htmlcov",
+        "rebuild": "uv run --extra dev pytest",
+        "why": "Coverage HTML report. pyproject's pytest addopts already pass --cov-report=html, so a normal test run recreates it."
+      }
+    ]
+  }
+}
