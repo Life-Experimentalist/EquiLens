@@ -31,7 +31,7 @@
 
 ## What is EquiLens?
 
-**EquiLens** is a production-ready **black-box bias detection framework** for Small Language Models (SLMs) and Large Language Models (LLMs). It probes models purely through their input/output interface — no weight access required — using systematic **prompt engineering** to surface differential responses across demographic groups.
+**EquiLens** is a **black-box bias detection framework** for Small Language Models (SLMs) and Large Language Models (LLMs). It probes models purely through their input/output interface — no weight access required — using systematic **prompt engineering** to surface differential responses across demographic groups.
 
 Built as a final-year B.Tech research project at **Amrita Vishwa Vidyapeetham**, EquiLens gives researchers, developers, and compliance teams rigorous tools to identify, quantify, and report on bias — all running **locally via Ollama**, keeping data and model interactions private.
 
